@@ -22,18 +22,20 @@ namespace JengaSimulator
             this.position = position;
             this.scale = scale;
 
-            _body = new Body();
-            _skin = new CollisionSkin(_body);
-            _body.CollisionSkin = _skin;
+            this._body = new Body();
+            this._skin = new CollisionSkin(_body);
+
+            this._body.CollisionSkin = _skin;
 
             Box box = new Box(Vector3.Zero, Matrix.Identity, scale);
-            _skin.AddPrimitive(box, new MaterialProperties(0.8f, 0.8f, 0.7f));
+            this._skin.AddPrimitive(box, new MaterialProperties(0.8f, 0.8f, 0.7f));
 
             Vector3 com = SetMass(1.0f);
 
-            _body.MoveTo(position, Matrix.Identity);
-            _skin.ApplyLocalTransform(new Transform(-com, Matrix.Identity));
-            _body.EnableBody();
+            this._body.MoveTo(position, Matrix.Identity);
+
+            this._skin.ApplyLocalTransform(new Transform(-com, Matrix.Identity));
+            this._body.EnableBody();
         }
 
         private Vector3 SetMass(float mass){
@@ -44,19 +46,18 @@ namespace JengaSimulator
 
             float junk;
             Vector3 com;
-            Matrix it;
-            Matrix itCoM;
+            Matrix it, itCoM;
 
-            _skin.GetMassProperties(primitiveProperties, out junk, out com, out it, out itCoM);
-            _body.BodyInertia = itCoM;
-            _body.Mass = junk;
+            this._skin.GetMassProperties(primitiveProperties, out junk, out com, out it, out itCoM);
+            this._body.BodyInertia = itCoM;
+            this._body.Mass = junk;
 
             return com;
         }
 
         protected override void LoadContent()
         {
-            this.model = Game.Content.Load<Model>("Models\\Crate");
+            this.model = Game.Content.Load<Model>("box");
         }
 
         private Matrix GetWorldMatrix()

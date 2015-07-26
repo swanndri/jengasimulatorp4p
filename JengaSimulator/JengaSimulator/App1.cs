@@ -17,9 +17,6 @@ using JigLibX.Collision;
 
 namespace JengaSimulator
 {
-    /// <summary>
-    /// This is the main type for your application.
-    /// </summary>
     public class App1 : Microsoft.Xna.Framework.Game
     {
         private readonly GraphicsDeviceManager graphics;
@@ -37,18 +34,8 @@ namespace JengaSimulator
         BoxActor fallingBox;
         BoxActor immovableBox;
 
-
-        private Matrix _view;
-        public Matrix View
-        {
-            get { return _view; }
-        }
-
-        private Matrix _projection;
-        public Matrix Projection
-        {
-            get { return _projection; }
-        }
+        public Matrix View { get; private set; }
+        public Matrix Projection { get; private set; }
 
 
         /// <summary>
@@ -69,11 +56,11 @@ namespace JengaSimulator
 
             InitializePhysics();
 
-            _projection = Matrix.CreatePerspectiveFieldOfView(
-                    MathHelper.ToRadians(45.0f),
-                    (float)graphics.PreferredBackBufferWidth / (float)graphics.PreferredBackBufferHeight,
-                    0.1f,
-                    1000.0f);
+            this.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45.0f),                    
+                (float)graphics.PreferredBackBufferWidth / (float)graphics.PreferredBackBufferHeight,
+                0.1f,
+                1000.0f
+            );
         }
 
         #region Initialization
@@ -85,7 +72,9 @@ namespace JengaSimulator
 
             fallingBox = new BoxActor(this, new Vector3(0, 50, 0), new Vector3(1, 1, 1));
             immovableBox = new BoxActor(this, new Vector3(0, -5, 0), new Vector3(5, 5, 5));
+
             immovableBox._body.Immovable = true;
+
             Components.Add(fallingBox);
             Components.Add(immovableBox);
         }
@@ -181,8 +170,8 @@ namespace JengaSimulator
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            myModel = Content.Load<Model>("Models\\Crate");
-            aspectRatio = graphics.GraphicsDevice.Viewport.AspectRatio;
+            //myModel = Content.Load<Model>("Models\\Crate");
+            //aspectRatio = graphics.GraphicsDevice.Viewport.AspectRatio;
         }
 
         /// <summary>
@@ -213,7 +202,7 @@ namespace JengaSimulator
 
                     if (touches.Count == 0)
                     {
-                        modelRotation += (float)gameTime.ElapsedGameTime.TotalMilliseconds * MathHelper.ToRadians(0.1f);    
+                        //modelRotation += (float)gameTime.ElapsedGameTime.TotalMilliseconds * MathHelper.ToRadians(0.1f);    
                     }
 
                 }
@@ -228,7 +217,7 @@ namespace JengaSimulator
             float timeStep = (float)gameTime.ElapsedGameTime.Ticks / TimeSpan.TicksPerSecond;
             PhysicsSystem.CurrentPhysicsSystem.Integrate(timeStep);
 
-            _view = Matrix.CreateLookAt(new Vector3(0, 5, 20), fallingBox._body.Position, Vector3.Up);
+            this.View = Matrix.CreateLookAt(new Vector3(0, 5, 20), fallingBox._body.Position, Vector3.Up);
         }
 
         /// <summary>
@@ -236,34 +225,10 @@ namespace JengaSimulator
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         /// 
-
-        //Position and rotation of model in world space.
-        Vector3 modelPosition = Vector3.Zero;
-        float modelRotation = 0.0f;
-
-        //Position of camera in world space for our view matrix.
-        Vector3 cameraPosition = new Vector3(0.0f, 2000.0f, 5000.0f);
         
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(backgroundColor);
-
-            Matrix[] transforms = new Matrix[myModel.Bones.Count];
-            myModel.CopyAbsoluteBoneTransformsTo(transforms);
-
-            //Draw the model. A model can have multiple meshes, so loop.
-            foreach (ModelMesh mesh in myModel.Meshes) {             
-                //This is where the mesh orientation is set, as well as our camera and projection.
-                foreach (BasicEffect effect in mesh.Effects)
-                {
-                    effect.EnableDefaultLighting();
-                    effect.World = transforms[mesh.ParentBone.Index] * Matrix.CreateRotationY(modelRotation) * Matrix.CreateTranslation(modelPosition);
-                    effect.View = Matrix.CreateLookAt(cameraPosition, Vector3.Zero, Vector3.Up);                    
-                    effect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45.0f), aspectRatio, 1.0f, 10000.0f);
-                }
-                mesh.Draw();
-
-            }
+            GraphicsDevice.Clear(backgroundColor);    
 
             base.Draw(gameTime);
         }
