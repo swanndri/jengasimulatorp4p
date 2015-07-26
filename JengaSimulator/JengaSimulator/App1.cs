@@ -248,7 +248,7 @@ namespace JengaSimulator
         {
             GraphicsDevice.Clear(backgroundColor);
 
-            /*Matrix[] transforms = new Matrix[myModel.Bones.Count];
+            Matrix[] transforms = new Matrix[myModel.Bones.Count];
             myModel.CopyAbsoluteBoneTransformsTo(transforms);
 
             //Draw the model. A model can have multiple meshes, so loop.
@@ -263,7 +263,7 @@ namespace JengaSimulator
                 }
                 mesh.Draw();
 
-            }*/
+            }
 
             base.Draw(gameTime);
         }
