@@ -41,3 +41,15 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.exe
+
+*.swp
+*.zip
+*.suo
+*.user
+JengaSimulator/Jengasimulator/bin
+JengaSimulator/JengasimulatorContent/bin
+JengaSimulator/Jengasimulator/obj
+JengaSimulator/JengasimulatorContent/obj
+*.cachefile
+*.ccgame
