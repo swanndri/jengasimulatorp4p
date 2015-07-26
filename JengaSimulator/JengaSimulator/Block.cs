@@ -8,7 +8,7 @@ using JigLibX.Collision;
 
 namespace JengaSimulator
 {
-    public class BoxActor : DrawableGameComponent
+    public class Block : DrawableGameComponent
     {
 
         private Vector3 position, scale;
@@ -16,9 +16,12 @@ namespace JengaSimulator
 
         public Body _body { get; private set; }
         public CollisionSkin _skin { get; private set; }
+        
+        private bool isTable;
 
-        public BoxActor(Game game, Vector3 position, Vector3 scale) : base(game)
+        public Block(Game game, Vector3 position, Matrix orientation, Vector3 scale, bool isTable) : base(game)
         {
+            this.isTable = isTable;
             this.position = position;
             this.scale = scale;
 
@@ -27,7 +30,10 @@ namespace JengaSimulator
 
             this._body.CollisionSkin = _skin;
 
-            Box box = new Box(Vector3.Zero, Matrix.Identity, scale);
+            //Vector3 blckScale = new Vector3(0.5f * scale.X, 1.0f * scale.Y, 3.0f * scale.Z);
+
+            //Position, Orientation, Scale
+            Box box = new Box(Vector3.Zero, orientation, scale);
             this._skin.AddPrimitive(box, new MaterialProperties(0.8f, 0.8f, 0.7f));
 
             Vector3 com = SetMass(1.0f);
@@ -57,7 +63,16 @@ namespace JengaSimulator
 
         protected override void LoadContent()
         {
-            this.model = Game.Content.Load<Model>("box");
+            if (isTable)
+            {
+                this.model = Game.Content.Load<Model>("models/table");
+            }
+            else
+            {
+                this.model = Game.Content.Load<Model>("models/block");
+            }
+            
+         
         }
 
         private Matrix GetWorldMatrix()
@@ -85,10 +100,8 @@ namespace JengaSimulator
                     effect.Projection = game.Projection;
                 }
                 mesh.Draw();
-            }
-        }
-
-                    
+            }   
+        }                    
 
     }
 }

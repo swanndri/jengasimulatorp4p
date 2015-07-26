@@ -31,9 +31,9 @@ namespace JengaSimulator
         private Model myModel;
         private float aspectRatio;
 
-        BoxActor fallingBox;
-        BoxActor immovableBox;
-
+        Block fallingBox;
+        Block table;
+        
         public Matrix View { get; private set; }
         public Matrix Projection { get; private set; }
 
@@ -70,13 +70,21 @@ namespace JengaSimulator
             PhysicsSystem world = new PhysicsSystem();
             world.CollisionSystem = new CollisionSystemSAP();
 
-            fallingBox = new BoxActor(this, new Vector3(0, 50, 0), new Vector3(1, 1, 1));
-            immovableBox = new BoxActor(this, new Vector3(0, -5, 0), new Vector3(5, 5, 5));
 
-            immovableBox._body.Immovable = true;
+            fallingBox = new Block(this, new Vector3(-5.0f, 0.5f, 5f), Matrix.Identity, new Vector3(3, 0.5f, 1), false);
+
+            //Position, Scale
+            table = new Block(this, new Vector3(0, 0, 0), Matrix.Identity, new Vector3(15, 0.2f, 15), true);
+            table._body.Immovable = true;
+
+
+
+            Components.Add(new Block(this, new Vector3(0, 0.5f, -1f), Matrix.Identity, new Vector3(3, 0.5f, 1), false));
+            Components.Add(new Block(this, new Vector3(0, 0.5f, 1f), Matrix.Identity, new Vector3(3, 0.5f, 1), false));
+            Components.Add(new Block(this, new Vector3(0, 0.5f, 0), Matrix.Identity, new Vector3(3, 0.5f, 1), false));
 
             Components.Add(fallingBox);
-            Components.Add(immovableBox);
+            Components.Add(table);
         }
 
         /// <summary>
