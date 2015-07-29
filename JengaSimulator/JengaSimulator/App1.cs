@@ -20,6 +20,7 @@ namespace JengaSimulator
     public class App1 : Microsoft.Xna.Framework.Game
     {
         private Vector3 BLOCK_DIMENSIONS = new Vector3(3, 0.5f, 1);
+        private Vector3 TABLE_DIMENSIONS = new Vector3(20, 0.2f, 20);
 
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
@@ -29,9 +30,6 @@ namespace JengaSimulator
 
         private UserOrientation currentOrientation = UserOrientation.Bottom;
         private Matrix screenTransform = Matrix.Identity;
-
-        private Model myModel;
-        private float aspectRatio;
 
         Block fallingBox;
         Block table;
@@ -72,11 +70,46 @@ namespace JengaSimulator
             PhysicsSystem world = new PhysicsSystem();
             world.CollisionSystem = new CollisionSystemSAP();
 
-            //Game game, Vector3 sideLengths, Matrix orientation, Vector3 position, bool isTable
+            //Game game, Vector3 sideLengths, Matrix orientation, Vector3 position, Vector3 color
 
-            fallingBox = new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 4, 0));
+            fallingBox = new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 0, 5), false);
 
-            table = new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 0, 0));
+            //Level 6
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(1.025f, 3, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 3, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(-1.025f, 3, 0), false)); 
+
+            //Level 5
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 2.5f, 1.025f), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 2.5f, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 2.5f, -1.025f), false));
+
+            //Level 4
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(1.025f, 2, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 2, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(-1.025f, 2, 0), false)); 
+
+            //Level 3
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 1.5f, 1.025f), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 1.5f, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 1.5f, -1.025f), false));  
+            
+            //Level 2
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(1.025f, 1, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 1, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(-1.025f, 1, 0), false)); 
+
+            //Level 1
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 0.5f, 1.025f), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 0.5f, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 0.5f, -1.025f), false));  
+
+            //Bottom Level
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(1.025f, 0, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 0, 0), false));
+            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(-1.025f, 0, 0), false));         
+
+            table = new Block(this, TABLE_DIMENSIONS, Matrix.Identity, new Vector3(0, -0.5f, 0), true);
             table._body.Immovable = true;
 
             Components.Add(fallingBox);
@@ -192,6 +225,10 @@ namespace JengaSimulator
         /// checking for collisions, gathering input and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        /// 
+        Vector3 cameraPosition = new Vector3(0, 6, 9);
+        int rotateTime = 201666730;
+
         protected override void Update(GameTime gameTime)
         {
             if (ApplicationServices.WindowAvailability != WindowAvailability.Unavailable)
@@ -222,7 +259,12 @@ namespace JengaSimulator
             float timeStep = (float)gameTime.ElapsedGameTime.Ticks / TimeSpan.TicksPerSecond;
             PhysicsSystem.CurrentPhysicsSystem.Integrate(timeStep);
 
-            this.View = Matrix.CreateLookAt(new Vector3(0, 5, 20), fallingBox._body.Position, Vector3.Up);
+            float t = (float) ((gameTime.TotalGameTime.Ticks + 1) % rotateTime) / (float)rotateTime;
+            double radians = System.Convert.ToDouble(MathHelper.ToRadians((t * 360)));
+            double x = 13 * Math.Cos(radians);
+            double z = 13 * Math.Sin(radians);
+            cameraPosition = new Vector3((float)x, 6, (float)z);
+            this.View = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 0, 0), Vector3.Up);
         }
 
         /// <summary>

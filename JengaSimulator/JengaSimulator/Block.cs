@@ -17,10 +17,11 @@ namespace JengaSimulator
         public Body _body { get; private set; }
         public CollisionSkin _skin { get; private set; }
 
-        public Block(Game game, Vector3 sideLengths, Matrix orientation, Vector3 position) : base(game)
+        private bool isTable;
+
+        public Block(Game game, Vector3 sideLengths, Matrix orientation, Vector3 position, bool isTable) : base(game)
         {
-            
-            this.model = model;
+            this.isTable = isTable;
             this.position = position;
 
             this._body = new Body();
@@ -59,11 +60,6 @@ namespace JengaSimulator
             this.model = Game.Content.Load<Model>("models/box");
         }
 
-        private Matrix GetWorldMatrix()
-        {
-            return Matrix.CreateScale(scale) * _skin.GetPrimitiveLocal(0).Transform.Orientation * _body.Orientation * Matrix.CreateTranslation(_body.Position);
-        }
-
         Matrix[] boneTransforms = null;
         int boneCount = 0;
 
@@ -79,8 +75,6 @@ namespace JengaSimulator
 
             model.CopyAbsoluteBoneTransformsTo(boneTransforms);
 
-            Matrix worldMatrix = GetWorldMatrix();
-
             foreach (ModelMesh mesh in model.Meshes)
             {
                 foreach (BasicEffect effect in mesh.Effects)
@@ -94,6 +88,15 @@ namespace JengaSimulator
 
                     effect.View = game.View;
                     effect.Projection = game.Projection;
+
+                    if (this.isTable == false)
+                    {
+                        effect.DiffuseColor = new Vector3(0.5f, 0.5f, 0.2f);
+                    }
+                    else
+                    {
+                        effect.DiffuseColor = new Vector3(0.0f, 0.2f, 0.2f);
+                    }
 
                     effect.EnableDefaultLighting();
                     effect.PreferPerPixelLighting = true;                  
