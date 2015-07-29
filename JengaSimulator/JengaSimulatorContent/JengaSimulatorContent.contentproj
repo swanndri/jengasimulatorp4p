@@ -42,13 +42,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\small_cube.fbx">
-      <Name>small_cube</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>RigidBodyModelProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\Users\Simon\Downloads\Henge3D_201011\Pipeline\Pipeline.csproj">
       <Project>{3086E95C-5A76-4E06-A494-F61C2B71FEA2}</Project>
       <Name>Pipeline</Name>
@@ -57,6 +50,13 @@
   <ItemGroup>
     <Compile Include="Models\jenga_block.fbx">
       <Name>jenga_block</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>RigidBodyModelProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\table.fbx">
+      <Name>table</Name>
       <Importer>FbxImporter</Importer>
       <Processor>RigidBodyModelProcessor</Processor>
     </Compile>

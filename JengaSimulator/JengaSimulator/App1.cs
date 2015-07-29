@@ -51,6 +51,7 @@ namespace JengaSimulator
             _physics = new PhysicsManager(this);            
             this.Components.Add(new PhysicsScene(this, _physics));
 
+            _viewManager.BackgroundColor = backgroundColor;
             Content.RootDirectory = "Content";
         }
 
@@ -65,15 +66,22 @@ namespace JengaSimulator
         private void CreateScene()
         {
             _physics.Clear();
-
-            Room room = new Room(this);
-            _physics.Add(room);
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
 
-
             Model cubeModel = this.Content.Load<Model>("models/jenga_block");
+            Model tableModel = this.Content.Load<Model>("models/table");
+
+            var table = new SolidThing(this, tableModel);
+            float tableScale = 5f;
+            Vector3 tablePosition = new Vector3(0,0,-1f);
+            Quaternion tableRotation = Quaternion.Identity;
+
+            table.SetWorld(tableScale, tablePosition ,tableRotation);
+            table.Freeze();
+            _physics.Add(table);
             
-            for (int j = 0; j < 6; j++){
+            
+            for (int j = 0; j < 10; j++){
                 for (int i = 0; i < 3; i++)
                 {
                     var cube = new SolidThing(this, cubeModel);
@@ -89,37 +97,6 @@ namespace JengaSimulator
                     _physics.Add(cube);
                 }
             }
-
-            //x,z,y
-            //y = 0.5;
-            //z = 3;
-            //x = 1
-            /*
-            var cube1 = new SolidThing(this, cubeModel);
-            Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));
-            cube1.SetWorld(new Vector3(0, 0f, 0f), rotation);
-            _physics.Add(cube1);
-
-            var cube2 = new SolidThing(this, cubeModel);
-            cube2.SetWorld(new Vector3(0, 0f, 0.5f));
-            _physics.Add(cube2);
-
-            var cube3 = new SolidThing(this, cubeModel);
-            cube3.SetWorld(new Vector3(0, 0f, 1f));
-            _physics.Add(cube3);*/
-
-
-            
-            /*
-            for (int i = 0; i < 7; i++)
-            {
-                for (int j = 0; j < 7 - i; j++)
-                {
-                    var cube = new SolidThing(this, cubeModel);
-                    cube.SetWorld(new Vector3(0f, 0.501f * j + 0.25f * i, 0.5f + 0.55f * i));
-                    _physics.Add(cube);
-                }
-            }*/
         }
 
         #region Initialization

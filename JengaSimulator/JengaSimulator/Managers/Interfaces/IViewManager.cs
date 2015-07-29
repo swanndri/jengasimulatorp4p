@@ -15,6 +15,7 @@ namespace JengaSimulator
         Vector3 Position { get; set; }
         Vector3 Direction { get; set; }
         Matrix Projection { get; set; }
+        Color BackgroundColor { get; set; }
         Matrix View { get; }
         float MaxPitch { get; set; }
         float MinPitch { get; set; }

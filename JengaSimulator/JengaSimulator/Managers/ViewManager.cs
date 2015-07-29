@@ -27,15 +27,25 @@ namespace JengaSimulator
 		private float _maxPitch = DefaultMaxPitch;
 		private float _minPitch = DefaultMinPitch;
 
+        private Color backgroundColor;
+
 		public ViewManager(Game game)
 			: base(game)
 		{
 			this.Game.Services.AddService(typeof(IViewManager), this);
 			this.Game.Components.Add(this);
+            this.backgroundColor = Color.Black;
 		}
 
 		public GraphicsDevice Device { get { return this.Game.GraphicsDevice; } }
 
+        public Color BackgroundColor {
+            get { return backgroundColor; }
+            set
+            {
+                this.backgroundColor = value;
+            }
+        }
 		public Vector3 UpAxis
 		{
 			get { return _upAxis; }
@@ -145,7 +155,7 @@ namespace JengaSimulator
 
 		public override void Draw(GameTime gameTime)
 		{
-			_device.Clear(Color.Black);
+			_device.Clear(backgroundColor);
 
 			Vector3 look = this.Direction;
 			Vector3.Add(ref _position, ref look, out look);
