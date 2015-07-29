@@ -16,14 +16,11 @@ namespace JengaSimulator
 
         public Body _body { get; private set; }
         public CollisionSkin _skin { get; private set; }
-        
-        private bool isTable;
 
-        public Block(Game game, Vector3 sideLengths, Matrix orientation, Vector3 position, bool isTable) : base(game)
+        public Block(Game game, Vector3 sideLengths, Matrix orientation, Vector3 position) : base(game)
         {
             
             this.model = model;
-            this.isTable = isTable;
             this.position = position;
 
             this._body = new Body();
@@ -59,16 +56,7 @@ namespace JengaSimulator
 
         protected override void LoadContent()
         {
-            if (isTable)
-            {
-                this.model = Game.Content.Load<Model>("models/box");
-            }
-            else
-            {
-                this.model = Game.Content.Load<Model>("models/box");
-            }
-            
-         
+            this.model = Game.Content.Load<Model>("models/box");
         }
 
         private Matrix GetWorldMatrix()

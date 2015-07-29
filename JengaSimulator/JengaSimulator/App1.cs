@@ -19,6 +19,8 @@ namespace JengaSimulator
 {
     public class App1 : Microsoft.Xna.Framework.Game
     {
+        private Vector3 BLOCK_DIMENSIONS = new Vector3(3, 0.5f, 1);
+
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
@@ -71,17 +73,11 @@ namespace JengaSimulator
             world.CollisionSystem = new CollisionSystemSAP();
 
             //Game game, Vector3 sideLengths, Matrix orientation, Vector3 position, bool isTable
-            fallingBox = new Block(this, new Vector3(3, 0.5f, 1), Matrix.Identity, new Vector3(2, 4, 0.5f), false);
-            //Components.Add(new Block(this, new Vector3(-5.0f, 2f, 5f), new Vector3(1, 1, 1), 0.0f, false));
 
-            //Position, Scale, Rotation
-            table = new Block(this, new Vector3(3, 0.5f, 1), Matrix.Identity, new Vector3(0, 0, 0), false);
+            fallingBox = new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 4, 0));
+
+            table = new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 0, 0));
             table._body.Immovable = true;
-
-
-            //Components.Add(new Block(this, new Vector3(0, 0.5f, -1.1f), new Vector3(3, 0.5f, 1),  0.0f, false));
-            //Components.Add(new Block(this, new Vector3(0, 0.5f, 1.1f), new Vector3(3, 0.5f, 1),  0.0f, false));
-            //Components.Add(new Block(this, new Vector3(0, 0.5f, 0), new Vector3(3, 0.5f, 1),  0.0f, false));
 
             Components.Add(fallingBox);
             Components.Add(table);
