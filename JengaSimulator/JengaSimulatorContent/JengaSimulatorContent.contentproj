@@ -42,16 +42,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\block.fbx">
-      <Name>block</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>ModelProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Models\table.fbx">
-      <Name>table</Name>
-      <Importer>FbxImporter</Importer>
+    <Compile Include="Models\box.x">
+      <Name>box</Name>
+      <Importer>XImporter</Importer>
       <Processor>ModelProcessor</Processor>
     </Compile>
   </ItemGroup>

@@ -70,18 +70,18 @@ namespace JengaSimulator
             PhysicsSystem world = new PhysicsSystem();
             world.CollisionSystem = new CollisionSystemSAP();
 
+            //Game game, Vector3 sideLengths, Matrix orientation, Vector3 position, bool isTable
+            fallingBox = new Block(this, new Vector3(3, 0.5f, 1), Matrix.Identity, new Vector3(2, 4, 0.5f), false);
+            //Components.Add(new Block(this, new Vector3(-5.0f, 2f, 5f), new Vector3(1, 1, 1), 0.0f, false));
 
-            fallingBox = new Block(this, new Vector3(-5.0f, 0.5f, 5f), Matrix.Identity, new Vector3(3, 0.5f, 1), false);
-
-            //Position, Scale
-            table = new Block(this, new Vector3(0, 0, 0), Matrix.Identity, new Vector3(15, 0.2f, 15), true);
+            //Position, Scale, Rotation
+            table = new Block(this, new Vector3(3, 0.5f, 1), Matrix.Identity, new Vector3(0, 0, 0), false);
             table._body.Immovable = true;
 
 
-
-            Components.Add(new Block(this, new Vector3(0, 0.5f, -1f), Matrix.Identity, new Vector3(3, 0.5f, 1), false));
-            Components.Add(new Block(this, new Vector3(0, 0.5f, 1f), Matrix.Identity, new Vector3(3, 0.5f, 1), false));
-            Components.Add(new Block(this, new Vector3(0, 0.5f, 0), Matrix.Identity, new Vector3(3, 0.5f, 1), false));
+            //Components.Add(new Block(this, new Vector3(0, 0.5f, -1.1f), new Vector3(3, 0.5f, 1),  0.0f, false));
+            //Components.Add(new Block(this, new Vector3(0, 0.5f, 1.1f), new Vector3(3, 0.5f, 1),  0.0f, false));
+            //Components.Add(new Block(this, new Vector3(0, 0.5f, 0), new Vector3(3, 0.5f, 1),  0.0f, false));
 
             Components.Add(fallingBox);
             Components.Add(table);
@@ -210,7 +210,8 @@ namespace JengaSimulator
 
                     if (touches.Count == 0)
                     {
-                        //modelRotation += (float)gameTime.ElapsedGameTime.TotalMilliseconds * MathHelper.ToRadians(0.1f);    
+                        //modelRotation += (float)gameTime.ElapsedGameTime.TotalMilliseconds * MathHelper.ToRadians(0.1f);
+                        //fallingBox.rotation += (float)gameTime.ElapsedGameTime.TotalMilliseconds * MathHelper.ToRadians(0.1f); 
                     }
 
                 }

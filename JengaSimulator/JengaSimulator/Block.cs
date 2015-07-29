@@ -11,7 +11,7 @@ namespace JengaSimulator
     public class Block : DrawableGameComponent
     {
 
-        private Vector3 position, scale;
+        private Vector3 position, scale, sideLengths;
         private Model model;
 
         public Body _body { get; private set; }
@@ -19,29 +19,25 @@ namespace JengaSimulator
         
         private bool isTable;
 
-        public Block(Game game, Vector3 position, Matrix orientation, Vector3 scale, bool isTable) : base(game)
+        public Block(Game game, Vector3 sideLengths, Matrix orientation, Vector3 position, bool isTable) : base(game)
         {
+            
+            this.model = model;
             this.isTable = isTable;
             this.position = position;
-            this.scale = scale;
 
             this._body = new Body();
             this._skin = new CollisionSkin(_body);
 
-            this._body.CollisionSkin = _skin;
-
-            //Vector3 blckScale = new Vector3(0.5f * scale.X, 1.0f * scale.Y, 3.0f * scale.Z);
-
-            //Position, Orientation, Scale
-            Box box = new Box(Vector3.Zero, orientation, scale);
+            Box box = new Box(-0.5f * sideLengths, orientation, sideLengths);
             this._skin.AddPrimitive(box, new MaterialProperties(0.8f, 0.8f, 0.7f));
-
+            this._body.CollisionSkin = _skin;
+          
             Vector3 com = SetMass(1.0f);
-
             this._body.MoveTo(position, Matrix.Identity);
-
             this._skin.ApplyLocalTransform(new Transform(-com, Matrix.Identity));
             this._body.EnableBody();
+            this.scale = sideLengths;
         }
 
         private Vector3 SetMass(float mass){
@@ -65,11 +61,11 @@ namespace JengaSimulator
         {
             if (isTable)
             {
-                this.model = Game.Content.Load<Model>("models/table");
+                this.model = Game.Content.Load<Model>("models/box");
             }
             else
             {
-                this.model = Game.Content.Load<Model>("models/block");
+                this.model = Game.Content.Load<Model>("models/box");
             }
             
          
@@ -79,12 +75,21 @@ namespace JengaSimulator
         {
             return Matrix.CreateScale(scale) * _skin.GetPrimitiveLocal(0).Transform.Orientation * _body.Orientation * Matrix.CreateTranslation(_body.Position);
         }
+
+        Matrix[] boneTransforms = null;
+        int boneCount = 0;
+
         public override void Draw(GameTime gameTime)
         {
             App1 game = (App1)Game;
 
-            Matrix[] transforms = new Matrix[model.Bones.Count];
-            model.CopyAbsoluteBoneTransformsTo(transforms);
+            if (boneTransforms == null || boneCount != model.Bones.Count)
+            {
+                boneTransforms = new Matrix[model.Bones.Count];
+                boneCount = model.Bones.Count;
+            }
+
+            model.CopyAbsoluteBoneTransformsTo(boneTransforms);
 
             Matrix worldMatrix = GetWorldMatrix();
 
@@ -92,12 +97,19 @@ namespace JengaSimulator
             {
                 foreach (BasicEffect effect in mesh.Effects)
                 {
-                    effect.EnableDefaultLighting();
-                    effect.PreferPerPixelLighting = true;
-                    
-                    effect.World = transforms[mesh.ParentBone.Index] * worldMatrix;
+                    // the body has an orientation but also the primitives in the collision skin
+                    // owned by the body can be rotated!
+                    if (this._body.CollisionSkin != null)
+                        effect.World = boneTransforms[mesh.ParentBone.Index] * Matrix.CreateScale(scale) * this._body.CollisionSkin.GetPrimitiveLocal(0).Transform.Orientation * this._body.Orientation * Matrix.CreateTranslation(this._body.Position);
+                    else
+                        effect.World = boneTransforms[mesh.ParentBone.Index] * Matrix.CreateScale(scale) * this._body.Orientation * Matrix.CreateTranslation(this._body.Position);
+
                     effect.View = game.View;
                     effect.Projection = game.Projection;
+
+                    effect.EnableDefaultLighting();
+                    effect.PreferPerPixelLighting = true;                  
+                    
                 }
                 mesh.Draw();
             }   
