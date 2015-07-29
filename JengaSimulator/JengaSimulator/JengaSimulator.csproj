@@ -125,6 +125,10 @@
       <Project>{888DC669-1E80-4AFD-895B-4B6A0751A07C}</Project>
       <Name>Physics</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Pipeline\Pipeline.csproj">
+      <Project>{3086E95C-5A76-4E06-A494-F61C2B71FEA2}</Project>
+      <Name>Pipeline</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\icon.png">

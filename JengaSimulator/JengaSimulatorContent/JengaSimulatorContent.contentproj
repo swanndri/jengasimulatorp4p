@@ -42,12 +42,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Users\Simon\Downloads\Henge3D_201011\Pipeline\Pipeline.csproj">
-      <Project>{3086E95C-5A76-4E06-A494-F61C2B71FEA2}</Project>
-      <Name>Pipeline</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Models\jenga_block.fbx">
       <Name>jenga_block</Name>
       <Importer>FbxImporter</Importer>
@@ -60,6 +54,12 @@
       <Importer>FbxImporter</Importer>
       <Processor>RigidBodyModelProcessor</Processor>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pipeline\Pipeline.csproj">
+      <Project>{3086E95C-5A76-4E06-A494-F61C2B71FEA2}</Project>
+      <Name>Pipeline</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 

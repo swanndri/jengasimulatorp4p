@@ -19,6 +19,15 @@ namespace JengaSimulator
         private Vector3 _diffuseColor;
         Game game;
 
+        public Model Model
+        {
+            get
+            {
+                return _model;
+            }
+            set { this._model = value; }
+        }
+
         public SolidThing(Game game, Model model)
             : this(game, model, true)
         {

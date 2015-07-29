@@ -72,7 +72,7 @@ namespace JengaSimulator
             Model tableModel = this.Content.Load<Model>("models/table");
 
             var table = new SolidThing(this, tableModel);
-            float tableScale = 5f;
+            float tableScale = 3f;
             Vector3 tablePosition = new Vector3(0,0,-1f);
             Quaternion tableRotation = Quaternion.Identity;
 
@@ -239,9 +239,8 @@ namespace JengaSimulator
                     ReadOnlyTouchPointCollection touches = touchTarget.GetState();
                     _lastTouchPosition = _touchPosition;
                     
-                    if (touches.Count > 0)
-                    {
-                        
+                    if (touches.Count == 1)
+                    {      
                         _touchPosition = touches[0];
 
                         //First time touch
@@ -255,6 +254,7 @@ namespace JengaSimulator
                             float scalar;
                             Vector3 point;
                             var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
+                            
                             if (c != null && c is BodySkin)
                             {
                                 _pickedObject = ((BodySkin)c).Owner;
@@ -263,6 +263,7 @@ namespace JengaSimulator
                                 _physics.Add(_pickedForce);
                                 _pickedDistance = scalar;
                                 _pickedObject.IsActive = true;
+                                _shiftCamera = false;
                             }
                             else
                             {
@@ -292,6 +293,18 @@ namespace JengaSimulator
                             _pickedObject = null;
                             _shiftCamera = false;
                         }
+                    }
+                    else if (touches.Count == 3)
+                    {
+                        Vector3 movement = Vector3.Zero;
+                        movement.Y -= 1f;
+                        _viewManager.Move(movement);
+                    }
+                    else if (touches.Count == 4)
+                    {
+                        Vector3 movement = Vector3.Zero;
+                        movement.Y += 1f;
+                        _viewManager.Move(movement);
                     }
                     else if (_pickedObject != null)
                     {
@@ -366,7 +379,7 @@ namespace JengaSimulator
         
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(backgroundColor);    
+            GraphicsDevice.Clear(backgroundColor);
 
             base.Draw(gameTime);
         }
