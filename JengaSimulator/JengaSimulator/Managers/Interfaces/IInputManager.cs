@@ -23,6 +23,7 @@ namespace JengaSimulator
 		KeyboardState KeyboardState { get; }
 		Vector2 MouseDelta { get; }
 		float MouseSensitivity { get; set; }
+        float TouchSensitivity { get; set; }
 		bool CaptureMouse { get; set; }
 		bool WasPressed(Buttons button);
 		bool WasPressed(MouseButton button);

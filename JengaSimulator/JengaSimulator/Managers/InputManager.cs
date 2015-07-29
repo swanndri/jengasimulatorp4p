@@ -13,6 +13,7 @@ namespace JengaSimulator
 		const int MouseCenterPositionX = 100;
 		const int MouseCenterPositionY = 100;
 		const float DefaultMouseSensitivity = 0.005f;
+        const float DefaultTouchSensitivity = 0.000001f;
 
 		private GamePadState _gamePadState, _lastGamePadState;
 		private MouseState? _preCaptureMouseState;
@@ -21,6 +22,7 @@ namespace JengaSimulator
 		
 		private KeyboardState _keyboardState, _lastKeyboardState;
 		private float _mouseSensitivity = DefaultMouseSensitivity;
+        private float _touchSensitivity = DefaultTouchSensitivity;
 		private bool _captureMouse = true;
 
 		public InputManager(Game game)
@@ -38,6 +40,7 @@ namespace JengaSimulator
 		public Vector2 TouchPosition { get { return _touchPosition; } }
 		public KeyboardState KeyboardState { get { return _keyboardState; } }
 		public float MouseSensitivity { get { return _mouseSensitivity; } set { _mouseSensitivity = value; } }
+        public float TouchSensitivity { get { return _touchSensitivity; } set { _touchSensitivity = value; } }
 
 		public Vector2 MouseDelta
 		{
@@ -48,6 +51,7 @@ namespace JengaSimulator
                     CaptureMouse ? MouseCenterPositionY - _mouseState.Y : 0);
 			}
 		}
+
 
 		public bool CaptureMouse
 		{

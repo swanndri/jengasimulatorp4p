@@ -28,9 +28,8 @@ namespace JengaSimulator
 			float delta = (float)time.ElapsedGameTime.TotalSeconds;
 			Vector3 moveVector = Vector3.Zero;
 
-#if WINDOWS || WINDOWS_PHONE
 			_camera.Pitch += _input.MouseDelta.Y * _input.MouseSensitivity;
-			_camera.Yaw -= _input.MouseDelta.X * _input.MouseSensitivity;
+            _camera.Yaw -= _input.MouseDelta.X * _input.MouseSensitivity;
 
 			if (_input.KeyboardState.IsKeyDown(Keys.E) || _input.KeyboardState.IsKeyDown(Keys.W))
 			{
@@ -48,13 +47,6 @@ namespace JengaSimulator
 			{
 				moveVector.X += 1f;
 			}
-#else
-			_camera.Pitch -= _input.GamePadState.ThumbSticks.Right.Y * delta * 0.8f;
-			_camera.Yaw -= _input.GamePadState.ThumbSticks.Right.X * delta;
-
-			moveVector.X -= _input.GamePadState.ThumbSticks.Left.Y;
-			moveVector.Y += _input.GamePadState.ThumbSticks.Left.X;
-#endif
 
 			if (moveVector != Vector3.Zero)
 			{

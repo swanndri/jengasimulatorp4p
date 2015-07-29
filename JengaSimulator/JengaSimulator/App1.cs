@@ -189,6 +189,7 @@ namespace JengaSimulator
             _viewManager.SetProjection(0.1f, 100f, MathHelper.ToRadians(45f));
             _viewManager.Position = new Vector3(15f, 0f, 5f);       
             _viewManager.UpAxis = Vector3.UnitZ;
+            
             _viewManager.ForwardAxis = -Vector3.UnitX;
             _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
             _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);
@@ -223,6 +224,7 @@ namespace JengaSimulator
         /// 
         Vector3 cameraPosition = new Vector3(0, 6, 9);
         int rotateTime = 201666730;
+        bool _shiftCamera = false;
 
         protected override void Update(GameTime gameTime)
         {
@@ -236,8 +238,10 @@ namespace JengaSimulator
 
                     ReadOnlyTouchPointCollection touches = touchTarget.GetState();
                     _lastTouchPosition = _touchPosition;
+                    
                     if (touches.Count > 0)
                     {
+                        
                         _touchPosition = touches[0];
 
                         //First time touch
@@ -260,6 +264,13 @@ namespace JengaSimulator
                                 _pickedDistance = scalar;
                                 _pickedObject.IsActive = true;
                             }
+                            else
+                            {
+                                _shiftCamera = true;
+                            }
+                        }else if (_shiftCamera == true){
+                            _viewManager.Pitch  += (_lastTouchPosition.CenterY - _touchPosition.CenterY) * _inputManager.MouseSensitivity;
+                            _viewManager.Yaw += (_lastTouchPosition.CenterX - _touchPosition.CenterX) * _inputManager.MouseSensitivity;
                         }
                         else if (_pickedObject != null)
                         {
@@ -279,12 +290,19 @@ namespace JengaSimulator
                         {
                             _physics.Remove(_pickedForce);
                             _pickedObject = null;
+                            _shiftCamera = false;
                         }
                     }
                     else if (_pickedObject != null)
                     {
                         _physics.Remove(_pickedForce);
                         _pickedObject = null;
+                        _touchPosition = null;
+                        _lastTouchPosition = null;
+                        _shiftCamera = false;
+                    }
+                    else
+                    {
                         _touchPosition = null;
                     }
 
