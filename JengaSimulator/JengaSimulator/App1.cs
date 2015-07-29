@@ -29,9 +29,9 @@ namespace JengaSimulator
         private GrabConstraint _pickedForce;
         private float _pickedDistance;
 
-        private Vector3 BLOCK_DIMENSIONS = new Vector3(3, 0.5f, 1);
-        private Vector3 TABLE_DIMENSIONS = new Vector3(20, 0.2f, 20);
+        private TouchPoint _touchPosition, _lastTouchPosition;
         private TouchTarget touchTarget;
+
         private Color backgroundColor = Color.CornflowerBlue;
         private UserOrientation currentOrientation = UserOrientation.Bottom;
         private Matrix screenTransform = Matrix.Identity;
@@ -249,74 +249,118 @@ namespace JengaSimulator
 
         protected override void Update(GameTime gameTime)
         {
-            _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             if (ApplicationServices.WindowAvailability != WindowAvailability.Unavailable)
             {
                 if (ApplicationServices.WindowAvailability == WindowAvailability.Interactive)
-                {   
+                {
                     // TODO: Process touches, 
                     // use the following code to get the state of all current touch points.
                     // ReadOnlyTouchPointCollection touches = touchTarget.GetState();
 
                     ReadOnlyTouchPointCollection touches = touchTarget.GetState();
-
-                    if (touches.Count == 0)
+                    _lastTouchPosition = _touchPosition;
+                    if (touches.Count > 0)
                     {
-                        //modelRotation += (float)gameTime.ElapsedGameTime.TotalMilliseconds * MathHelper.ToRadians(0.1f);
-                        //fallingBox.rotation += (float)gameTime.ElapsedGameTime.TotalMilliseconds * MathHelper.ToRadians(0.1f); 
+                        _touchPosition = touches[0];
+
+                        //First time touch
+                        if (_lastTouchPosition == null)
+                        {
+                            Segment s;
+                            s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
+                                _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                            s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
+                                _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                            float scalar;
+                            Vector3 point;
+                            var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
+                            if (c != null && c is BodySkin)
+                            {
+                                _pickedObject = ((BodySkin)c).Owner;
+
+                                _pickedForce = new GrabConstraint(_pickedObject, point);
+                                _physics.Add(_pickedForce);
+                                _pickedDistance = scalar;
+                                _pickedObject.IsActive = true;
+                            }
+                        }
+                        else if (_pickedObject != null)
+                        {
+                            Segment s;
+                            s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
+                                _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                            s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
+                                _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                            Vector3 diff, point;
+                            Vector3.Subtract(ref s.P2, ref s.P1, out diff);
+                            Vector3.Multiply(ref diff, _pickedDistance, out diff);
+                            Vector3.Add(ref s.P1, ref diff, out point);
+                            _pickedForce.WorldPoint = point;
+                            _pickedObject.IsActive = true;
+                        }
+                        else if (_pickedObject != null)
+                        {
+                            _physics.Remove(_pickedForce);
+                            _pickedObject = null;
+                        }
+                    }
+                    else if (_pickedObject != null)
+                    {
+                        _physics.Remove(_pickedForce);
+                        _pickedObject = null;
+                        _touchPosition = null;
                     }
 
                 }
-
-                // TODO: Add your update logic here               
-            
-
-            }
-
-            // object picking
-            if (_inputManager.WasPressed(MouseButton.MiddleButton))
-            {
-                Segment s;
-                s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                float scalar;
-                Vector3 point;
-                var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
-                if (c != null && c is BodySkin)
+                
+                _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
+                /*
+                // object picking
+                if (_inputManager.WasPressed(MouseButton.MiddleButton))
                 {
-                    _pickedObject = ((BodySkin)c).Owner;
+                    Segment s;
+                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
+                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
+                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                    float scalar;
+                    Vector3 point;
+                    var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
+                    if (c != null && c is BodySkin)
+                    {
+                        _pickedObject = ((BodySkin)c).Owner;
 
-                    _pickedForce = new GrabConstraint(_pickedObject, point);
-                    _physics.Add(_pickedForce);
-                    _pickedDistance = scalar;
+                        _pickedForce = new GrabConstraint(_pickedObject, point);
+                        _physics.Add(_pickedForce);
+                        _pickedDistance = scalar;
+                        _pickedObject.IsActive = true;
+                    }
+                }
+                else if (_inputManager.MouseState.MiddleButton == ButtonState.Pressed && _pickedObject != null)
+                {
+                    Segment s;
+                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
+                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
+                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                    Vector3 diff, point;
+                    Vector3.Subtract(ref s.P2, ref s.P1, out diff);
+                    Vector3.Multiply(ref diff, _pickedDistance, out diff);
+                    Vector3.Add(ref s.P1, ref diff, out point);
+                    _pickedForce.WorldPoint = point;
                     _pickedObject.IsActive = true;
                 }
-            }
-            else if (_inputManager.MouseState.MiddleButton == ButtonState.Pressed && _pickedObject != null)
-            {
-                Segment s;
-                s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                Vector3 diff, point;
-                Vector3.Subtract(ref s.P2, ref s.P1, out diff);
-                Vector3.Multiply(ref diff, _pickedDistance, out diff);
-                Vector3.Add(ref s.P1, ref diff, out point);
-                _pickedForce.WorldPoint = point;
-                _pickedObject.IsActive = true;
-            }
-            else if (_pickedObject != null)
-            {
-                _physics.Remove(_pickedForce);
-                _pickedObject = null;
+                else if (_pickedObject != null)
+                {
+                    _physics.Remove(_pickedForce);
+                    _pickedObject = null;
+                }*/
             }
 
             _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
 
             base.Update(gameTime);
+            
         }
 
         /// <summary>
