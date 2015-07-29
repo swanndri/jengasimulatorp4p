@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using Microsoft.Surface;
 using Microsoft.Surface.Core;
 using Microsoft.Xna.Framework;
@@ -11,32 +10,49 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using JigLibX.Physics;
-using JigLibX.Geometry;
-using JigLibX.Collision;
+using Henge3D;
+using Henge3D.Physics;
 
 namespace JengaSimulator
 {
     public class App1 : Microsoft.Xna.Framework.Game
     {
-        private Vector3 BLOCK_DIMENSIONS = new Vector3(3, 0.5f, 1);
-        private Vector3 TABLE_DIMENSIONS = new Vector3(20, 0.2f, 20);
+        private IViewManager _viewManager;
+        private IInputManager _inputManager;
+        private IStateManager _stateManager;
 
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
+        private PhysicsManager _physics;
 
+        private RigidBody _pickedObject;
+        private GrabConstraint _pickedForce;
+        private float _pickedDistance;
+
+        private Vector3 BLOCK_DIMENSIONS = new Vector3(3, 0.5f, 1);
+        private Vector3 TABLE_DIMENSIONS = new Vector3(20, 0.2f, 20);
         private TouchTarget touchTarget;
         private Color backgroundColor = Color.CornflowerBlue;
-
         private UserOrientation currentOrientation = UserOrientation.Bottom;
         private Matrix screenTransform = Matrix.Identity;
 
-        Block fallingBox;
-        Block table;
-        
-        public Matrix View { get; private set; }
-        public Matrix Projection { get; private set; }
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public App1()
+        {
+            graphics = new GraphicsDeviceManager(this);
+            graphics.SynchronizeWithVerticalRetrace = false;
+            
 
+            _viewManager = new ViewManager(this);
+            _inputManager = new InputManager(this);
+            _stateManager = new StateManager(this);
+            _physics = new PhysicsManager(this);            
+            this.Components.Add(new PhysicsScene(this, _physics));
+
+            Content.RootDirectory = "Content";
+        }
 
         /// <summary>
         /// The target receiving all surface input for the application.
@@ -46,75 +62,67 @@ namespace JengaSimulator
             get { return touchTarget; }
         }
 
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public App1()
+        private void CreateScene()
         {
-            graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
+            _physics.Clear();
 
-            InitializePhysics();
+            Room room = new Room(this);
+            _physics.Add(room);
+            _physics.Gravity = new Vector3(0f, 0f, -9.8f);
 
-            this.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45.0f),                    
-                (float)graphics.PreferredBackBufferWidth / (float)graphics.PreferredBackBufferHeight,
-                0.1f,
-                1000.0f
-            );
+
+            Model cubeModel = this.Content.Load<Model>("models/jenga_block");
+            
+            for (int j = 0; j < 6; j++){
+                for (int i = 0; i < 3; i++)
+                {
+                    var cube = new SolidThing(this, cubeModel);
+                    if (j % 2 == 1)
+                    {
+                        Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));
+                        cube.SetWorld(new Vector3(1, i-1, j * 0.5f), rotation);
+                    }
+                    else
+                    {
+                        cube.SetWorld(new Vector3(i, 0, j * 0.5f));
+                    }                    
+                    _physics.Add(cube);
+                }
+            }
+
+            //x,z,y
+            //y = 0.5;
+            //z = 3;
+            //x = 1
+            /*
+            var cube1 = new SolidThing(this, cubeModel);
+            Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));
+            cube1.SetWorld(new Vector3(0, 0f, 0f), rotation);
+            _physics.Add(cube1);
+
+            var cube2 = new SolidThing(this, cubeModel);
+            cube2.SetWorld(new Vector3(0, 0f, 0.5f));
+            _physics.Add(cube2);
+
+            var cube3 = new SolidThing(this, cubeModel);
+            cube3.SetWorld(new Vector3(0, 0f, 1f));
+            _physics.Add(cube3);*/
+
+
+            
+            /*
+            for (int i = 0; i < 7; i++)
+            {
+                for (int j = 0; j < 7 - i; j++)
+                {
+                    var cube = new SolidThing(this, cubeModel);
+                    cube.SetWorld(new Vector3(0f, 0.501f * j + 0.25f * i, 0.5f + 0.55f * i));
+                    _physics.Add(cube);
+                }
+            }*/
         }
 
         #region Initialization
-
-        private void InitializePhysics()
-        {
-            PhysicsSystem world = new PhysicsSystem();
-            world.CollisionSystem = new CollisionSystemSAP();
-
-            //Game game, Vector3 sideLengths, Matrix orientation, Vector3 position, Vector3 color
-
-            fallingBox = new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 0, 5), false);
-
-            //Level 6
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(1.025f, 3, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 3, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(-1.025f, 3, 0), false)); 
-
-            //Level 5
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 2.5f, 1.025f), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 2.5f, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 2.5f, -1.025f), false));
-
-            //Level 4
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(1.025f, 2, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 2, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(-1.025f, 2, 0), false)); 
-
-            //Level 3
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 1.5f, 1.025f), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 1.5f, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 1.5f, -1.025f), false));  
-            
-            //Level 2
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(1.025f, 1, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 1, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(-1.025f, 1, 0), false)); 
-
-            //Level 1
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 0.5f, 1.025f), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 0.5f, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity, new Vector3(0, 0.5f, -1.025f), false));  
-
-            //Bottom Level
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(1.025f, 0, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(0, 0, 0), false));
-            Components.Add(new Block(this, BLOCK_DIMENSIONS, Matrix.Identity * Matrix.CreateRotationY(MathHelper.ToRadians(90)), new Vector3(-1.025f, 0, 0), false));         
-
-            table = new Block(this, TABLE_DIMENSIONS, Matrix.Identity, new Vector3(0, -0.5f, 0), true);
-            table._body.Immovable = true;
-
-            Components.Add(fallingBox);
-            Components.Add(table);
-        }
 
         /// <summary>
         /// Moves and sizes the window to cover the input surface.
@@ -194,8 +202,21 @@ namespace JengaSimulator
             {
                 screenTransform = inverted;
             }
-
+            
             base.Initialize();
+
+            var state = new FreeLookState(_stateManager);
+            state.MovementSpeed = 10f;
+            _stateManager.SetState(state);
+
+            _viewManager.SetProjection(0.1f, 100f, MathHelper.ToRadians(45f));
+            _viewManager.Position = new Vector3(15f, 0f, 5f);       
+            _viewManager.UpAxis = Vector3.UnitZ;
+            _viewManager.ForwardAxis = -Vector3.UnitX;
+            _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
+            _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);
+
+            CreateScene();
         }
 
         /// <summary>
@@ -206,9 +227,6 @@ namespace JengaSimulator
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            //myModel = Content.Load<Model>("Models\\Crate");
-            //aspectRatio = graphics.GraphicsDevice.Viewport.AspectRatio;
         }
 
         /// <summary>
@@ -231,10 +249,11 @@ namespace JengaSimulator
 
         protected override void Update(GameTime gameTime)
         {
+            _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             if (ApplicationServices.WindowAvailability != WindowAvailability.Unavailable)
             {
                 if (ApplicationServices.WindowAvailability == WindowAvailability.Interactive)
-                {
+                {   
                     // TODO: Process touches, 
                     // use the following code to get the state of all current touch points.
                     // ReadOnlyTouchPointCollection touches = touchTarget.GetState();
@@ -254,17 +273,50 @@ namespace JengaSimulator
 
             }
 
+            // object picking
+            if (_inputManager.WasPressed(MouseButton.MiddleButton))
+            {
+                Segment s;
+                s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
+                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
+                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                float scalar;
+                Vector3 point;
+                var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
+                if (c != null && c is BodySkin)
+                {
+                    _pickedObject = ((BodySkin)c).Owner;
+
+                    _pickedForce = new GrabConstraint(_pickedObject, point);
+                    _physics.Add(_pickedForce);
+                    _pickedDistance = scalar;
+                    _pickedObject.IsActive = true;
+                }
+            }
+            else if (_inputManager.MouseState.MiddleButton == ButtonState.Pressed && _pickedObject != null)
+            {
+                Segment s;
+                s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
+                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
+                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                Vector3 diff, point;
+                Vector3.Subtract(ref s.P2, ref s.P1, out diff);
+                Vector3.Multiply(ref diff, _pickedDistance, out diff);
+                Vector3.Add(ref s.P1, ref diff, out point);
+                _pickedForce.WorldPoint = point;
+                _pickedObject.IsActive = true;
+            }
+            else if (_pickedObject != null)
+            {
+                _physics.Remove(_pickedForce);
+                _pickedObject = null;
+            }
+
+            _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
+
             base.Update(gameTime);
-
-            float timeStep = (float)gameTime.ElapsedGameTime.Ticks / TimeSpan.TicksPerSecond;
-            PhysicsSystem.CurrentPhysicsSystem.Integrate(timeStep);
-
-            float t = (float) ((gameTime.TotalGameTime.Ticks + 1) % rotateTime) / (float)rotateTime;
-            double radians = System.Convert.ToDouble(MathHelper.ToRadians((t * 360)));
-            double x = 13 * Math.Cos(radians);
-            double z = 13 * Math.Sin(radians);
-            cameraPosition = new Vector3((float)x, 6, (float)z);
-            this.View = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 0, 0), Vector3.Up);
         }
 
         /// <summary>

@@ -5,7 +5,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JengaSimulator", "JengaSimu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JengaSimulatorContent", "JengaSimulator\JengaSimulatorContent\JengaSimulatorContent.contentproj", "{E57EBB4C-C3F2-4C8D-932F-D186C20A7197}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JigLibX", "JengaSimulator\JigLibX\JigLibX.csproj", "{8A7CEF45-3501-491D-AEDA-0164060F5348}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pipeline", "..\..\..\Users\Simon\Downloads\Henge3D_201011\Pipeline\Pipeline.csproj", "{3086E95C-5A76-4E06-A494-F61C2B71FEA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics", "JengaSimulator\Physics\Physics.csproj", "{888DC669-1E80-4AFD-895B-4B6A0751A07C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +21,14 @@ Global
 		{EABBDC73-203B-480D-95E1-5957931FD79B}.Release|x86.Build.0 = Release|x86
 		{E57EBB4C-C3F2-4C8D-932F-D186C20A7197}.Debug|x86.ActiveCfg = Debug|x86
 		{E57EBB4C-C3F2-4C8D-932F-D186C20A7197}.Release|x86.ActiveCfg = Release|x86
-		{8A7CEF45-3501-491D-AEDA-0164060F5348}.Debug|x86.ActiveCfg = Debug|x86
-		{8A7CEF45-3501-491D-AEDA-0164060F5348}.Debug|x86.Build.0 = Debug|x86
-		{8A7CEF45-3501-491D-AEDA-0164060F5348}.Release|x86.ActiveCfg = Release|x86
-		{8A7CEF45-3501-491D-AEDA-0164060F5348}.Release|x86.Build.0 = Release|x86
+		{3086E95C-5A76-4E06-A494-F61C2B71FEA2}.Debug|x86.ActiveCfg = Debug|x86
+		{3086E95C-5A76-4E06-A494-F61C2B71FEA2}.Debug|x86.Build.0 = Debug|x86
+		{3086E95C-5A76-4E06-A494-F61C2B71FEA2}.Release|x86.ActiveCfg = Debug|x86
+		{3086E95C-5A76-4E06-A494-F61C2B71FEA2}.Release|x86.Build.0 = Debug|x86
+		{888DC669-1E80-4AFD-895B-4B6A0751A07C}.Debug|x86.ActiveCfg = Debug|x86
+		{888DC669-1E80-4AFD-895B-4B6A0751A07C}.Debug|x86.Build.0 = Debug|x86
+		{888DC669-1E80-4AFD-895B-4B6A0751A07C}.Release|x86.ActiveCfg = Release|x86
+		{888DC669-1E80-4AFD-895B-4B6A0751A07C}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
