@@ -25,11 +25,21 @@ namespace JengaSimulator
         private float _touchSensitivity = DefaultTouchSensitivity;
 		private bool _captureMouse = true;
 
+        private IViewManager _camera;
+        private IInputManager _input;
+
+        float movementSpeed = 10f;
+
 		public InputManager(Game game)
 			: base(game)
 		{
-			game.Services.AddService(typeof(IInputManager), this);
+			game.Services.AddService(typeof(IInputManager), this);            
 			game.Components.Add(this);
+
+            _camera = (IViewManager)game.Services.GetService(typeof(IViewManager));
+            _input = this;
+
+            _input.CaptureMouse = true;
 		}
 
 		public GamePadState LastGamePadState { get { return _lastGamePadState; } }
@@ -127,20 +137,41 @@ namespace JengaSimulator
 			_mouseState = Mouse.GetState();
 			_keyboardState = Keyboard.GetState();
 
-			var touches = TouchPanel.GetState();
-			if (touches.Count > 0)
-			{
-				_touchPosition = touches[0].Position;
-			}
-			else
-			{
-				_touchPosition = new Vector2(float.NaN, float.NaN);
-			}
-
 			if (this.CaptureMouse)
 			{
 				Mouse.SetPosition(MouseCenterPositionX, MouseCenterPositionY);
 			}
+
+            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Vector3 moveVector = Vector3.Zero;
+
+            _camera.Pitch += _input.MouseDelta.Y * _input.MouseSensitivity;
+            _camera.Yaw -= _input.MouseDelta.X * _input.MouseSensitivity;
+
+            if (_input.KeyboardState.IsKeyDown(Keys.E) || _input.KeyboardState.IsKeyDown(Keys.W))
+            {
+                moveVector.X -= 1f;
+            }
+            if (_input.KeyboardState.IsKeyDown(Keys.A))
+            {
+                moveVector.Y -= 1f;
+            }
+            if (_input.KeyboardState.IsKeyDown(Keys.D))
+            {
+                moveVector.Y += 1f;
+            }
+            if (_input.KeyboardState.IsKeyDown(Keys.S))
+            {
+                moveVector.X += 1f;
+            }
+
+            if (moveVector != Vector3.Zero)
+            {
+                moveVector.Normalize();
+                moveVector *= movementSpeed * delta;
+                _camera.Move(moveVector);
+            }
+
 			base.Update(gameTime);
 		}
 	}

@@ -19,7 +19,6 @@ namespace JengaSimulator
     {
         private IViewManager _viewManager;
         private IInputManager _inputManager;
-        private IStateManager _stateManager;
 
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
@@ -33,7 +32,6 @@ namespace JengaSimulator
         private TouchTarget touchTarget;
 
         private Color backgroundColor = Color.CornflowerBlue;
-        private UserOrientation currentOrientation = UserOrientation.Bottom;
         private Matrix screenTransform = Matrix.Identity;
 
         /// <summary>
@@ -44,24 +42,21 @@ namespace JengaSimulator
             graphics = new GraphicsDeviceManager(this);
             graphics.SynchronizeWithVerticalRetrace = false;
             
-
             _viewManager = new ViewManager(this);
+            _viewManager.BackgroundColor = backgroundColor;
+
             _inputManager = new InputManager(this);
-            _stateManager = new StateManager(this);
+
             _physics = new PhysicsManager(this);            
             this.Components.Add(new PhysicsScene(this, _physics));
 
-            _viewManager.BackgroundColor = backgroundColor;
+       
             Content.RootDirectory = "Content";
         }
 
-        /// <summary>
-        /// The target receiving all surface input for the application.
-        /// </summary>
-        protected TouchTarget TouchTarget
-        {
-            get { return touchTarget; }
-        }
+        
+
+        #region Initialization
 
         private void CreateScene()
         {
@@ -73,33 +68,40 @@ namespace JengaSimulator
 
             var table = new SolidThing(this, tableModel);
             float tableScale = 3f;
-            Vector3 tablePosition = new Vector3(0,0,-1f);
+            Vector3 tablePosition = new Vector3(0, 0, -1f);
             Quaternion tableRotation = Quaternion.Identity;
 
-            table.SetWorld(tableScale, tablePosition ,tableRotation);
+            table.SetWorld(tableScale, tablePosition, tableRotation);
             table.Freeze();
             _physics.Add(table);
-            
-            
-            for (int j = 0; j < 10; j++){
+
+
+            for (int j = 0; j < 6; j++)
+            {
                 for (int i = 0; i < 3; i++)
                 {
                     var cube = new SolidThing(this, cubeModel);
                     if (j % 2 == 1)
                     {
                         Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));
-                        cube.SetWorld(new Vector3(1, i-1, j * 0.5f), rotation);
+                        cube.SetWorld(new Vector3(1, i - 1, j * 0.5f), rotation);
                     }
                     else
                     {
                         cube.SetWorld(new Vector3(i, 0, j * 0.5f));
-                    }                    
+                    }
                     _physics.Add(cube);
                 }
             }
         }
-
-        #region Initialization
+        
+        /// <summary>
+        /// The target receiving all surface input for the application.
+        /// </summary>
+        protected TouchTarget TouchTarget
+        {
+            get { return touchTarget; }
+        }
 
         /// <summary>
         /// Moves and sizes the window to cover the input surface.
@@ -158,37 +160,13 @@ namespace JengaSimulator
             IsMouseVisible = true; // easier for debugging not to "lose" mouse
             SetWindowOnSurface();
             InitializeSurfaceInput();
-
-            // Set the application's orientation based on the orientation at launch
-            currentOrientation = ApplicationServices.InitialOrientation;
-
-            // Subscribe to surface window availability events
-            ApplicationServices.WindowInteractive += OnWindowInteractive;
-            ApplicationServices.WindowNoninteractive += OnWindowNoninteractive;
-            ApplicationServices.WindowUnavailable += OnWindowUnavailable;
-
-            // Setup the UI to transform if the UI is rotated.
-            // Create a rotation matrix to orient the screen so it is viewed correctly
-            // when the user orientation is 180 degress different.
-            Matrix inverted = Matrix.CreateRotationZ(MathHelper.ToRadians(180)) *
-                       Matrix.CreateTranslation(graphics.GraphicsDevice.Viewport.Width,
-                                                 graphics.GraphicsDevice.Viewport.Height,
-                                                 0);
-
-            if (currentOrientation == UserOrientation.Top)
-            {
-                screenTransform = inverted;
-            }
             
             base.Initialize();
-
-            var state = new FreeLookState(_stateManager);
-            state.MovementSpeed = 10f;
-            _stateManager.SetState(state);
 
             _viewManager.SetProjection(0.1f, 100f, MathHelper.ToRadians(45f));
             _viewManager.Position = new Vector3(15f, 0f, 5f);       
             _viewManager.UpAxis = Vector3.UnitZ;
+            _viewManager.Pitch = MathHelper.ToRadians(-15f);
             
             _viewManager.ForwardAxis = -Vector3.UnitX;
             _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
@@ -228,112 +206,24 @@ namespace JengaSimulator
 
         protected override void Update(GameTime gameTime)
         {
-            if (ApplicationServices.WindowAvailability != WindowAvailability.Unavailable)
-            {
-                if (ApplicationServices.WindowAvailability == WindowAvailability.Interactive)
-                {
-                    // TODO: Process touches, 
-                    // use the following code to get the state of all current touch points.
-                    // ReadOnlyTouchPointCollection touches = touchTarget.GetState();
-
-                    ReadOnlyTouchPointCollection touches = touchTarget.GetState();
-                    _lastTouchPosition = _touchPosition;
-                    
-                    if (touches.Count == 1)
-                    {      
-                        _touchPosition = touches[0];
-
-                        //First time touch
-                        if (_lastTouchPosition == null)
-                        {
-                            Segment s;
-                            s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
-                                _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                            s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
-                                _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                            float scalar;
-                            Vector3 point;
-                            var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
-                            
-                            if (c != null && c is BodySkin)
-                            {
-                                _pickedObject = ((BodySkin)c).Owner;
-
-                                _pickedForce = new GrabConstraint(_pickedObject, point);
-                                _physics.Add(_pickedForce);
-                                _pickedDistance = scalar;
-                                _pickedObject.IsActive = true;
-                                _shiftCamera = false;
-                            }
-                            else
-                            {
-                                _shiftCamera = true;
-                            }
-                        }else if (_shiftCamera == true){
-                            _viewManager.Pitch  += (_lastTouchPosition.CenterY - _touchPosition.CenterY) * _inputManager.MouseSensitivity;
-                            _viewManager.Yaw += (_lastTouchPosition.CenterX - _touchPosition.CenterX) * _inputManager.MouseSensitivity;
-                        }
-                        else if (_pickedObject != null)
-                        {
-                            Segment s;
-                            s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
-                                _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                            s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
-                                _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                            Vector3 diff, point;
-                            Vector3.Subtract(ref s.P2, ref s.P1, out diff);
-                            Vector3.Multiply(ref diff, _pickedDistance, out diff);
-                            Vector3.Add(ref s.P1, ref diff, out point);
-                            _pickedForce.WorldPoint = point;
-                            _pickedObject.IsActive = true;
-                        }
-                        else if (_pickedObject != null)
-                        {
-                            _physics.Remove(_pickedForce);
-                            _pickedObject = null;
-                            _shiftCamera = false;
-                        }
-                    }
-                    else if (touches.Count == 3)
-                    {
-                        Vector3 movement = Vector3.Zero;
-                        movement.Y -= 1f;
-                        _viewManager.Move(movement);
-                    }
-                    else if (touches.Count == 4)
-                    {
-                        Vector3 movement = Vector3.Zero;
-                        movement.Y += 1f;
-                        _viewManager.Move(movement);
-                    }
-                    else if (_pickedObject != null)
-                    {
-                        _physics.Remove(_pickedForce);
-                        _pickedObject = null;
-                        _touchPosition = null;
-                        _lastTouchPosition = null;
-                        _shiftCamera = false;
-                    }
-                    else
-                    {
-                        _touchPosition = null;
-                    }
-
-                }
-                
-                _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-                /*
-                // object picking
-                if (_inputManager.WasPressed(MouseButton.MiddleButton))
+            ReadOnlyTouchPointCollection touches = touchTarget.GetState();
+            _lastTouchPosition = _touchPosition;
+            /*
+            if (touches.Count == 1)
+            {      
+                _touchPosition = touches[0];
+                //First time touch
+                if (_lastTouchPosition == null)
                 {
                     Segment s;
-                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
+                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
                         _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
+                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
                         _viewManager.Projection, _viewManager.View, Matrix.Identity);
                     float scalar;
                     Vector3 point;
                     var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
+                            
                     if (c != null && c is BodySkin)
                     {
                         _pickedObject = ((BodySkin)c).Owner;
@@ -342,14 +232,22 @@ namespace JengaSimulator
                         _physics.Add(_pickedForce);
                         _pickedDistance = scalar;
                         _pickedObject.IsActive = true;
+                        _shiftCamera = false;
                     }
+                    else
+                    {
+                        _shiftCamera = true;
+                    }
+                }else if (_shiftCamera == true){
+                    _viewManager.Pitch  += (_lastTouchPosition.CenterY - _touchPosition.CenterY) * _inputManager.MouseSensitivity;
+                    _viewManager.Yaw += (_lastTouchPosition.CenterX - _touchPosition.CenterX) * _inputManager.MouseSensitivity;
                 }
-                else if (_inputManager.MouseState.MiddleButton == ButtonState.Pressed && _pickedObject != null)
+                else if (_pickedObject != null)
                 {
                     Segment s;
-                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
+                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
                         _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
+                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
                         _viewManager.Projection, _viewManager.View, Matrix.Identity);
                     Vector3 diff, point;
                     Vector3.Subtract(ref s.P2, ref s.P1, out diff);
@@ -362,8 +260,78 @@ namespace JengaSimulator
                 {
                     _physics.Remove(_pickedForce);
                     _pickedObject = null;
-                }*/
+                    _shiftCamera = false;
+                }
             }
+            else if (touches.Count == 3)
+            {
+                Vector3 movement = Vector3.Zero;
+                movement.Y -= 1f;
+                _viewManager.Move(movement);
+            }
+            else if (touches.Count == 4)
+            {
+                Vector3 movement = Vector3.Zero;
+                movement.Y += 1f;
+                _viewManager.Move(movement);
+            }
+            else if (_pickedObject != null)
+            {
+                _physics.Remove(_pickedForce);
+                _pickedObject = null;
+                _touchPosition = null;
+                _lastTouchPosition = null;
+                _shiftCamera = false;
+            }
+            else
+            {
+                _touchPosition = null;
+            }*/
+                          
+                
+            _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
+               
+            // object picking
+            if (_inputManager.WasPressed(MouseButton.MiddleButton))
+            {
+                Segment s;
+                s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
+                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
+                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                float scalar;
+                Vector3 point;
+                var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
+                if (c != null && c is BodySkin)
+                {
+                    _pickedObject = ((BodySkin)c).Owner;
+
+                    _pickedForce = new GrabConstraint(_pickedObject, point);
+                    _physics.Add(_pickedForce);
+                    _pickedDistance = scalar;
+                    _pickedObject.IsActive = true;
+                }
+            }
+            else if (_inputManager.MouseState.MiddleButton == ButtonState.Pressed && _pickedObject != null)
+            {
+                Segment s;
+                s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
+                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
+                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                Vector3 diff, point;
+                Vector3.Subtract(ref s.P2, ref s.P1, out diff);
+                Vector3.Multiply(ref diff, _pickedDistance, out diff);
+                Vector3.Add(ref s.P1, ref diff, out point);
+                _pickedForce.WorldPoint = point;
+                _pickedObject.IsActive = true;
+            }
+            else if (_pickedObject != null)
+            {
+                _physics.Remove(_pickedForce);
+                _pickedObject = null;
+            }
+            
 
             _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
 
@@ -382,46 +350,6 @@ namespace JengaSimulator
             GraphicsDevice.Clear(backgroundColor);
 
             base.Draw(gameTime);
-        }
-
-        #endregion
-
-        #region Application Event Handlers
-
-        /// <summary>
-        /// This is called when the user can interact with the application's window.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnWindowInteractive(object sender, EventArgs e)
-        {
-            //TODO: Enable audio, animations here
-
-            //TODO: Optionally enable raw image here
-        }
-
-        /// <summary>
-        /// This is called when the user can see but not interact with the application's window.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnWindowNoninteractive(object sender, EventArgs e)
-        {
-            //TODO: Disable audio here if it is enabled
-
-            //TODO: Optionally enable animations here
-        }
-
-        /// <summary>
-        /// This is called when the application's window is not visible or interactive.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnWindowUnavailable(object sender, EventArgs e)
-        {
-            //TODO: Disable audio, animations here
-
-            //TODO: Disable raw image if it's enabled
         }
 
         #endregion
