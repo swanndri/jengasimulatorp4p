@@ -13,6 +13,7 @@ namespace Henge3D.Physics
 	{
 		private Vector3 _bodyPoint, _worldOffset, _worldPoint, _impulse;
 		private Matrix _mass;
+        private Quaternion orientation;
 
 		/// <summary>
 		/// Construct a new world point constraint.
@@ -25,6 +26,7 @@ namespace Henge3D.Physics
 		{
 			_worldPoint = worldPoint;
 			Vector3.Transform(ref worldPoint, ref BodyA.WorldInverse.Combined, out _bodyPoint);
+            orientation = body.Orientation;
 		}
 
 		/// <summary>

@@ -53,3 +53,8 @@ JengaSimulator/Jengasimulator/obj
 JengaSimulator/JengasimulatorContent/obj
 *.cachefile
 *.ccgame
+
+JengaSimulator/Pipeline/bin
+JengaSimulator/Pipeline/obj
+JengaSimulator/Physics/bin
+
