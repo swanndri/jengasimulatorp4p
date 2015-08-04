@@ -104,6 +104,10 @@ namespace Henge3D.Physics
 			float mass = a.MassWorld.EffectiveMass(ref _worldOffset, ref n);
 			Vector3.Multiply(ref impulse, mass * this.Manager.PositionCorrectionFactor, out impulse);
 
+            TransformDelta v = a.Velocity;
+            a.SetWorld(a.Position, this.orientation);
+            a.SetVelocity(v.Linear, v.Angular);
+            
 			// apply impulse
 			a.ApplyFlashImpulse(ref impulse, ref _worldOffset);
 

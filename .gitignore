@@ -57,4 +57,7 @@ JengaSimulator/JengasimulatorContent/obj
 JengaSimulator/Pipeline/bin
 JengaSimulator/Pipeline/obj
 JengaSimulator/Physics/bin
+*.dll
+*.pdb
+
 
