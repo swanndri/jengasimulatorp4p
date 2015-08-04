@@ -54,8 +54,6 @@ namespace JengaSimulator
             Content.RootDirectory = "Content";
         }
 
-        
-
         #region Initialization
 
         private void CreateScene()
@@ -75,20 +73,31 @@ namespace JengaSimulator
             table.Freeze();
             _physics.Add(table);
 
+            Random random = new Random();
 
             for (int j = 0; j < 6; j++)
             {
                 for (int i = 0; i < 3; i++)
                 {
                     var cube = new SolidThing(this, cubeModel);
+                  
+                    //int randomNumber = random.Next(90, 100);
+                    //float random1 = (float)randomNumber;
+
+                    //float scale = (random1 / 100) * 1.0f;
+                    float scale = 1.0f;
+                    Quaternion rotation; 
+
                     if (j % 2 == 1)
                     {
-                        Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));
-                        cube.SetWorld(new Vector3(1, i - 1, j * 0.5f), rotation);
+                        rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));      
+                        cube.SetWorld(scale, new Vector3(1, i - 1, j * 0.5f), rotation);
+                        
                     }
                     else
                     {
-                        cube.SetWorld(new Vector3(i, 0, j * 0.5f));
+                        rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(0));
+                        cube.SetWorld(scale, new Vector3(i, 0, j * 0.5f), rotation);
                     }
                     _physics.Add(cube);
                 }
