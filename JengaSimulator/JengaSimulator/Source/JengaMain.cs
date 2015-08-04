@@ -217,7 +217,7 @@ namespace JengaSimulator
         {
             ReadOnlyTouchPointCollection touches = touchTarget.GetState();
             _lastTouchPosition = _touchPosition;
-            /*
+            
             if (touches.Count == 1)
             {      
                 _touchPosition = touches[0];
@@ -295,11 +295,12 @@ namespace JengaSimulator
             else
             {
                 _touchPosition = null;
-            }*/
+            }
                           
                 
             _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-               
+            
+            /*
             // object picking
             if (_inputManager.WasPressed(MouseButton.MiddleButton))
             {
@@ -339,7 +340,8 @@ namespace JengaSimulator
             {
                 _physics.Remove(_pickedForce);
                 _pickedObject = null;
-            }
+            }*/
+
             
 
             _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
