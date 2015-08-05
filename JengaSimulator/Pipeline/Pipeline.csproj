@@ -56,7 +56,7 @@
     <Compile Include="StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Development\Surface\JengaSimulator\JengaSimulator\Physics\Physics.csproj">
+    <ProjectReference Include="..\Physics\Physics.csproj">
       <Project>{888DC669-1E80-4AFD-895B-4B6A0751A07C}</Project>
       <Name>Physics</Name>
     </ProjectReference>

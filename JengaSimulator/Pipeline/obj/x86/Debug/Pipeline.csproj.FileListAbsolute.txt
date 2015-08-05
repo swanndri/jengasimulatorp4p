@@ -5,3 +5,10 @@ C:\Users\Simon\Downloads\Henge3D_201011\Pipeline\bin\x86\Debug\Henge3D.Physics.p
 C:\Users\Simon\Downloads\Henge3D_201011\Pipeline\obj\x86\Debug\Pipeline.csprojResolveAssemblyReference.cache
 C:\Users\Simon\Downloads\Henge3D_201011\Pipeline\obj\x86\Debug\Pipeline.dll
 C:\Users\Simon\Downloads\Henge3D_201011\Pipeline\obj\x86\Debug\Pipeline.pdb
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Pipeline\bin\x86\Debug\Pipeline.dll
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Pipeline\bin\x86\Debug\Pipeline.pdb
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Pipeline\bin\x86\Debug\Henge3D.Physics.dll
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Pipeline\bin\x86\Debug\Henge3D.Physics.pdb
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Pipeline\obj\x86\Debug\Pipeline.csprojResolveAssemblyReference.cache
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Pipeline\obj\x86\Debug\Pipeline.dll
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Pipeline\obj\x86\Debug\Pipeline.pdb

@@ -22,6 +22,7 @@ namespace JengaSimulator
 
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
+        private SpriteBatch bBatch;
         private PhysicsManager _physics;
 
         private RigidBody _pickedObject;
@@ -33,6 +34,8 @@ namespace JengaSimulator
 
         private Color backgroundColor = Color.CornflowerBlue;
         private Matrix screenTransform = Matrix.Identity;
+
+        public Texture2D texture;
 
         /// <summary>
         /// Default constructor.
@@ -192,6 +195,8 @@ namespace JengaSimulator
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            bBatch = new SpriteBatch(GraphicsDevice);
+            texture = Content.Load<Texture2D>(@"Sprites/easy");
         }
 
         /// <summary>
@@ -360,7 +365,13 @@ namespace JengaSimulator
         {
             GraphicsDevice.Clear(backgroundColor);
 
+
             base.Draw(gameTime);
+
+
+            bBatch.Begin();
+            bBatch.Draw(texture, Vector2.Zero, Color.Blue);
+            bBatch.End();
         }
 
         #endregion

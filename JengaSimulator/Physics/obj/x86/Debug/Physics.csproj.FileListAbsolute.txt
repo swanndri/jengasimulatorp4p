@@ -16,3 +16,9 @@ C:\Development\Surface\JengaSimulator\JengaSimulator\Physics\obj\x86\Debug\Physi
 C:\Development\Surface\JengaSimulator\JengaSimulator\Physics\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
 C:\Development\Surface\JengaSimulator\JengaSimulator\Physics\obj\x86\Debug\Henge3D.Physics.dll
 C:\Development\Surface\JengaSimulator\JengaSimulator\Physics\obj\x86\Debug\Henge3D.Physics.pdb
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Physics\bin\x86\Debug\Henge3D.Physics.dll
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Physics\bin\x86\Debug\Henge3D.Physics.pdb
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Physics\obj\x86\Debug\Physics.csprojResolveAssemblyReference.cache
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Physics\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Physics\obj\x86\Debug\Henge3D.Physics.dll
+C:\Users\Ben\Documents\Jenga\JengaSimulator\Physics\obj\x86\Debug\Henge3D.Physics.pdb
