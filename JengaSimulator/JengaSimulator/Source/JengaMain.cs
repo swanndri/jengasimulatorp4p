@@ -72,7 +72,7 @@ namespace JengaSimulator
             this.Components.Add(new PhysicsScene(this, _physics));
 
             gestureRecognizer = new GestureRecognizer(this, _viewManager, _physics);
-       
+            _resetFlag = false;
             Content.RootDirectory = "Content";
         }
 
@@ -83,13 +83,13 @@ namespace JengaSimulator
 
             _ScreenHeight = GraphicsDevice.PresentationParameters.Bounds.Height;
             _ScreenWidth = GraphicsDevice.PresentationParameters.Bounds.Width;
-            _resetFlag = false;
+            
 
             //Create rectangles for slider sprites
-            _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 150, _ScreenHeight / 4, 150, _ScreenHeight / 2);
+            _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 180, _ScreenHeight / 4, 150, _ScreenHeight / 2);
             _rotationBottomSliderRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 200, _ScreenWidth / 2, 150);
             _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, _ScreenHeight / 4, 50, 50);
-            _rotationBottomSliderBallRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 195, 75, 75);
+            _rotationBottomSliderBallRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 165, 75, 75);
 
             rotationAngle = 0;
             heightAngle = MathHelper.ToRadians(1);
@@ -107,11 +107,12 @@ namespace JengaSimulator
             
            
 
-
+            
             Model cubeModel = this.Content.Load<Model>("models/jenga_block");
             Model tableModel = this.Content.Load<Model>("models/table");
+            
+            SolidThing table = new SolidThing(this, tableModel, false);
 
-            var table = new SolidThing(this, tableModel);
             float tableScale = 3f;
             Vector3 tablePosition = new Vector3(0, 0, -1f);
             Quaternion tableRotation = Quaternion.Identity;
@@ -127,7 +128,7 @@ namespace JengaSimulator
                 for (int i = 0; i < 3; i++)
                 {
                     var cube = new SolidThing(this, cubeModel);
-                  
+
                     //int randomNumber = random.Next(90, 100);
                     //float random1 = (float)randomNumber;
 
@@ -230,7 +231,7 @@ namespace JengaSimulator
 
             CreateScene();
         }
-
+        
         /// <summary>
         /// LoadContent will be called once per app and is the place to load
         /// all of your content.
@@ -240,8 +241,8 @@ namespace JengaSimulator
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             buttonBatch = new SpriteBatch(GraphicsDevice);
-            _resetButtonTexture = Content.Load<Texture2D>(@"Sprites/easy");
-            _viewButtonTexture = Content.Load<Texture2D>(@"Sprites/hard");
+            _resetButtonTexture = Content.Load<Texture2D>(@"Sprites/reset_button");
+            _viewButtonTexture = Content.Load<Texture2D>(@"Sprites/reset_button_pressed");
             _rotationSideSliderTexture = Content.Load<Texture2D>(@"Sprites/Rotation Slider");
             _rotationBottomSliderTexture = Content.Load<Texture2D>(@"Sprites/Rotation Slider - Bottom");
             _rotationSliderBallTexture = Content.Load<Texture2D>(@"Sprites/circle");
@@ -286,7 +287,10 @@ namespace JengaSimulator
 
             //_viewManager.Position = (Vector3.Add(_viewManager.Position , new Vector3(0.0f,0.1f,0.0f)));
 
-
+            if (touches.Count == 0)
+            {
+                _resetFlag = false;
+            }
 
             //BUTTON CODE - WILL NOT WORK WITH ACTUAL TOUCH
             if (touches.Count == 1)
@@ -294,12 +298,20 @@ namespace JengaSimulator
                 _touchPosition = touches[0];
 
                     //Pressed reset button
-                    if ((_touchPosition.CenterX < 165)&&(_touchPosition.CenterY < 70) && (_resetFlag == false))
+                if ((_touchPosition.CenterX < 165) && (_touchPosition.CenterY < 70))
+                {
+
+                    if (!_resetFlag)
                     {
                         _resetFlag = true;
                         CreateScene();
-                       
                     }
+
+                }
+                else
+                {
+                    _resetFlag = false;
+                }
 
                     
                     
@@ -333,7 +345,7 @@ namespace JengaSimulator
                         propOfSlider = dFromLeft / _rotationBottomSliderRectangle.Width;
 
                         int distance = (int)(((_ScreenWidth / 4) + dFromLeft) - (propOfSlider * 75));
-                        _rotationBottomSliderBallRectangle = new Rectangle(distance, _ScreenHeight - 195, 75, 75);
+                        _rotationBottomSliderBallRectangle = new Rectangle(distance, _ScreenHeight - 165, 75, 75);
 
                         double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 360)));
                         this.rotationAngle = (float)radians;
@@ -415,7 +427,13 @@ namespace JengaSimulator
             base.Draw(gameTime);
 
             buttonBatch.Begin();
-            buttonBatch.Draw(_resetButtonTexture, Vector2.Zero, Color.White);
+            if (_resetFlag)
+            {
+                buttonBatch.Draw(_viewButtonTexture, Vector2.Zero, Color.White);
+            }
+            else {
+                buttonBatch.Draw(_resetButtonTexture, Vector2.Zero, Color.White);
+            }
             
             //buttonBatch.Draw(_viewButtonTexture, viewButtonPos, Color.White);
 
