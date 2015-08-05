@@ -104,9 +104,7 @@ namespace JengaSimulator
 
             _physics.Clear();
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
-            
-           
-
+      
             
             Model cubeModel = this.Content.Load<Model>("models/jenga_block");
             Model tableModel = this.Content.Load<Model>("models/table");

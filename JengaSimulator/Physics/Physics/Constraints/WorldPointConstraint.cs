@@ -13,7 +13,7 @@ namespace Henge3D.Physics
 	{
 		private Vector3 _bodyPoint, _worldOffset, _worldPoint, _impulse;
 		private Matrix _mass;
-        private Quaternion orientation;
+        public Quaternion orientation;
 
 		/// <summary>
 		/// Construct a new world point constraint.
