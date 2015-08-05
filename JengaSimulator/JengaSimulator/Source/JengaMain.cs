@@ -32,6 +32,7 @@ namespace JengaSimulator
 
         private TouchPoint _touchPosition, _lastTouchPosition;
         private TouchTarget touchTarget;
+        private GestureRecognizer gestureRecognizer;
 
         private Color backgroundColor = Color.CornflowerBlue;
         private Matrix screenTransform = Matrix.Identity;
@@ -53,24 +54,24 @@ namespace JengaSimulator
         private int _ScreenHeight;
         private int _ScreenWidth;
 
+        private Vector3 cameraPosition = new Vector3(0, 6, 9);
         /// <summary>
         /// Default constructor.
         /// </summary>
         public App1()
-        {
-           
-
+        {   
             graphics = new GraphicsDeviceManager(this);
             graphics.SynchronizeWithVerticalRetrace = false;
             
             _viewManager = new ViewManager(this);
             _viewManager.BackgroundColor = backgroundColor;
 
-            _inputManager = new InputManager(this);
+            _inputManager = new InputManager(this);            
 
             _physics = new PhysicsManager(this);            
             this.Components.Add(new PhysicsScene(this, _physics));
 
+            gestureRecognizer = new GestureRecognizer(this, _viewManager, _physics);
        
             Content.RootDirectory = "Content";
         }
@@ -260,16 +261,12 @@ namespace JengaSimulator
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         /// 
-        Vector3 cameraPosition = new Vector3(0, 6, 9);
-        int rotateTime = 201666730;
-        bool _shiftCamera = false;
+        
 
         protected override void Update(GameTime gameTime)
         {
             ReadOnlyTouchPointCollection touches = touchTarget.GetState();
             _lastTouchPosition = _touchPosition;
-
-
 
             //BUTTON CODE - WILL NOT WORK WITH ACTUAL TOUCH
             if (touches.Count == 1)
@@ -331,95 +328,7 @@ namespace JengaSimulator
             }
 
 
-
-
-
-
-
-
-
-
-            //COMMENT OUT FROM HERE
-            if (touches.Count == 1)
-            {      
-                _touchPosition = touches[0];
-                //First time touch
-                if (_lastTouchPosition == null)
-                {
-                    Segment s;
-                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
-                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
-                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                    float scalar;
-                    Vector3 point;
-                    var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
-                            
-                    if (c != null && c is BodySkin)
-                    {
-                        _pickedObject = ((BodySkin)c).Owner;
-
-                        _pickedForce = new WorldPointConstraint(_pickedObject, point);
-                        _physics.Add(_pickedForce);
-                        _pickedDistance = scalar;
-                        _pickedObject.IsActive = true;
-                        _shiftCamera = false;
-                    }
-                    else
-                    {
-                        _shiftCamera = true;
-                    }
-                }else if (_shiftCamera == true){
-                    _viewManager.Pitch  += (_lastTouchPosition.CenterY - _touchPosition.CenterY) * _inputManager.MouseSensitivity;
-                    _viewManager.Yaw += (_lastTouchPosition.CenterX - _touchPosition.CenterX) * _inputManager.MouseSensitivity;
-                }
-                else if (_pickedObject != null)
-                {
-                    Segment s;
-                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
-                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
-                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                    Vector3 diff, point;
-                    Vector3.Subtract(ref s.P2, ref s.P1, out diff);
-                    Vector3.Multiply(ref diff, _pickedDistance, out diff);
-                    Vector3.Add(ref s.P1, ref diff, out point);
-                    _pickedForce.WorldPoint = point;
-                    _pickedObject.IsActive = true;
-                }
-                else if (_pickedObject != null)
-                {
-                    _physics.Remove(_pickedForce);
-                    _pickedObject = null;
-                    _shiftCamera = false;
-                }
-            }
-            else if (touches.Count == 3)
-            {
-                Vector3 movement = Vector3.Zero;
-                movement.Y -= 1f;
-                _viewManager.Move(movement);
-            }
-            else if (touches.Count == 4)
-            {
-                Vector3 movement = Vector3.Zero;
-                movement.Y += 1f;
-                _viewManager.Move(movement);
-            }
-            else if (_pickedObject != null)
-            {
-                _physics.Remove(_pickedForce);
-                _pickedObject = null;
-                _touchPosition = null;
-                _lastTouchPosition = null;
-                _shiftCamera = false;
-            }
-            else
-            {
-                _touchPosition = null;
-            }
-             //COMMENT OUT TO HERE
-                          
+            gestureRecognizer.processTouchPoints(touches);
                 
             _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             
