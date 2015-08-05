@@ -38,14 +38,28 @@ namespace JengaSimulator
 
         private Texture2D _resetButtonTexture;
         private Texture2D _viewButtonTexture;
+        
+        private Texture2D _rotationSideSliderTexture;
+        private Rectangle _rotationSideSliderRectangle;
+        private Texture2D _rotationBottomSliderTexture;
+        private Rectangle _rotationBottomSliderRectangle;
+
+        private Texture2D _rotationSliderBallTexture;
+        private Rectangle _rotationSideSliderBallRectangle;
+        private Rectangle _rotationBottomSliderBallRectangle;
 
         private Boolean _resetFlag;
+
+        private int _ScreenHeight;
+        private int _ScreenWidth;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         public App1()
         {
+           
+
             graphics = new GraphicsDeviceManager(this);
             graphics.SynchronizeWithVerticalRetrace = false;
             
@@ -65,10 +79,21 @@ namespace JengaSimulator
 
         private void CreateScene()
         {
+
+            _ScreenHeight = GraphicsDevice.PresentationParameters.Bounds.Height;
+            _ScreenWidth = GraphicsDevice.PresentationParameters.Bounds.Width;
+
             _physics.Clear();
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
             
             _resetFlag = false;
+
+            //Create rectangles for slider sprites
+            _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 150, _ScreenHeight/4, 150, _ScreenHeight/2);
+            _rotationBottomSliderRectangle = new Rectangle(_ScreenWidth/4, _ScreenHeight-200, _ScreenWidth/2, 150);
+            _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, _ScreenHeight / 4, 50, 50);
+            _rotationBottomSliderBallRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 195, 75, 75);
+
 
             Model cubeModel = this.Content.Load<Model>("models/jenga_block");
             Model tableModel = this.Content.Load<Model>("models/table");
@@ -206,6 +231,10 @@ namespace JengaSimulator
             buttonBatch = new SpriteBatch(GraphicsDevice);
             _resetButtonTexture = Content.Load<Texture2D>(@"Sprites/easy");
             _viewButtonTexture = Content.Load<Texture2D>(@"Sprites/hard");
+            _rotationSideSliderTexture = Content.Load<Texture2D>(@"Sprites/Rotation Slider");
+            _rotationBottomSliderTexture = Content.Load<Texture2D>(@"Sprites/Rotation Slider - Bottom");
+            _rotationSliderBallTexture = Content.Load<Texture2D>(@"Sprites/circle");
+            
         }
 
         /// <summary>
@@ -238,15 +267,6 @@ namespace JengaSimulator
             if (touches.Count == 1)
             {
                 _touchPosition = touches[0];
-                //First time touch
-                    Segment s;
-                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
-                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
-                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                    float scalar;
-                    Vector3 point;
-                    var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
 
                     //Pressed reset button
                     if ((_touchPosition.CenterX < 165)&&(_touchPosition.CenterY < 70) && (_resetFlag == false))
@@ -256,9 +276,49 @@ namespace JengaSimulator
                        
                     }
 
-                    //Pressed reset button
-                    if ((_touchPosition.CenterX < 165) && (_touchPosition.CenterY < 140) && (_touchPosition.CenterY > 70))
+
+
+                    
+                    
+                    Point p = new Point((int)_touchPosition.CenterX, (int)_touchPosition.CenterY);
+                    if (_rotationSideSliderRectangle.Contains(p))
                     {
+                        //Console.Out.WriteLine(p);
+
+                        float dFromTop;
+                        dFromTop = (float)(p.Y - _rotationSideSliderRectangle.Y);
+
+                        float propOfSlider;
+                        propOfSlider = dFromTop / _rotationSideSliderRectangle.Height;
+
+                        int distance = (int)(((_ScreenHeight / 4) + dFromTop)-(50*propOfSlider));
+                        _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, distance, 50, 50);
+
+                        double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 360)));
+                        double x = 13 * Math.Cos(radians);
+                        double z = 13 * Math.Sin(radians);
+                        cameraPosition = new Vector3((float)z,(float)x , 6);
+                        _viewManager.Position = cameraPosition;
+                    }
+
+                    if (_rotationBottomSliderRectangle.Contains(p))
+                    {
+                        //Console.Out.WriteLine(p);
+
+                        float dFromLeft;
+                        dFromLeft = (float)(p.X - _rotationBottomSliderRectangle.X);
+
+                        float propOfSlider;
+                        propOfSlider = dFromLeft / _rotationBottomSliderRectangle.Width;
+
+                        int distance = (int)(((_ScreenWidth / 4) + dFromLeft) - (propOfSlider * 75));
+                        _rotationBottomSliderBallRectangle = new Rectangle(distance, _ScreenHeight - 195, 75, 75);
+
+                        double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 360)));
+                        double x = 13 * Math.Cos(radians);
+                        double z = 13 * Math.Sin(radians);
+                        cameraPosition = new Vector3((float)x, (float)z, 6);
+                        _viewManager.Position = cameraPosition;
                     }
             }
 
@@ -271,7 +331,7 @@ namespace JengaSimulator
 
 
 
-            /*
+            //COMMENT OUT FROM HERE
             if (touches.Count == 1)
             {      
                 _touchPosition = touches[0];
@@ -291,7 +351,7 @@ namespace JengaSimulator
                     {
                         _pickedObject = ((BodySkin)c).Owner;
 
-                        _pickedForce = new GrabConstraint(_pickedObject, point);
+                        _pickedForce = new WorldPointConstraint(_pickedObject, point);
                         _physics.Add(_pickedForce);
                         _pickedDistance = scalar;
                         _pickedObject.IsActive = true;
@@ -350,12 +410,13 @@ namespace JengaSimulator
             {
                 _touchPosition = null;
             }
-            */
+             //COMMENT OUT TO HERE
                           
                 
             _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             
-            
+            //COMMENT OUT FROM HERE
+            /*
             // object picking
             if (_inputManager.WasPressed(MouseButton.MiddleButton))
             {
@@ -396,8 +457,8 @@ namespace JengaSimulator
                 _physics.Remove(_pickedForce);
                 _pickedObject = null;
             }
-
-            
+            */
+            //COMMENT OUT TILL HERE
 
             _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
 
@@ -424,10 +485,14 @@ namespace JengaSimulator
 
             buttonBatch.Begin();
             buttonBatch.Draw(_resetButtonTexture, Vector2.Zero, Color.White);
-            Vector2 viewButtonPos = new Vector2();
-            viewButtonPos.X = 0;
-            viewButtonPos.Y = 80;
-            buttonBatch.Draw(_viewButtonTexture, viewButtonPos, Color.White);
+            
+            //buttonBatch.Draw(_viewButtonTexture, viewButtonPos, Color.White);
+
+            buttonBatch.Draw(_rotationSideSliderTexture, _rotationSideSliderRectangle, Color.White);
+            buttonBatch.Draw(_rotationBottomSliderTexture, _rotationBottomSliderRectangle, Color.White);
+            buttonBatch.Draw(_rotationSliderBallTexture, _rotationSideSliderBallRectangle, Color.White);
+            buttonBatch.Draw(_rotationSliderBallTexture, _rotationBottomSliderBallRectangle, Color.White);
+
             buttonBatch.End();
 
         }

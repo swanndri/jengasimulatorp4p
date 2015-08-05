@@ -144,7 +144,7 @@ namespace JengaSimulator
 			}
 
             
-
+            /*
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector3 moveVector = Vector3.Zero;
 
@@ -174,7 +174,7 @@ namespace JengaSimulator
                 moveVector *= movementSpeed * delta;
                 _camera.Move(moveVector);
             }
-
+            */
 			base.Update(gameTime);
 		}
 	}

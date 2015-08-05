@@ -158,11 +158,13 @@ namespace JengaSimulator
 			_device.Clear(backgroundColor);
 
 			Vector3 look = this.Direction;
+            Vector3 origin = Vector3.Zero;
 			Vector3.Add(ref _position, ref look, out look);
 
 			Matrix.CreateLookAt(
 				ref _position,
-				ref look,
+				//ref look,
+                ref origin,
 				ref _upAxis,
 				out _viewMatrix);
 
