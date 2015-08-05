@@ -53,3 +53,14 @@ JengaSimulator/Jengasimulator/obj
 JengaSimulator/JengasimulatorContent/obj
 *.cachefile
 *.ccgame
+<<<<<<< .merge_file_a02848
+=======
+
+JengaSimulator/Pipeline/bin
+JengaSimulator/Pipeline/obj
+JengaSimulator/Physics/bin
+*.dll
+*.pdb
+
+
+>>>>>>> .merge_file_a02836

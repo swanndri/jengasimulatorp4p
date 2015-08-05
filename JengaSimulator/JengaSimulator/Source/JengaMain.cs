@@ -26,7 +26,7 @@ namespace JengaSimulator
         private PhysicsManager _physics;
 
         private RigidBody _pickedObject;
-        private GrabConstraint _pickedForce;
+        private WorldPointConstraint _pickedForce;
         private float _pickedDistance;
 
         private TouchPoint _touchPosition, _lastTouchPosition;
@@ -223,6 +223,7 @@ namespace JengaSimulator
             ReadOnlyTouchPointCollection touches = touchTarget.GetState();
             _lastTouchPosition = _touchPosition;
             
+            /*
             if (touches.Count == 1)
             {      
                 _touchPosition = touches[0];
@@ -301,11 +302,12 @@ namespace JengaSimulator
             {
                 _touchPosition = null;
             }
+            */
                           
                 
             _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             
-            /*
+            
             // object picking
             if (_inputManager.WasPressed(MouseButton.MiddleButton))
             {
@@ -321,7 +323,7 @@ namespace JengaSimulator
                 {
                     _pickedObject = ((BodySkin)c).Owner;
 
-                    _pickedForce = new GrabConstraint(_pickedObject, point);
+                    _pickedForce = new WorldPointConstraint(_pickedObject, point);
                     _physics.Add(_pickedForce);
                     _pickedDistance = scalar;
                     _pickedObject.IsActive = true;
@@ -345,7 +347,7 @@ namespace JengaSimulator
             {
                 _physics.Remove(_pickedForce);
                 _pickedObject = null;
-            }*/
+            }
 
             
 

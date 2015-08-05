@@ -13,6 +13,7 @@ namespace Henge3D.Physics
 	{
 		private Vector3 _bodyPoint, _worldOffset, _worldPoint, _impulse;
 		private Matrix _mass;
+        private Quaternion orientation;
 
 		/// <summary>
 		/// Construct a new world point constraint.
@@ -25,6 +26,7 @@ namespace Henge3D.Physics
 		{
 			_worldPoint = worldPoint;
 			Vector3.Transform(ref worldPoint, ref BodyA.WorldInverse.Combined, out _bodyPoint);
+            orientation = body.Orientation;
 		}
 
 		/// <summary>
@@ -101,9 +103,13 @@ namespace Henge3D.Physics
 			Vector3.Divide(ref impulse, error, out n);
 			float mass = a.MassWorld.EffectiveMass(ref _worldOffset, ref n);
 			Vector3.Multiply(ref impulse, mass * this.Manager.PositionCorrectionFactor, out impulse);
-
+            
 			// apply impulse
 			a.ApplyFlashImpulse(ref impulse, ref _worldOffset);
+
+            TransformDelta v = a.Velocity;
+            a.SetWorld(a.Position, this.orientation);
+            a.SetVelocity(v.Linear, Vector3.Zero);
 
 			return false;
 		}
