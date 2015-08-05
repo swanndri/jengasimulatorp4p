@@ -416,8 +416,11 @@ namespace JengaSimulator
             GraphicsDevice.Clear(backgroundColor);
 
 
+         
+            
+            GraphicsDevice.BlendState = BlendState.Opaque;
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
             base.Draw(gameTime);
-
 
             buttonBatch.Begin();
             buttonBatch.Draw(_resetButtonTexture, Vector2.Zero, Color.White);
@@ -426,6 +429,7 @@ namespace JengaSimulator
             viewButtonPos.Y = 80;
             buttonBatch.Draw(_viewButtonTexture, viewButtonPos, Color.White);
             buttonBatch.End();
+
         }
 
         #endregion
