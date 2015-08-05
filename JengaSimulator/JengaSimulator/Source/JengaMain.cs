@@ -18,8 +18,8 @@ namespace JengaSimulator
     public class App1 : Microsoft.Xna.Framework.Game
     {
         private float cameraDistance = 13;
-        private float rotationAngle = 0;
-        private float heightAngle = 0;
+        private float rotationAngle;
+        private float heightAngle;
 
         private IViewManager _viewManager;
         private IInputManager _inputManager;
@@ -91,7 +91,11 @@ namespace JengaSimulator
             _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, _ScreenHeight / 4, 50, 50);
             _rotationBottomSliderBallRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 195, 75, 75);
 
-            _viewManager.Position = new Vector3(15f, 0f, 5f);     
+            rotationAngle = 0;
+            heightAngle = MathHelper.ToRadians(1);
+
+            //_viewManager.Position = new Vector3(15f, 0f, 5f); 
+            updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
 
         }
         private void CreateScene()
@@ -134,13 +138,13 @@ namespace JengaSimulator
                     if (j % 2 == 1)
                     {
                         rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));      
-                        cube.SetWorld(scale, new Vector3(1, i - 1, j * 0.5f), rotation);
+                        cube.SetWorld(scale, new Vector3(0, i - 1, j * 0.5f), rotation);
                         
                     }
                     else
                     {
                         rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(0));
-                        cube.SetWorld(scale, new Vector3(i, 0, j * 0.5f), rotation);
+                        cube.SetWorld(scale, new Vector3(i-1, 0, j * 0.5f), rotation);
                     }
                     _physics.Add(cube);
                 }
@@ -218,9 +222,7 @@ namespace JengaSimulator
             base.Initialize();
 
             _viewManager.SetProjection(0.1f, 100f, MathHelper.ToRadians(45f));
-            _viewManager.Position = new Vector3(15f, 0f, 5f);       
             _viewManager.UpAxis = Vector3.UnitZ;
-            //_viewManager.Pitch = MathHelper.ToRadians(-15f);
             
             _viewManager.ForwardAxis = -Vector3.UnitX;
             _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
@@ -315,7 +317,7 @@ namespace JengaSimulator
                         int distance = (int)(((_ScreenHeight / 4) + dFromTop)-(50*propOfSlider));
                         _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, distance, 50, 50);
 
-                        double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 90)));
+                        double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 89)));
                         this.heightAngle = (float)radians;
                         updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
                     }
