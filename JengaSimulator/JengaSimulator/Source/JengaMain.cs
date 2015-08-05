@@ -17,6 +17,10 @@ namespace JengaSimulator
 {
     public class App1 : Microsoft.Xna.Framework.Game
     {
+        private float cameraDistance = 13;
+        private float rotationAngle = 0;
+        private float heightAngle = 0;
+
         private IViewManager _viewManager;
         private IInputManager _inputManager;
 
@@ -25,10 +29,6 @@ namespace JengaSimulator
         private SpriteBatch buttonBatch;
 
         private PhysicsManager _physics;
-
-        private RigidBody _pickedObject;
-        private WorldPointConstraint _pickedForce;
-        private float _pickedDistance;
 
         private TouchPoint _touchPosition, _lastTouchPosition;
         private TouchTarget touchTarget;
@@ -54,7 +54,7 @@ namespace JengaSimulator
         private int _ScreenHeight;
         private int _ScreenWidth;
 
-        private Vector3 cameraPosition = new Vector3(0, 6, 9);
+        
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -261,12 +261,30 @@ namespace JengaSimulator
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         /// 
-        
+
+        //Theta is angle in radians, radius is radius of sphere
+        private void updateCameraPosition(float rotationAngle, float heightAngle, float radius)
+        {
+            Console.Out.WriteLine(MathHelper.ToDegrees(rotationAngle));
+            Console.Out.WriteLine(MathHelper.ToDegrees(heightAngle));
+            Console.Out.WriteLine(radius);
+
+            double x = radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle);
+            double y = radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle);
+            double z = radius * Math.Cos(heightAngle);
+
+            Vector3 cameraPosition = new Vector3((float)x, (float)y, (float)z);
+            _viewManager.Position = cameraPosition;
+        }
 
         protected override void Update(GameTime gameTime)
         {
             ReadOnlyTouchPointCollection touches = touchTarget.GetState();
             _lastTouchPosition = _touchPosition;
+
+            //_viewManager.Position = (Vector3.Add(_viewManager.Position , new Vector3(0.0f,0.1f,0.0f)));
+
+
 
             //BUTTON CODE - WILL NOT WORK WITH ACTUAL TOUCH
             if (touches.Count == 1)
@@ -280,8 +298,6 @@ namespace JengaSimulator
                         CreateScene();
                        
                     }
-
-
 
                     
                     
@@ -299,11 +315,9 @@ namespace JengaSimulator
                         int distance = (int)(((_ScreenHeight / 4) + dFromTop)-(50*propOfSlider));
                         _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, distance, 50, 50);
 
-                        double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 360)));
-                        double x = 13 * Math.Cos(radians);
-                        double z = 13 * Math.Sin(radians);
-                        cameraPosition = new Vector3((float)z,(float)x , 6);
-                        _viewManager.Position = cameraPosition;
+                        double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 90)));
+                        this.heightAngle = (float)radians;
+                        updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
                     }
 
                     if (_rotationBottomSliderRectangle.Contains(p))
@@ -320,10 +334,8 @@ namespace JengaSimulator
                         _rotationBottomSliderBallRectangle = new Rectangle(distance, _ScreenHeight - 195, 75, 75);
 
                         double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 360)));
-                        double x = 13 * Math.Cos(radians);
-                        double z = 13 * Math.Sin(radians);
-                        cameraPosition = new Vector3((float)x, (float)z, 6);
-                        _viewManager.Position = cameraPosition;
+                        this.rotationAngle = (float)radians;
+                        updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
                     }
             }
 

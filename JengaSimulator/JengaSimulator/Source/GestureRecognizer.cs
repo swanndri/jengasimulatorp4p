@@ -34,7 +34,8 @@ namespace JengaSimulator
         }
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches) {
-            lastTouchPosition = touchPosition;
+            lastTouchPosition = touchPosition; 
+            
             if (touches.Count >= 1)
             {
                 touchPosition = touches[0];
@@ -91,7 +92,6 @@ namespace JengaSimulator
             {
                 touchPosition = null;
             }
-            //COMMENT OUT TO HERE
             
         }
     }
