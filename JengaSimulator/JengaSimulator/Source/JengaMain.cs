@@ -22,7 +22,8 @@ namespace JengaSimulator
 
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private SpriteBatch bBatch;
+        private SpriteBatch buttonBatch;
+
         private PhysicsManager _physics;
 
         private RigidBody _pickedObject;
@@ -35,7 +36,10 @@ namespace JengaSimulator
         private Color backgroundColor = Color.CornflowerBlue;
         private Matrix screenTransform = Matrix.Identity;
 
-        public Texture2D texture;
+        private Texture2D _resetButtonTexture;
+        private Texture2D _viewButtonTexture;
+
+        private Boolean _resetFlag;
 
         /// <summary>
         /// Default constructor.
@@ -63,6 +67,8 @@ namespace JengaSimulator
         {
             _physics.Clear();
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
+            
+            _resetFlag = false;
 
             Model cubeModel = this.Content.Load<Model>("models/jenga_block");
             Model tableModel = this.Content.Load<Model>("models/table");
@@ -105,6 +111,8 @@ namespace JengaSimulator
                     _physics.Add(cube);
                 }
             }
+
+            
         }
         
         /// <summary>
@@ -195,8 +203,9 @@ namespace JengaSimulator
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            bBatch = new SpriteBatch(GraphicsDevice);
-            texture = Content.Load<Texture2D>(@"Sprites/easy");
+            buttonBatch = new SpriteBatch(GraphicsDevice);
+            _resetButtonTexture = Content.Load<Texture2D>(@"Sprites/easy");
+            _viewButtonTexture = Content.Load<Texture2D>(@"Sprites/hard");
         }
 
         /// <summary>
@@ -222,7 +231,46 @@ namespace JengaSimulator
         {
             ReadOnlyTouchPointCollection touches = touchTarget.GetState();
             _lastTouchPosition = _touchPosition;
-            
+
+
+
+            //BUTTON CODE - WILL NOT WORK WITH ACTUAL TOUCH
+            if (touches.Count == 1)
+            {
+                _touchPosition = touches[0];
+                //First time touch
+                    Segment s;
+                    s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 0f),
+                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                    s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_touchPosition.CenterX, _touchPosition.CenterY, 1f),
+                        _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                    float scalar;
+                    Vector3 point;
+                    var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
+
+                    //Pressed reset button
+                    if ((_touchPosition.CenterX < 165)&&(_touchPosition.CenterY < 70) && (_resetFlag == false))
+                    {
+                        _resetFlag = true;
+                        CreateScene();
+                       
+                    }
+
+                    //Pressed reset button
+                    if ((_touchPosition.CenterX < 165) && (_touchPosition.CenterY < 140) && (_touchPosition.CenterY > 70))
+                    {
+                    }
+            }
+
+
+
+
+
+
+
+
+
+
             /*
             if (touches.Count == 1)
             {      
@@ -371,9 +419,13 @@ namespace JengaSimulator
             base.Draw(gameTime);
 
 
-            bBatch.Begin();
-            bBatch.Draw(texture, Vector2.Zero, Color.Blue);
-            bBatch.End();
+            buttonBatch.Begin();
+            buttonBatch.Draw(_resetButtonTexture, Vector2.Zero, Color.White);
+            Vector2 viewButtonPos = new Vector2();
+            viewButtonPos.X = 0;
+            viewButtonPos.Y = 80;
+            buttonBatch.Draw(_viewButtonTexture, viewButtonPos, Color.White);
+            buttonBatch.End();
         }
 
         #endregion

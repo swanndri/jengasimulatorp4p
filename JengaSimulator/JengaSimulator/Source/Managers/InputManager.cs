@@ -127,6 +127,7 @@ namespace JengaSimulator
 			}
 		}
 
+
 		public override void Update(GameTime gameTime)
 		{
 			_lastKeyboardState = _keyboardState;
@@ -141,6 +142,8 @@ namespace JengaSimulator
 			{
 				Mouse.SetPosition(MouseCenterPositionX, MouseCenterPositionY);
 			}
+
+            
 
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector3 moveVector = Vector3.Zero;
@@ -175,4 +178,5 @@ namespace JengaSimulator
 			base.Update(gameTime);
 		}
 	}
+
 }
