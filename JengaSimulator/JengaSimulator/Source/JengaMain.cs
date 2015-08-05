@@ -77,22 +77,30 @@ namespace JengaSimulator
 
         #region Initialization
 
-        private void CreateScene()
+        private void InitVariables()
         {
 
             _ScreenHeight = GraphicsDevice.PresentationParameters.Bounds.Height;
             _ScreenWidth = GraphicsDevice.PresentationParameters.Bounds.Width;
+            _resetFlag = false;
+
+            //Create rectangles for slider sprites
+            _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 150, _ScreenHeight / 4, 150, _ScreenHeight / 2);
+            _rotationBottomSliderRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 200, _ScreenWidth / 2, 150);
+            _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, _ScreenHeight / 4, 50, 50);
+            _rotationBottomSliderBallRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 195, 75, 75);
+
+            _viewManager.Position = new Vector3(15f, 0f, 5f);     
+
+        }
+        private void CreateScene()
+        {
+            InitVariables();
 
             _physics.Clear();
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
             
-            _resetFlag = false;
-
-            //Create rectangles for slider sprites
-            _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 150, _ScreenHeight/4, 150, _ScreenHeight/2);
-            _rotationBottomSliderRectangle = new Rectangle(_ScreenWidth/4, _ScreenHeight-200, _ScreenWidth/2, 150);
-            _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, _ScreenHeight / 4, 50, 50);
-            _rotationBottomSliderBallRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 195, 75, 75);
+           
 
 
             Model cubeModel = this.Content.Load<Model>("models/jenga_block");
@@ -211,7 +219,7 @@ namespace JengaSimulator
             _viewManager.SetProjection(0.1f, 100f, MathHelper.ToRadians(45f));
             _viewManager.Position = new Vector3(15f, 0f, 5f);       
             _viewManager.UpAxis = Vector3.UnitZ;
-            _viewManager.Pitch = MathHelper.ToRadians(-15f);
+            //_viewManager.Pitch = MathHelper.ToRadians(-15f);
             
             _viewManager.ForwardAxis = -Vector3.UnitX;
             _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
