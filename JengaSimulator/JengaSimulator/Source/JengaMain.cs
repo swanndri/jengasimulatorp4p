@@ -111,19 +111,11 @@ namespace JengaSimulator
             _ScreenHeight = GraphicsDevice.PresentationParameters.Bounds.Height;
             _ScreenWidth = GraphicsDevice.PresentationParameters.Bounds.Width;
             
-
             //Create rectangles for slider sprites
             _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 180, _ScreenHeight / 4, 150, _ScreenHeight / 2);
             _rotationBottomSliderRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 200, _ScreenWidth / 2, 150);
             _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, _ScreenHeight / 4, 50, 50);
             _rotationBottomSliderBallRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 165, 75, 75);
-
-            rotationAngle = 0;
-            heightAngle = MathHelper.ToRadians(1);
-
-            //_viewManager.Position = new Vector3(15f, 0f, 5f); 
-            updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
-
         }
         
         
@@ -191,8 +183,7 @@ namespace JengaSimulator
 
             IsMouseVisible = true; // easier for debugging not to "lose" mouse
             SetWindowOnSurface();
-            InitializeSurfaceInput();
-            
+            InitializeSurfaceInput();            
             base.Initialize();
 
             _viewManager.SetProjection(0.1f, 100f, MathHelper.ToRadians(45f));
@@ -201,6 +192,10 @@ namespace JengaSimulator
             _viewManager.ForwardAxis = -Vector3.UnitX;
             _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
             _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);
+
+            rotationAngle = 0;
+            heightAngle = MathHelper.ToRadians(1);            
+            updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
 
             CreateScene();
             CreateHUD();
