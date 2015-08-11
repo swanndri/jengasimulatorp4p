@@ -12,10 +12,11 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Henge3D;
 using Henge3D.Physics;
+using JengaSimulator.Source.UI;
 
 namespace JengaSimulator
 {
-    public class App1 : Microsoft.Xna.Framework.Game
+    public class App1 : Microsoft.Xna.Framework.Game, ButtonListener, SliderListener
     {
         private float cameraDistance = 13;
         private float rotationAngle;
@@ -26,7 +27,6 @@ namespace JengaSimulator
 
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private SpriteBatch buttonBatch;
 
         private PhysicsManager _physics;
 
@@ -54,6 +54,7 @@ namespace JengaSimulator
         private int _ScreenHeight;
         private int _ScreenWidth;
 
+        private Overlay _HUD;
         
         /// <summary>
         /// Default constructor.
@@ -70,11 +71,37 @@ namespace JengaSimulator
 
             _physics = new PhysicsManager(this);            
             this.Components.Add(new PhysicsScene(this, _physics));
-
+            
             gestureRecognizer = new GestureRecognizer(this, _viewManager, _physics);
             _resetFlag = false;
             Content.RootDirectory = "Content";
         }
+
+        #region UIlistenercallbacks
+        //These methods should really all be made into listeners and but cbf
+
+        public void onButtonDown(String buttonName) {
+            if (buttonName == "reset_button") {
+                CreateScene();
+            }            
+        }
+
+        public void onSlide(String sliderName, float slideRatio)
+        {
+            if (sliderName == "side_slider")
+            {
+                double radians = System.Convert.ToDouble(MathHelper.ToRadians((slideRatio * 89)));
+                this.heightAngle = (float)radians;
+                updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
+            }
+            else if (sliderName == "bottom_slider") {
+                double radians = System.Convert.ToDouble(MathHelper.ToRadians((slideRatio * 360)));
+                this.rotationAngle = (float)radians;
+                updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
+            }
+        }
+
+        #endregion
 
         #region Initialization
 
@@ -98,59 +125,7 @@ namespace JengaSimulator
             updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
 
         }
-        private void CreateScene()
-        {
-            InitVariables();
-
-            _physics.Clear();
-            _physics.Gravity = new Vector3(0f, 0f, -9.8f);
-      
-            
-            Model cubeModel = this.Content.Load<Model>("models/jenga_block");
-            Model tableModel = this.Content.Load<Model>("models/table");
-            
-            SolidThing table = new SolidThing(this, tableModel, false);
-
-            float tableScale = 3f;
-            Vector3 tablePosition = new Vector3(0, 0, -1f);
-            Quaternion tableRotation = Quaternion.Identity;
-
-            table.SetWorld(tableScale, tablePosition, tableRotation);
-            table.Freeze();
-            _physics.Add(table);
-
-            Random random = new Random();
-
-            for (int j = 0; j < 6; j++)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    var cube = new SolidThing(this, cubeModel);
-
-                    //int randomNumber = random.Next(90, 100);
-                    //float random1 = (float)randomNumber;
-
-                    //float scale = (random1 / 100) * 1.0f;
-                    float scale = 1.0f;
-                    Quaternion rotation; 
-
-                    if (j % 2 == 1)
-                    {
-                        rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));      
-                        cube.SetWorld(scale, new Vector3(0, i - 1, j * 0.5f), rotation);
-                        
-                    }
-                    else
-                    {
-                        rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(0));
-                        cube.SetWorld(scale, new Vector3(i-1, 0, j * 0.5f), rotation);
-                    }
-                    _physics.Add(cube);
-                }
-            }
-
-            
-        }
+        
         
         /// <summary>
         /// The target receiving all surface input for the application.
@@ -228,8 +203,10 @@ namespace JengaSimulator
             _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);
 
             CreateScene();
+            CreateHUD();
+            
         }
-        
+
         /// <summary>
         /// LoadContent will be called once per app and is the place to load
         /// all of your content.
@@ -238,13 +215,85 @@ namespace JengaSimulator
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            buttonBatch = new SpriteBatch(GraphicsDevice);
             _resetButtonTexture = Content.Load<Texture2D>(@"Sprites/reset_button");
             _viewButtonTexture = Content.Load<Texture2D>(@"Sprites/reset_button_pressed");
             _rotationSideSliderTexture = Content.Load<Texture2D>(@"Sprites/Rotation Slider");
             _rotationBottomSliderTexture = Content.Load<Texture2D>(@"Sprites/Rotation Slider - Bottom");
             _rotationSliderBallTexture = Content.Load<Texture2D>(@"Sprites/circle");
-            
+        }
+
+        private void CreateScene()
+        {
+            InitVariables();
+
+            _physics.Clear();
+            _physics.Gravity = new Vector3(0f, 0f, -9.8f);
+
+
+            Model cubeModel = this.Content.Load<Model>("models/jenga_block");
+            Model tableModel = this.Content.Load<Model>("models/table");
+
+            SolidThing table = new SolidThing(this, tableModel, false);
+
+            float tableScale = 3f;
+            Vector3 tablePosition = new Vector3(0, 0, -1f);
+            Quaternion tableRotation = Quaternion.Identity;
+
+            table.SetWorld(tableScale, tablePosition, tableRotation);
+            table.Freeze();
+            _physics.Add(table);
+
+            Random random = new Random();
+
+            for (int j = 0; j < 6; j++)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    var cube = new SolidThing(this, cubeModel);
+
+                    //int randomNumber = random.Next(90, 100);
+                    //float random1 = (float)randomNumber;
+
+                    //float scale = (random1 / 100) * 1.0f;
+                    float scale = 1.0f;
+                    Quaternion rotation;
+
+                    if (j % 2 == 1)
+                    {
+                        rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));
+                        cube.SetWorld(scale, new Vector3(0, i - 1, j * 0.5f), rotation);
+
+                    }
+                    else
+                    {
+                        rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(0));
+                        cube.SetWorld(scale, new Vector3(i - 1, 0, j * 0.5f), rotation);
+                    }
+                    _physics.Add(cube);
+                }
+            }
+
+
+        }
+
+        private void CreateHUD() {
+
+            _HUD = new Overlay(this);
+
+            Button resetButton = new Button(_resetButtonTexture, new Rectangle(0,0,165,70), "reset_button");
+            resetButton.addButtonListener(this);
+            _HUD.addUIComponent(resetButton);
+
+            SliderBar sideSlider = new SliderBar(_rotationSideSliderTexture, _rotationSliderBallTexture, _rotationSideSliderRectangle,"side_slider", true);
+            sideSlider.addSliderListener(this);
+            _HUD.addUIComponent(sideSlider);
+
+            SliderBar bottomSlider = new SliderBar(_rotationBottomSliderTexture, _rotationSliderBallTexture, _rotationBottomSliderRectangle, "bottom_slider", false);
+            bottomSlider.addSliderListener(this);
+            _HUD.addUIComponent(bottomSlider);
+
+
+            this.Components.Add(_HUD);
         }
 
         /// <summary>
@@ -266,9 +315,6 @@ namespace JengaSimulator
         //Theta is angle in radians, radius is radius of sphere
         private void updateCameraPosition(float rotationAngle, float heightAngle, float radius)
         {
-            Console.Out.WriteLine(MathHelper.ToDegrees(rotationAngle));
-            Console.Out.WriteLine(MathHelper.ToDegrees(heightAngle));
-            Console.Out.WriteLine(radius);
 
             double x = radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle);
             double y = radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle);
@@ -283,8 +329,15 @@ namespace JengaSimulator
             ReadOnlyTouchPointCollection touches = touchTarget.GetState();
             _lastTouchPosition = _touchPosition;
 
-            //_viewManager.Position = (Vector3.Add(_viewManager.Position , new Vector3(0.0f,0.1f,0.0f)));
-
+            if (touches.Count == 0)
+            {
+                _HUD.checkHitUI(null);
+            }
+            foreach (TouchPoint t in touches)
+            {                
+                _HUD.checkHitUI(t);
+            }
+   
             if (touches.Count == 0)
             {
                 _resetFlag = false;
@@ -293,45 +346,11 @@ namespace JengaSimulator
             //BUTTON CODE - WILL NOT WORK WITH ACTUAL TOUCH
             if (touches.Count == 1)
             {
-                _touchPosition = touches[0];
-
-                    //Pressed reset button
-                if ((_touchPosition.CenterX < 165) && (_touchPosition.CenterY < 70))
-                {
-
-                    if (!_resetFlag)
-                    {
-                        _resetFlag = true;
-                        CreateScene();
-                    }
-
-                }
-                else
-                {
-                    _resetFlag = false;
-                }
-
-                    
+                _touchPosition = touches[0];                    
                     
                     Point p = new Point((int)_touchPosition.CenterX, (int)_touchPosition.CenterY);
-                    if (_rotationSideSliderRectangle.Contains(p))
-                    {
-                        //Console.Out.WriteLine(p);
-
-                        float dFromTop;
-                        dFromTop = (float)(p.Y - _rotationSideSliderRectangle.Y);
-
-                        float propOfSlider;
-                        propOfSlider = dFromTop / _rotationSideSliderRectangle.Height;
-
-                        int distance = (int)(((_ScreenHeight / 4) + dFromTop)-(50*propOfSlider));
-                        _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, distance, 50, 50);
-
-                        double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 89)));
-                        this.heightAngle = (float)radians;
-                        updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
-                    }
-
+                
+                /*
                     if (_rotationBottomSliderRectangle.Contains(p))
                     {
                         //Console.Out.WriteLine(p);
@@ -348,7 +367,7 @@ namespace JengaSimulator
                         double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 360)));
                         this.rotationAngle = (float)radians;
                         updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
-                    }
+                    }*/
             }
 
 
@@ -415,33 +434,8 @@ namespace JengaSimulator
         
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(backgroundColor);
-
-
-         
-            
-            GraphicsDevice.BlendState = BlendState.Opaque;
-            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            GraphicsDevice.Clear(backgroundColor);  
             base.Draw(gameTime);
-
-            buttonBatch.Begin();
-            if (_resetFlag)
-            {
-                buttonBatch.Draw(_viewButtonTexture, Vector2.Zero, Color.White);
-            }
-            else {
-                buttonBatch.Draw(_resetButtonTexture, Vector2.Zero, Color.White);
-            }
-            
-            //buttonBatch.Draw(_viewButtonTexture, viewButtonPos, Color.White);
-
-            buttonBatch.Draw(_rotationSideSliderTexture, _rotationSideSliderRectangle, Color.White);
-            buttonBatch.Draw(_rotationBottomSliderTexture, _rotationBottomSliderRectangle, Color.White);
-            buttonBatch.Draw(_rotationSliderBallTexture, _rotationSideSliderBallRectangle, Color.White);
-            buttonBatch.Draw(_rotationSliderBallTexture, _rotationBottomSliderBallRectangle, Color.White);
-
-            buttonBatch.End();
-
         }
 
         #endregion

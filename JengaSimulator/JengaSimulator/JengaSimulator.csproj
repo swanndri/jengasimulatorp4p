@@ -107,6 +107,12 @@
     <Compile Include="Source\JengaMain.cs" />
     <Compile Include="Source\SolidThing.cs" />
     <Compile Include="Source\Managers\ViewManager.cs" />
+    <Compile Include="Source\UI\Button.cs" />
+    <Compile Include="Source\UI\Listeners\ButtonListener.cs" />
+    <Compile Include="Source\UI\Overlay.cs" />
+    <Compile Include="Source\UI\SliderBar.cs" />
+    <Compile Include="Source\UI\Listeners\SliderListener.cs" />
+    <Compile Include="Source\UI\UIComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
