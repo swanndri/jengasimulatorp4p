@@ -35,14 +35,11 @@ namespace JengaSimulator
             this.viewManager = viewManager;
             this.physics = physics;
 
-            Manipulations2D enabledManipulations =
-                Manipulations2D.Translate | Manipulations2D.Rotate;
+            Manipulations2D enabledManipulations = Manipulations2D.Rotate;
             manipulationProcessor = new ManipulationProcessor2D(enabledManipulations);
 
             manipulationProcessor.Pivot = new ManipulationPivot2D();
-            manipulationProcessor.Pivot.Radius = 50;
-
-            manipulationProcessor.MinimumScaleRotateRadius = 10.0f;
+            manipulationProcessor.Pivot.Radius = 10;
 
             manipulationProcessor.Started += OnManipulationStarted;
             manipulationProcessor.Delta += OnManipulationDelta;

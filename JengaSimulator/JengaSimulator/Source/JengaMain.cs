@@ -88,10 +88,10 @@ namespace JengaSimulator
             if (buttonName == "reset_button") {
                 CreateScene();
             }
-            if (buttonName == "exit_button")
+            /*if (buttonName == "exit_button")
             {
                 this.Exit();
-            }       
+            }*/
         }
 
         /// <summary>
@@ -242,8 +242,8 @@ namespace JengaSimulator
             foreach (TouchPoint t in touches)                            
                 _HUD.checkHitUI(t);
             
-            _gestureRecognizer.processTouchPoints(touches);
-            //_tangibles.processTouchPoints(touches);
+            //_gestureRecognizer.processTouchPoints(touches);
+            _tangibles.processTouchPoints(touches);
            
             _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             
@@ -334,9 +334,9 @@ namespace JengaSimulator
             resetButton.addButtonListener(this);
             _HUD.addUIComponent(resetButton);
 
-            Button exitButton = new Button(_exitButtonTexture, new Rectangle(0,80,165,70), "exit_button");
+            /*Button exitButton = new Button(_exitButtonTexture, new Rectangle(0,80,165,70), "exit_button");
             exitButton.addButtonListener(this);
-            _HUD.addUIComponent(exitButton);
+            _HUD.addUIComponent(exitButton);*/
 
 
 

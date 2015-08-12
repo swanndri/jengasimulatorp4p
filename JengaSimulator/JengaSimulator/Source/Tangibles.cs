@@ -76,6 +76,7 @@ namespace JengaSimulator
                         pickedDistance = scalar;
                         pickedObject.IsActive = true;
                     }
+                    lastOrientation = touches[0].Orientation;
                 }
                 else if (pickedObject != null)
                 {
@@ -88,9 +89,9 @@ namespace JengaSimulator
                     Vector3.Subtract(ref s.P2, ref s.P1, out diff);
                     Vector3.Multiply(ref diff, pickedDistance, out diff);
                     Vector3.Add(ref s.P1, ref diff, out point);
-                    //pickedForce.WorldPoint = point;
+                    pickedForce.WorldPoint = point;
                     pickedObject.IsActive = true;
-
+                    
                     switch (tagID)
                     {
 
@@ -108,7 +109,14 @@ namespace JengaSimulator
                             break;
                         //Move a block towards or away from camera
                         case 3:
+                            TouchPoint tagPoint = touches[0];
+                            float deltaRotation = MathHelper.ToDegrees(lastOrientation) - MathHelper.ToDegrees(tagPoint.Orientation);
 
+                            Vector3 direction = new Vector3(0, 0, 1.0f);
+                            direction.Normalize();
+                            pickedForce.WorldPoint = Vector3.Add(pickedForce.WorldPoint, Vector3.Multiply(direction, deltaRotation * 0.01f));
+
+                            /*
                             if (lastOrientation != null)
                             {
                                 if (lastTouchPosition.Orientation > 0)
@@ -129,8 +137,8 @@ namespace JengaSimulator
                                         pickedForce.WorldPoint = Vector3.Add(pickedForce.WorldPoint, direction);
                                     }
                                 }
-                            }
-                            lastOrientation = lastTouchPosition.Orientation;
+                            }*/
+                            //lastOrientation = lastTouchPosition.Orientation;
                             
                             break;
                         //Rotate stack onto top view
