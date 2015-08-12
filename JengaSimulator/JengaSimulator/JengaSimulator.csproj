@@ -97,6 +97,7 @@
     <Reference Include="Microsoft.Surface.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\Tangibles.cs" />
     <Compile Include="Source\GestureRecognizer.cs" />
     <Compile Include="Source\Managers\InputManager.cs" />
     <Compile Include="Source\Managers\Interfaces\IInputManager.cs" />

@@ -26,7 +26,8 @@ namespace JengaSimulator
         private IInputManager _inputManager;        
         private PhysicsManager _physics;
         private Overlay _HUD;
-        private GestureRecognizer gestureRecognizer;
+        private GestureRecognizer _gestureRecognizer;
+        private Tangibles _tangibles;
 
         private readonly GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;       
@@ -62,7 +63,8 @@ namespace JengaSimulator
             _physics = new PhysicsManager(this);
             this.Components.Add(new PhysicsScene(this, _physics));
 
-            gestureRecognizer = new GestureRecognizer(this, _viewManager, _physics);
+            _gestureRecognizer = new GestureRecognizer(this, _viewManager, _physics);
+            _tangibles = new Tangibles(this, _viewManager, _physics);
             
         }
 
@@ -230,7 +232,8 @@ namespace JengaSimulator
                 _HUD.checkHitUI(t);
             
    
-            gestureRecognizer.processTouchPoints(touches);                
+            _gestureRecognizer.processTouchPoints(touches);
+            _tangibles.processTouchPoints(touches);
             
             _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             
