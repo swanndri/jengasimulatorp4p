@@ -254,7 +254,6 @@ namespace JengaSimulator
         //Theta is angle in radians, radius is radius of sphere
         private void updateCameraPosition(float rotationAngle, float heightAngle, float radius)
         {
-
             double x = radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle);
             double y = radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle);
             double z = radius * Math.Cos(heightAngle);
