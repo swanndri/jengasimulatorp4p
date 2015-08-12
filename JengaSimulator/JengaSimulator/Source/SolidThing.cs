@@ -46,7 +46,7 @@ namespace JengaSimulator
                 foreach (BasicEffect effect in mesh.Effects)
                 {
                     //By disabling this we get even lighting
-                    //effect.EnableDefaultLighting();
+                    effect.EnableDefaultLighting();
                     effect.AmbientLightColor = Vector3.One * 0.6f; 
                     effect.SpecularColor = Vector3.One;
                     effect.PreferPerPixelLighting = true;
@@ -56,7 +56,7 @@ namespace JengaSimulator
             {
                 _diffuseColor = new Vector3((float)_colorRand.NextDouble(),
                     (float)_colorRand.NextDouble(), (float)_colorRand.NextDouble());
-                _diffuseColor *= 3f; //By Increasing this we get a increase in vibrance of the blocks
+                _diffuseColor *= 0.75f; //By Increasing this we get a increase in vibrance of the blocks
             }
         }
 

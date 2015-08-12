@@ -37,6 +37,7 @@ namespace JengaSimulator
         private Matrix screenTransform = Matrix.Identity;
 
         private Texture2D _resetButtonTexture;
+        private Texture2D _exitButtonTexture;
         private Texture2D _viewButtonTexture;        
         private Texture2D _rotationSideSliderTexture;
         private Texture2D _rotationBottomSliderTexture;
@@ -73,7 +74,11 @@ namespace JengaSimulator
         public void onButtonDown(String buttonName) {
             if (buttonName == "reset_button") {
                 CreateScene();
-            }            
+            }
+            if (buttonName == "exit_button")
+            {
+                this.Exit();
+            }       
         }
 
         /// <summary>
@@ -121,6 +126,7 @@ namespace JengaSimulator
             // Set the graphics device buffers.
             graphics.PreferredBackBufferWidth = Program.WindowSize.Width;
             graphics.PreferredBackBufferHeight = Program.WindowSize.Height;
+            graphics.IsFullScreen = true;
             graphics.ApplyChanges();
             // Make sure the window is in the right location.
             Program.PositionWindow();
@@ -190,6 +196,7 @@ namespace JengaSimulator
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             _resetButtonTexture = Content.Load<Texture2D>(@"Sprites/reset_button");
+            _exitButtonTexture = Content.Load<Texture2D>(@"Sprites/reset_button_pressed");
             _viewButtonTexture = Content.Load<Texture2D>(@"Sprites/reset_button_pressed");
             _rotationSideSliderTexture = Content.Load<Texture2D>(@"Sprites/Rotation Slider");
             _rotationBottomSliderTexture = Content.Load<Texture2D>(@"Sprites/Rotation Slider - Bottom");
@@ -322,6 +329,12 @@ namespace JengaSimulator
             Button resetButton = new Button(_resetButtonTexture, new Rectangle(0, 0, 165, 70), "reset_button");
             resetButton.addButtonListener(this);
             _HUD.addUIComponent(resetButton);
+
+            Button exitButton = new Button(_exitButtonTexture, new Rectangle(0,80,165,70), "exit_button");
+            exitButton.addButtonListener(this);
+            _HUD.addUIComponent(exitButton);
+
+
 
             SliderBar sideSlider = new SliderBar(_rotationSideSliderTexture, _rotationSliderBallTexture, _rotationSideSliderRectangle, "side_slider", true);
             sideSlider.addSliderListener(this);
