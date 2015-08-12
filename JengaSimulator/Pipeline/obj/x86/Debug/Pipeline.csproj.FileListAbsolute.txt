@@ -19,3 +19,10 @@ C:\Development\Surface\jengasimulatorp4p\JengaSimulator\Pipeline\bin\x86\Debug\H
 C:\Development\Surface\jengasimulatorp4p\JengaSimulator\Pipeline\obj\x86\Debug\Pipeline.csprojResolveAssemblyReference.cache
 C:\Development\Surface\jengasimulatorp4p\JengaSimulator\Pipeline\obj\x86\Debug\Pipeline.dll
 C:\Development\Surface\jengasimulatorp4p\JengaSimulator\Pipeline\obj\x86\Debug\Pipeline.pdb
+C:\Users\Ben\Documents\JengaSim\jengasimulatorp4p\JengaSimulator\Pipeline\bin\x86\Debug\Pipeline.dll
+C:\Users\Ben\Documents\JengaSim\jengasimulatorp4p\JengaSimulator\Pipeline\bin\x86\Debug\Pipeline.pdb
+C:\Users\Ben\Documents\JengaSim\jengasimulatorp4p\JengaSimulator\Pipeline\bin\x86\Debug\Henge3D.Physics.dll
+C:\Users\Ben\Documents\JengaSim\jengasimulatorp4p\JengaSimulator\Pipeline\bin\x86\Debug\Henge3D.Physics.pdb
+C:\Users\Ben\Documents\JengaSim\jengasimulatorp4p\JengaSimulator\Pipeline\obj\x86\Debug\Pipeline.csprojResolveAssemblyReference.cache
+C:\Users\Ben\Documents\JengaSim\jengasimulatorp4p\JengaSimulator\Pipeline\obj\x86\Debug\Pipeline.dll
+C:\Users\Ben\Documents\JengaSim\jengasimulatorp4p\JengaSimulator\Pipeline\obj\x86\Debug\Pipeline.pdb
