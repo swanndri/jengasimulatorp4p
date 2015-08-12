@@ -47,11 +47,8 @@ namespace JengaSimulator
         }
 
         /** Manipulation Events ********/
-
         #region ManipulationEvents
-        private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e)
-        {
-        }
+        private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e){}
 
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
         {
@@ -85,9 +82,7 @@ namespace JengaSimulator
             }
         }
 
-        private void OnManipulationCompleted(object sender, Manipulation2DCompletedEventArgs e)
-        {
-        }
+        private void OnManipulationCompleted(object sender, Manipulation2DCompletedEventArgs e){}
         #endregion
 
         private long Timestamp
@@ -103,9 +98,8 @@ namespace JengaSimulator
         public void processTouchPoints(ReadOnlyTouchPointCollection touches) {
             lastTouchPosition = touchPosition;
             
-            int tagID = -1;
-            if (touches.Count == 2)
-            {
+            if (touches.Count == 2 && touches[0].IsFingerRecognized && touches[1].IsFingerRecognized)
+            {                
                 Manipulator2D[] manipulators;
                 manipulators = new Manipulator2D[] { new Manipulator2D(1, touches[1].X, touches[1].Y) };
 
@@ -117,18 +111,9 @@ namespace JengaSimulator
             {
                 manipulationProcessor.CompleteManipulation(Timestamp);
             }
-
+            
             if (touches.Count >= 1)
-            {
-                for (int i = 0; i < touches.Count; i++ )
-                {
-                    if (touches[i].IsTagRecognized)
-                    {
-                        tagID = touches[i].Id;
-                        break;
-                    }
-                }                
-                
+            {         
                 touchPosition = touches[0];
                 //First time touch
                 if (lastTouchPosition == null)
@@ -165,13 +150,7 @@ namespace JengaSimulator
                     Vector3.Multiply(ref diff, pickedDistance, out diff);
                     Vector3.Add(ref s.P1, ref diff, out point);
                     pickedForce.WorldPoint = point;
-                    pickedObject.IsActive = true;
-                    
-                    if (tagID != -1)
-                    {
-                        pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), touches.GetTouchPointFromId(tagID).Orientation);
-                        
-                    }
+                    pickedObject.IsActive = true;                   
                 }
                 else if (pickedObject != null)
                 {

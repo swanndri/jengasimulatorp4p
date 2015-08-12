@@ -53,128 +53,106 @@ namespace JengaSimulator
                         break;
                     }
                 }
-
-                touchPosition = touches[0];
-                //First time touch
-                if (lastTouchPosition == null)
+                if (tagID != -1)
                 {
-                    Segment s;
-                    s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 0f),
-                        viewManager.Projection, viewManager.View, Matrix.Identity);
-                    s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 1f),
-                        viewManager.Projection, viewManager.View, Matrix.Identity);
-                    float scalar;
-                    Vector3 point;
-                    var c = physics.BroadPhase.Intersect(ref s, out scalar, out point);
-
-                    if (c != null && c is BodySkin)
+                    touchPosition = touches[0];
+                    //First time touch
+                    if (lastTouchPosition == null)
                     {
-                        pickedObject = ((BodySkin)c).Owner;
+                        Segment s;
+                        s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 0f),
+                            viewManager.Projection, viewManager.View, Matrix.Identity);
+                        s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 1f),
+                            viewManager.Projection, viewManager.View, Matrix.Identity);
+                        float scalar;
+                        Vector3 point;
+                        var c = physics.BroadPhase.Intersect(ref s, out scalar, out point);
 
-                        pickedForce = new WorldPointConstraint(pickedObject, point);
-                        physics.Add(pickedForce);
-                        pickedDistance = scalar;
+                        if (c != null && c is BodySkin)
+                        {
+                            pickedObject = ((BodySkin)c).Owner;
+
+                            pickedForce = new WorldPointConstraint(pickedObject, point);
+                            physics.Add(pickedForce);
+                            pickedDistance = scalar;
+                            pickedObject.IsActive = true;
+                        }
+                        lastOrientation = touches[0].Orientation;
+                    }
+                    else if (pickedObject != null)
+                    {
+                        Segment s;
+                        s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 0f),
+                            viewManager.Projection, viewManager.View, Matrix.Identity);
+                        s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 1f),
+                            viewManager.Projection, viewManager.View, Matrix.Identity);
+                        Vector3 diff, point;
+                        Vector3.Subtract(ref s.P2, ref s.P1, out diff);
+                        Vector3.Multiply(ref diff, pickedDistance, out diff);
+                        Vector3.Add(ref s.P1, ref diff, out point);
+                        pickedForce.WorldPoint = point;
                         pickedObject.IsActive = true;
+
+                        switch (tagID)
+                        {
+
+                            //Pin a block
+                            case 0:
+                                pickedObject.Freeze();
+                                break;
+                            //unPin a block
+                            case 1:
+                                pickedObject.Unfreeze();
+                                break;
+                            //Rotate a block
+                            case 2:
+                                pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, -1.0f), touchPosition.Orientation);
+                                break;
+                            //Move a block towards or away from camera
+                            case 3:
+                                TouchPoint tagPoint = touches[0];
+                                float deltaRotation = MathHelper.ToDegrees(lastOrientation) - MathHelper.ToDegrees(tagPoint.Orientation);
+
+                                Vector3 direction = new Vector3(0, 0, 1.0f);
+                                direction.Normalize();
+                                pickedForce.WorldPoint = Vector3.Add(pickedForce.WorldPoint, Vector3.Multiply(direction, deltaRotation * 0.01f));
+
+                                break;
+                            //Rotate stack onto top view
+                            case 4:
+                                viewManager.rotateToTop();
+                                _lastSideToTouch = 0;
+                                break;
+                            //Corkscrew closer or further away
+                            case 5:
+                                viewManager.rotateToSide(5, true);
+                                break;
+                            case 6:
+                                viewManager.rotateToSide(6, true);
+                                break;
+                            case 7:
+                                viewManager.rotateToSide(7, true);
+                                break;
+                            case 8:
+                                viewManager.rotateToSide(8, true);
+                                break;
+
+
+                        }
+
+
+
+                        //if (tagID != -1)
+                        //{
+                        //    pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), touches.GetTouchPointFromId(tagID).Orientation);
+
+                        //}
                     }
-                    lastOrientation = touches[0].Orientation;
-                }
-                else if (pickedObject != null)
-                {
-                    Segment s;
-                    s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 0f),
-                        viewManager.Projection, viewManager.View, Matrix.Identity);
-                    s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 1f),
-                        viewManager.Projection, viewManager.View, Matrix.Identity);
-                    Vector3 diff, point;
-                    Vector3.Subtract(ref s.P2, ref s.P1, out diff);
-                    Vector3.Multiply(ref diff, pickedDistance, out diff);
-                    Vector3.Add(ref s.P1, ref diff, out point);
-                    pickedForce.WorldPoint = point;
-                    pickedObject.IsActive = true;
-                    
-                    switch (tagID)
+                    else if (pickedObject != null)
                     {
-
-                        //Pin a block
-                        case 0:
-                            pickedObject.Freeze();
-                            break;
-                        //unPin a block
-                        case 1:
-                            pickedObject.Unfreeze();
-                            break;
-                        //Rotate a block
-                        case 2:
-                            pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, -1.0f), touchPosition.Orientation);
-                            break;
-                        //Move a block towards or away from camera
-                        case 3:
-                            TouchPoint tagPoint = touches[0];
-                            float deltaRotation = MathHelper.ToDegrees(lastOrientation) - MathHelper.ToDegrees(tagPoint.Orientation);
-
-                            Vector3 direction = new Vector3(0, 0, 1.0f);
-                            direction.Normalize();
-                            pickedForce.WorldPoint = Vector3.Add(pickedForce.WorldPoint, Vector3.Multiply(direction, deltaRotation * 0.01f));
-
-                            /*
-                            if (lastOrientation != null)
-                            {
-                                if (lastTouchPosition.Orientation > 0)
-                                {
-                                    if (lastTouchPosition.Orientation != lastOrientation)
-                                    {
-                                        pickedObject.SetVelocity(new Vector3(0, 0, 1), new Vector3(0, 0, 0));
-                                    }
-                                }
-                                else if (lastTouchPosition.Orientation < 0)
-                                {
-                                    if (lastTouchPosition.Orientation != lastOrientation)
-                                    {
-                                        //Move Backwards
-
-                                        Vector3 direction = pickedObject.Position - viewManager.Position;
-                                        direction.Normalize();
-                                        pickedForce.WorldPoint = Vector3.Add(pickedForce.WorldPoint, direction);
-                                    }
-                                }
-                            }*/
-                            //lastOrientation = lastTouchPosition.Orientation;
-                            
-                            break;
-                        //Rotate stack onto top view
-                        case 4:
-                            viewManager.rotateToTop();
-                            _lastSideToTouch = 0;
-                            break;
-                        //Corkscrew closer or further away
-                        case 5:
-                            viewManager.rotateToSide(5, true);
-                            break;
-                        case 6:
-                            viewManager.rotateToSide(6, true);
-                            break;
-                        case 7:
-                            viewManager.rotateToSide(7, true);
-                            break;
-                        case 8:
-                            viewManager.rotateToSide(8, true);
-                            break;
-                        
-                            
+                        physics.Remove(pickedForce);
+                        pickedObject = null;
                     }
-
-
-
-                    //if (tagID != -1)
-                    //{
-                    //    pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), touches.GetTouchPointFromId(tagID).Orientation);
-
-                    //}
-                }
-                else if (pickedObject != null)
-                {
-                    physics.Remove(pickedForce);
-                    pickedObject = null;
                 }
             }
             else if (pickedObject != null)
