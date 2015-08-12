@@ -185,48 +185,30 @@ namespace JengaSimulator
             this.Position = cameraPosition;
         }
 
-        public void rotateToTop()
+        public void rotateToSide(int sidesToRotate)
         {
-            double radians = System.Convert.ToDouble(MathHelper.ToRadians((0.0001f * 89f)));
-            updateCameraPosition(0, (float)radians, 13f);
-
-        }
-
-        public void rotateToSide(int sidesToRotate, bool firstSideToTouch)
-        {
-            if (firstSideToTouch)
+            float rotationAngle = 0;
+            double heightAngle = MathHelper.ToRadians(1);
+            switch (sidesToRotate)
             {
-                //float ratioToRotate = 0.25f * (float)sidesToRotate;
-                //ratioToRotate = Math.Abs(ratioToRotate);
-                //double radians = System.Convert.ToDouble(MathHelper.ToRadians((ratioToRotate * 360)));
-                //double heightAngle = System.Convert.ToDouble(MathHelper.ToRadians((1 * 89)));
-                //updateCameraPosition(0, (float)heightAngle, 13f);
-
-                float ratioToRotate = 0; ;
-                switch (sidesToRotate)
-                {
-                    case 4:
-                        ratioToRotate = 0.0f;
-                        break;
-                    case 5:
-                        ratioToRotate = 0.25f;
-                        break;
-                    case 6:
-                        ratioToRotate = 0.5f;
-                        break;
-                    case 7:
-                        ratioToRotate = 0.75f;
-                        break;
-                }
-
-                double radians = System.Convert.ToDouble(MathHelper.ToRadians((ratioToRotate * 360)));
-                double heightAngle = System.Convert.ToDouble(MathHelper.ToRadians((1 * 89)));
-                updateCameraPosition(0, (float)heightAngle, 13f);
-
-
-            }
-
-
+                case 4:
+                    heightAngle = System.Convert.ToDouble(MathHelper.ToRadians(89));
+                    rotationAngle = MathHelper.ToRadians(270.0f);
+                    break;
+                case 5:
+                    rotationAngle = MathHelper.ToRadians(0f);
+                    break;
+                case 6:
+                    rotationAngle = MathHelper.ToRadians(90.0f);
+                    break;
+                case 7:
+                    rotationAngle = MathHelper.ToRadians(180.0f);
+                    break;                    
+                case 8:
+                    rotationAngle = MathHelper.ToRadians(270.0f);
+                    break;
+            }                
+            updateCameraPosition(rotationAngle, (float)heightAngle, 13f);
         }
 	}
 }

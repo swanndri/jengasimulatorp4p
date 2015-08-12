@@ -77,7 +77,7 @@ namespace JengaSimulator
                             pickedDistance = scalar;
                             pickedObject.IsActive = true;
                         }
-                        lastOrientation = touches[0].Orientation;
+                        lastOrientation = touches.Count == 1 ? touches[0].Orientation : touches[1].Orientation;
                     }
                     else if (pickedObject != null)
                     {
@@ -120,21 +120,20 @@ namespace JengaSimulator
                                 break;
                             //Rotate stack onto top view
                             case 4:
-                                viewManager.rotateToTop();
-                                _lastSideToTouch = 0;
+                                viewManager.rotateToSide(4);
                                 break;
                             //Corkscrew closer or further away
                             case 5:
-                                viewManager.rotateToSide(5, true);
+                                viewManager.rotateToSide(5);
                                 break;
                             case 6:
-                                viewManager.rotateToSide(6, true);
+                                viewManager.rotateToSide(6);
                                 break;
                             case 7:
-                                viewManager.rotateToSide(7, true);
+                                viewManager.rotateToSide(7);
                                 break;
                             case 8:
-                                viewManager.rotateToSide(8, true);
+                                viewManager.rotateToSide(8);
                                 break;
 
 

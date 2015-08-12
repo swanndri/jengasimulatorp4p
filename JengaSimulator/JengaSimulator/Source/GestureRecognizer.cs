@@ -65,8 +65,6 @@ namespace JengaSimulator
                 double pitch = Math.Asin(-2.0 * (q.X * q.Z - q.W * q.Y));
                 double roll = Math.Atan2(2.0 * (q.X * q.Y + q.W * q.Z), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z);
 
-                Console.Out.WriteLine(toRotate);
-
                 float currentRotation = MathHelper.ToDegrees((float)roll);
                 float finalRotation = currentRotation - toRotate;
                 if (finalRotation < 0)
@@ -79,9 +77,7 @@ namespace JengaSimulator
                 }
 
                 float totalRotation = MathHelper.ToRadians(finalRotation);
-                pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
-
-                
+                pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);          
             }
         }
 
@@ -130,6 +126,25 @@ namespace JengaSimulator
                     }
                 }
 
+                switch (tagValue)
+                {
+                    case 4:
+                        viewManager.rotateToSide(4);
+                        break;
+                    case 5:
+                        viewManager.rotateToSide(5);
+                        break;
+                    case 6:
+                        viewManager.rotateToSide(6);
+                        break;
+                    case 7:
+                        viewManager.rotateToSide(7);
+                        break;
+                    case 8:
+                        viewManager.rotateToSide(8);
+                        break;
+                }
+
                 touchPosition = touches[0];
                 //First time touch
                 if (lastTouchPosition == null)
@@ -151,6 +166,7 @@ namespace JengaSimulator
                         pickedDistance = scalar;
                         pickedObject.IsActive = true;
                     }
+                    lastOrientation = touches.Count == 1 ? touches[0].Orientation : touches[1].Orientation;
                 }
                 else if (pickedObject != null)
                 {                    
@@ -188,27 +204,9 @@ namespace JengaSimulator
 
                             Vector3 direction = new Vector3(0, 0, 1.0f);
                             direction.Normalize();
-                            pickedForce.WorldPoint = Vector3.Add(pickedForce.WorldPoint, Vector3.Multiply(direction, deltaRotation * 0.01f));
+                            pickedForce.WorldPoint = Vector3.Add(pickedForce.WorldPoint, Vector3.Multiply(direction, deltaRotation * 0.03f));
 
-                            break;
-                        //Rotate stack onto top view
-                        case 4:
-                            viewManager.rotateToTop();
-                            _lastSideToTouch = 0;
-                            break;
-                        //Corkscrew closer or further away
-                        case 5:
-                            viewManager.rotateToSide(5, true);
-                            break;
-                        case 6:
-                            viewManager.rotateToSide(6, true);
-                            break;
-                        case 7:
-                            viewManager.rotateToSide(7, true);
-                            break;
-                        case 8:
-                            viewManager.rotateToSide(8, true);
-                            break;
+                            break;                    
                     }
                 }
                 else if (pickedObject != null)
