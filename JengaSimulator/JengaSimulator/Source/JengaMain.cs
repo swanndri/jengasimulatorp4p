@@ -131,7 +131,7 @@ namespace JengaSimulator
             // Set the graphics device buffers.
             graphics.PreferredBackBufferWidth = Program.WindowSize.Width;
             graphics.PreferredBackBufferHeight = Program.WindowSize.Height;
-            graphics.IsFullScreen = true;
+            //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
             // Make sure the window is in the right location.
             Program.PositionWindow();
@@ -236,7 +236,7 @@ namespace JengaSimulator
             
    
             _gestureRecognizer.processTouchPoints(touches);
-            _tangibles.processTouchPoints(touches);
+            //_tangibles.processTouchPoints(touches);
             
             _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             
