@@ -216,14 +216,12 @@ namespace JengaSimulator
         {
             ReadOnlyTouchPointCollection touches = touchTarget.GetState();
 
-            if (touches.Count == 0)
-            {
+            if (touches.Count == 0)            
                 _HUD.checkHitUI(null);
-            }
-            foreach (TouchPoint t in touches)
-            {                
+            
+            foreach (TouchPoint t in touches)                            
                 _HUD.checkHitUI(t);
-            }
+            
    
             gestureRecognizer.processTouchPoints(touches);                
             
@@ -316,8 +314,8 @@ namespace JengaSimulator
             _ScreenHeight = GraphicsDevice.PresentationParameters.Bounds.Height;
             _ScreenWidth = GraphicsDevice.PresentationParameters.Bounds.Width;
 
-            Rectangle _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 180, _ScreenHeight / 4, 150, _ScreenHeight / 2);
-            Rectangle _rotationBottomSliderRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 200, _ScreenWidth / 2, 150);
+            Rectangle _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 180, _ScreenHeight / 4, _rotationSideSliderTexture.Width, _ScreenHeight / 2);
+            Rectangle _rotationBottomSliderRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 200, _ScreenWidth / 2, _rotationBottomSliderTexture.Height);
 
             _HUD = new Overlay(this);
 
