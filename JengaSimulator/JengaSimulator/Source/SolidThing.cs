@@ -45,17 +45,18 @@ namespace JengaSimulator
             {
                 foreach (BasicEffect effect in mesh.Effects)
                 {
-                    effect.EnableDefaultLighting();
-                    effect.AmbientLightColor = Vector3.One * 0.75f;
+                    //By Disabling this we can make everything evenly lit. It all just looks quite dull tho.
+                    //effect.EnableDefaultLighting();
+                    effect.AmbientLightColor = Vector3.One * 0.6f; 
                     effect.SpecularColor = Vector3.One;
-                    effect.PreferPerPixelLighting = true;
+                    effect.PreferPerPixelLighting = true;              
                 }
             }
             if (_isColorRandom = isColorRandom)
             {
                 _diffuseColor = new Vector3((float)_colorRand.NextDouble(),
                     (float)_colorRand.NextDouble(), (float)_colorRand.NextDouble());
-                _diffuseColor *= 0.6f;
+                _diffuseColor *= 2f; //By setting this to a value higher value we can make the blocks brighter.
             }
         }
 
@@ -71,7 +72,7 @@ namespace JengaSimulator
                     if (_isColorRandom) effect.DiffuseColor = _diffuseColor;
                     if (!this.IsActive)
                     {
-                        effect.DiffuseColor *= 0.5f;
+                        effect.DiffuseColor *= 0.6f;
                     }
                 }
                 mesh.Draw();

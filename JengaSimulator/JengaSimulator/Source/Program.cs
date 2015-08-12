@@ -17,7 +17,7 @@ namespace JengaSimulator
         /// </summary>
         [STAThread]
         static void Main(string[] args)
-        {
+        illu{
             // Disable the WinForms unhandled exception dialog.
             // SurfaceShell will notify the user.
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);

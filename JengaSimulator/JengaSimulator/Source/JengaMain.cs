@@ -108,8 +108,8 @@ namespace JengaSimulator
         private void InitVariables()
         {
 
-            _ScreenHeight = GraphicsDevice.PresentationParameters.Bounds.Height;
-            _ScreenWidth = GraphicsDevice.PresentationParameters.Bounds.Width;
+            _ScreenHeight = GraphicsDevice.Viewport.Bounds.Height;
+            _ScreenWidth = GraphicsDevice.Viewport.Bounds.Width;
             
 
             //Create rectangles for slider sprites
