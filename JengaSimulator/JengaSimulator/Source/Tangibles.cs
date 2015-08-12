@@ -139,14 +139,6 @@ namespace JengaSimulator
 
 
                         }
-
-
-
-                        //if (tagID != -1)
-                        //{
-                        //    pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), touches.GetTouchPointFromId(tagID).Orientation);
-
-                        //}
                     }
                     else if (pickedObject != null)
                     {

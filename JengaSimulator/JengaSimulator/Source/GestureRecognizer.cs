@@ -27,13 +27,16 @@ namespace JengaSimulator
         private float pickedDistance;
 
         private TouchPoint touchPosition, lastTouchPosition;
-
         private ManipulationProcessor2D manipulationProcessor;
+
+        private int _lastSideToTouch;
+        private float lastOrientation;
 
         public GestureRecognizer(Game game, IViewManager viewManager, PhysicsManager physics) {
             this.game = game;
             this.viewManager = viewManager;
             this.physics = physics;
+            this._lastSideToTouch = 0;
 
             Manipulations2D enabledManipulations = Manipulations2D.Rotate;
             manipulationProcessor = new ManipulationProcessor2D(enabledManipulations);
@@ -97,7 +100,10 @@ namespace JengaSimulator
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches) {
             lastTouchPosition = touchPosition;
+            int tagID = -1;
+            int tagValue = -1;
             
+
             if (touches.Count == 2 && touches[0].IsFingerRecognized && touches[1].IsFingerRecognized)
             {                
                 Manipulator2D[] manipulators;
@@ -113,7 +119,17 @@ namespace JengaSimulator
             }
             
             if (touches.Count >= 1)
-            {         
+            {
+                for (int i = 0; i < touches.Count; i++)
+                {
+                    if (touches[i].IsTagRecognized)
+                    {
+                        tagID = touches[i].Id;
+                        tagValue = (int)touches[i].Tag.Value;
+                        break;
+                    }
+                }
+
                 touchPosition = touches[0];
                 //First time touch
                 if (lastTouchPosition == null)
@@ -130,9 +146,7 @@ namespace JengaSimulator
                     if (c != null && c is BodySkin)
                     {
                         pickedObject = ((BodySkin)c).Owner;
-
-                        pickedForce = new WorldPointConstraint(pickedObject, point);
-                        
+                        pickedForce = new WorldPointConstraint(pickedObject, point);                        
                         physics.Add(pickedForce);
                         pickedDistance = scalar;
                         pickedObject.IsActive = true;
@@ -150,7 +164,52 @@ namespace JengaSimulator
                     Vector3.Multiply(ref diff, pickedDistance, out diff);
                     Vector3.Add(ref s.P1, ref diff, out point);
                     pickedForce.WorldPoint = point;
-                    pickedObject.IsActive = true;                   
+                    pickedObject.IsActive = true;
+
+                    switch (tagValue)
+                    {
+
+                        //Pin a block
+                        case 0:
+                            pickedObject.Freeze();
+                            break;
+                        //unPin a block
+                        case 1:
+                            pickedObject.Unfreeze();
+                            break;
+                        //Rotate a block
+                        case 2:
+                            pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, -1.0f), touchPosition.Orientation);
+                            break;
+                        //Move a block towards or away from camera
+                        case 3:
+                            TouchPoint tagPoint = touches.GetTouchPointFromId(tagID);
+                            float deltaRotation = MathHelper.ToDegrees(lastOrientation) - MathHelper.ToDegrees(tagPoint.Orientation);
+
+                            Vector3 direction = new Vector3(0, 0, 1.0f);
+                            direction.Normalize();
+                            pickedForce.WorldPoint = Vector3.Add(pickedForce.WorldPoint, Vector3.Multiply(direction, deltaRotation * 0.01f));
+
+                            break;
+                        //Rotate stack onto top view
+                        case 4:
+                            viewManager.rotateToTop();
+                            _lastSideToTouch = 0;
+                            break;
+                        //Corkscrew closer or further away
+                        case 5:
+                            viewManager.rotateToSide(5, true);
+                            break;
+                        case 6:
+                            viewManager.rotateToSide(6, true);
+                            break;
+                        case 7:
+                            viewManager.rotateToSide(7, true);
+                            break;
+                        case 8:
+                            viewManager.rotateToSide(8, true);
+                            break;
+                    }
                 }
                 else if (pickedObject != null)
                 {
