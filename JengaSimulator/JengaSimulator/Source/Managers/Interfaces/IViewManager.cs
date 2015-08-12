@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using JengaSimulator.Source.UI;
 
 namespace JengaSimulator
 {
-    public interface IViewManager
+    public interface IViewManager : SliderListener
     {
         GraphicsDevice Device { get; }
         Vector3 UpAxis { get; set; }

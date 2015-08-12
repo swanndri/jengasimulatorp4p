@@ -16,12 +16,8 @@ using JengaSimulator.Source.UI;
 
 namespace JengaSimulator
 {
-    public class App1 : Microsoft.Xna.Framework.Game, ButtonListener, SliderListener
-    {
-        private float cameraDistance = 13;
-        private float rotationAngle;
-        private float heightAngle;
-
+    public class App1 : Microsoft.Xna.Framework.Game, ButtonListener
+    {        
         private IViewManager _viewManager;
         private IInputManager _inputManager;        
         private PhysicsManager _physics;
@@ -94,23 +90,7 @@ namespace JengaSimulator
             }*/
         }
 
-        /// <summary>
-        /// Called anytime user touches somewhere on a slider bar
-        /// </summary>
-        public void onSlide(String sliderName, float slideRatio)
-        {
-            if (sliderName == "side_slider")
-            {
-                double radians = System.Convert.ToDouble(MathHelper.ToRadians((slideRatio * 89)));
-                this.heightAngle = (float)radians;
-                _viewManager.updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
-            }
-            else if (sliderName == "bottom_slider") {
-                double radians = System.Convert.ToDouble(MathHelper.ToRadians((slideRatio * 360)));
-                this.rotationAngle = (float)radians;
-                _viewManager.updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
-            }
-        }
+        
 
         #endregion
 
@@ -189,11 +169,8 @@ namespace JengaSimulator
             
             _viewManager.ForwardAxis = -Vector3.UnitX;
             _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
-            _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);
-
-            rotationAngle = 0;
-            heightAngle = MathHelper.ToRadians(1);            
-            _viewManager.updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
+            _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);        
+            _viewManager.updateCameraPosition(0, MathHelper.ToRadians(1), 13);
 
             CreateScene();
             CreateHUD();
@@ -341,11 +318,11 @@ namespace JengaSimulator
 
 
             SliderBar sideSlider = new SliderBar(_rotationSideSliderTexture, _rotationSliderBallTexture, _rotationSideSliderRectangle, "side_slider", true);
-            sideSlider.addSliderListener(this);
+            sideSlider.addSliderListener(_viewManager);
             _HUD.addUIComponent(sideSlider);
 
             SliderBar bottomSlider = new SliderBar(_rotationBottomSliderTexture, _rotationSliderBallTexture, _rotationBottomSliderRectangle, "bottom_slider", false);
-            bottomSlider.addSliderListener(this);
+            bottomSlider.addSliderListener(_viewManager);
             _HUD.addUIComponent(bottomSlider);
 
 

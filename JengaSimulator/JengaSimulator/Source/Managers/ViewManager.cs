@@ -4,11 +4,16 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using JengaSimulator.Source.UI;
 
 namespace JengaSimulator
 {
-	public sealed class ViewManager : DrawableGameComponent, IViewManager
+    public sealed class ViewManager : DrawableGameComponent, IViewManager, SliderListener
 	{
+        private float cameraDistance = 13;
+        private float rotationAngle;
+        private float heightAngle;
+
 		const float DefaultMaxPitch = float.PositiveInfinity;
 		const float DefaultMinPitch = float.NegativeInfinity;
 		static readonly Vector3 DefaultUpAxis = Vector3.UnitY;
@@ -177,22 +182,78 @@ namespace JengaSimulator
         //Theta is angle in radians, radius is radius of sphere
         public void updateCameraPosition(float rotationAngle, float heightAngle, float radius)
         {
-            double x = radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle);
-            double y = radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle);
-            double z = radius * Math.Cos(heightAngle);
+            float x = (float)(radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle));
+            float y = (float)(radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle));
+            float z = (float)(radius * Math.Cos(heightAngle));
 
-            Vector3 cameraPosition = new Vector3((float)x, (float)y, (float)z);
+            this.rotationAngle = rotationAngle;
+            this.heightAngle = heightAngle;
+            Vector3 cameraPosition = new Vector3(x, y, z);
             this.Position = cameraPosition;
+        }
+
+        private void updateCameraPositionSmoothly(float targetRotation, float targetHeight, float radius)
+        {
+            float speedFactor = 10f;
+            float rotationDifference = MathHelper.ToDegrees(targetRotation) - MathHelper.ToDegrees(this.rotationAngle);
+            float heightDifference = MathHelper.ToDegrees(targetHeight) - MathHelper.ToDegrees(this.heightAngle);
+
+            float newRotation, newHeight;
+
+            newRotation = MathHelper.ToRadians(MathHelper.ToDegrees(this.rotationAngle) + (rotationDifference * speedFactor) / 180);
+            newHeight = MathHelper.ToRadians(MathHelper.ToDegrees(this.heightAngle) + (heightDifference * speedFactor) / 89);
+
+            updateCameraPosition(newRotation, newHeight, radius);     
+            Console.WriteLine(rotationDifference);
+
+            /*float bufferValue = 1.0f;
+
+            float newRotation = MathHelper.ToDegrees(this.rotationAngle);
+            if (this.rotationAngle > (targetRotation + 1.0f) || this.rotationAngle < (targetRotation - 1.0f))
+            {
+                newRotation = MathHelper.ToDegrees(this.rotationAngle) + 5;
+                newRotation = newRotation > 360 ? newRotation - 360 : newRotation;
+                newRotation = newRotation < 0 ? 360 + newRotation : newRotation;
+            }
+
+            float newheightAngle = MathHelper.ToDegrees(this.heightAngle);
+            if (this.heightAngle > (heightAngle + 1.0f) || this.heightAngle < (heightAngle - 1.0f))
+            {
+                newheightAngle = MathHelper.ToDegrees(this.heightAngle) + 5;
+                newheightAngle = newheightAngle > 89 ? newheightAngle - 89 : newheightAngle;
+                newheightAngle = newheightAngle < 0 ? 89 + newheightAngle : newheightAngle;
+            }*/
+
+            //updateCameraPosition(MathHelper.ToRadians(newRotation), MathHelper.ToRadians(newheightAngle), radius);      
+        }
+
+        /// <summary>
+        /// Called anytime user touches somewhere on a slider bar
+        /// </summary>
+        public void onSlide(String sliderName, float slideRatio)
+        {
+            if (sliderName == "side_slider")
+            {
+                double radians = System.Convert.ToDouble(MathHelper.ToRadians((slideRatio * 89)));
+                this.heightAngle = (float)radians;
+                this.updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
+            }
+            else if (sliderName == "bottom_slider")
+            {
+                double radians = System.Convert.ToDouble(MathHelper.ToRadians((slideRatio * 360)));
+                this.rotationAngle = (float)radians;
+                this.updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
+            }
         }
 
         public void rotateToSide(int sidesToRotate)
         {
             float rotationAngle = 0;
-            double heightAngle = MathHelper.ToRadians(1);
+            double heightAngle = MathHelper.ToRadians(89);
             switch (sidesToRotate)
             {
                 case 4:
-                    heightAngle = System.Convert.ToDouble(MathHelper.ToRadians(89));
+                    heightAngle = System.Convert.ToDouble(MathHelper.ToRadians(1));
                     rotationAngle = MathHelper.ToRadians(270.0f);
                     break;
                 case 5:
@@ -208,7 +269,8 @@ namespace JengaSimulator
                     rotationAngle = MathHelper.ToRadians(270.0f);
                     break;
             }                
-            updateCameraPosition(rotationAngle, (float)heightAngle, 13f);
+            //updateCameraPosition(rotationAngle, (float)heightAngle, 13f);
+            updateCameraPositionSmoothly(rotationAngle, (float)heightAngle, 13f);
         }
 	}
 }
