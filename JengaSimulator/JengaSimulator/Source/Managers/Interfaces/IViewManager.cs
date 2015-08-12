@@ -24,5 +24,9 @@ namespace JengaSimulator
         void SetProjection(float viewPlaneNear, float viewPlaneFar, float fieldOfView);
         void SetProjection(float viewPlaneFar);
         void Move(Vector3 delta);
+        void updateCameraPosition(float rotationAngle, float heightAngle, float radius);
+        void rotateToSide(int sidesToRotate, bool firstSideToTouch);
+        void rotateToTop();
+   
     }
 }

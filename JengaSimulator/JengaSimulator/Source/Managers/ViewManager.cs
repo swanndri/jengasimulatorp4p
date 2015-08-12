@@ -110,6 +110,8 @@ namespace JengaSimulator
 			}
 		}
 
+        
+
 		public void SetProjection(float viewPlaneNear, float viewPlaneFar, float fieldOfView)
 		{
 			Matrix.CreatePerspectiveFieldOfView(
@@ -170,5 +172,61 @@ namespace JengaSimulator
 
 			base.Draw(gameTime);
 		}
+
+        
+        //Theta is angle in radians, radius is radius of sphere
+        public void updateCameraPosition(float rotationAngle, float heightAngle, float radius)
+        {
+            double x = radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle);
+            double y = radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle);
+            double z = radius * Math.Cos(heightAngle);
+
+            Vector3 cameraPosition = new Vector3((float)x, (float)y, (float)z);
+            this.Position = cameraPosition;
+        }
+
+        public void rotateToTop()
+        {
+            double radians = System.Convert.ToDouble(MathHelper.ToRadians((0.0001f * 89f)));
+            updateCameraPosition(0, (float)radians, 13f);
+
+        }
+
+        public void rotateToSide(int sidesToRotate, bool firstSideToTouch)
+        {
+            if (firstSideToTouch)
+            {
+                //float ratioToRotate = 0.25f * (float)sidesToRotate;
+                //ratioToRotate = Math.Abs(ratioToRotate);
+                //double radians = System.Convert.ToDouble(MathHelper.ToRadians((ratioToRotate * 360)));
+                //double heightAngle = System.Convert.ToDouble(MathHelper.ToRadians((1 * 89)));
+                //updateCameraPosition(0, (float)heightAngle, 13f);
+
+                float ratioToRotate = 0; ;
+                switch (sidesToRotate)
+                {
+                    case 4:
+                        ratioToRotate = 0.0f;
+                        break;
+                    case 5:
+                        ratioToRotate = 0.25f;
+                        break;
+                    case 6:
+                        ratioToRotate = 0.5f;
+                        break;
+                    case 7:
+                        ratioToRotate = 0.75f;
+                        break;
+                }
+
+                double radians = System.Convert.ToDouble(MathHelper.ToRadians((ratioToRotate * 360)));
+                double heightAngle = System.Convert.ToDouble(MathHelper.ToRadians((1 * 89)));
+                updateCameraPosition(0, (float)heightAngle, 13f);
+
+
+            }
+
+
+        }
 	}
 }

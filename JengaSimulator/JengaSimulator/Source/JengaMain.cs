@@ -43,6 +43,8 @@ namespace JengaSimulator
         private Texture2D _rotationSideSliderTexture;
         private Texture2D _rotationBottomSliderTexture;
         private Texture2D _rotationSliderBallTexture;
+
+        public Game instance;
         
         
         /// <summary>
@@ -52,6 +54,7 @@ namespace JengaSimulator
         {
             this.IsFixedTimeStep = false;
             TaskManager.IsThreadingEnabled = false;
+            instance = this;
 
             Content.RootDirectory = "Content";            
 
@@ -69,6 +72,11 @@ namespace JengaSimulator
             _gestureRecognizer = new GestureRecognizer(this, _viewManager, _physics);
             _tangibles = new Tangibles(this, _viewManager, _physics);
             
+        }
+
+        public static Game Instance
+        {
+            get { return Instance; }
         }
 
         #region UIlistenercallbacks
@@ -95,12 +103,12 @@ namespace JengaSimulator
             {
                 double radians = System.Convert.ToDouble(MathHelper.ToRadians((slideRatio * 89)));
                 this.heightAngle = (float)radians;
-                updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
+                _viewManager.updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
             }
             else if (sliderName == "bottom_slider") {
                 double radians = System.Convert.ToDouble(MathHelper.ToRadians((slideRatio * 360)));
                 this.rotationAngle = (float)radians;
-                updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
+                _viewManager.updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
             }
         }
 
@@ -131,7 +139,7 @@ namespace JengaSimulator
             // Set the graphics device buffers.
             graphics.PreferredBackBufferWidth = Program.WindowSize.Width;
             graphics.PreferredBackBufferHeight = Program.WindowSize.Height;
-            graphics.IsFullScreen = true;
+            //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
             // Make sure the window is in the right location.
             Program.PositionWindow();
@@ -185,7 +193,7 @@ namespace JengaSimulator
 
             rotationAngle = 0;
             heightAngle = MathHelper.ToRadians(1);            
-            updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
+            _viewManager.updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
 
             CreateScene();
             CreateHUD();
@@ -235,7 +243,7 @@ namespace JengaSimulator
                 _HUD.checkHitUI(t);
             
    
-            _gestureRecognizer.processTouchPoints(touches);
+            //_gestureRecognizer.processTouchPoints(touches);
             _tangibles.processTouchPoints(touches);
             
             _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
@@ -262,17 +270,6 @@ namespace JengaSimulator
         #endregion
 
         #region Helper Methods
-
-        //Theta is angle in radians, radius is radius of sphere
-        private void updateCameraPosition(float rotationAngle, float heightAngle, float radius)
-        {
-            double x = radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle);
-            double y = radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle);
-            double z = radius * Math.Cos(heightAngle);
-
-            Vector3 cameraPosition = new Vector3((float)x, (float)y, (float)z);
-            _viewManager.Position = cameraPosition;
-        }
 
         private void CreateScene()
         {
@@ -319,6 +316,8 @@ namespace JengaSimulator
 
 
         }
+
+
 
         private void CreateHUD()
         {
