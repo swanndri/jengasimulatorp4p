@@ -242,15 +242,9 @@ namespace JengaSimulator
             foreach (TouchPoint t in touches)                            
                 _HUD.checkHitUI(t);
             
-   
-<<<<<<< HEAD
             _gestureRecognizer.processTouchPoints(touches);
             //_tangibles.processTouchPoints(touches);
-=======
-            //_gestureRecognizer.processTouchPoints(touches);
-            _tangibles.processTouchPoints(touches);
->>>>>>> origin/master
-            
+           
             _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             
             _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);

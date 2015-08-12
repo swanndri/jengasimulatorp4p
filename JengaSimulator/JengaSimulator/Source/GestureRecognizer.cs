@@ -28,11 +28,6 @@ namespace JengaSimulator
 
         private TouchPoint touchPosition, lastTouchPosition;
 
-
-        Manipulator2D point1;
-        Manipulator2D point2;
-        Manipulator2D[] manipulators;
-
         private ManipulationProcessor2D manipulationProcessor;
 
         public GestureRecognizer(Game game, IViewManager viewManager, PhysicsManager physics) {
@@ -112,6 +107,20 @@ namespace JengaSimulator
             lastTouchPosition = touchPosition;
             
             int tagID = -1;
+            if (touches.Count == 2)
+            {
+                Manipulator2D[] manipulators;
+                manipulators = new Manipulator2D[] { new Manipulator2D(1, touches[1].X, touches[1].Y) };
+
+                manipulationProcessor.Pivot.X = touches[0].X;
+                manipulationProcessor.Pivot.Y = touches[0].Y;
+                manipulationProcessor.ProcessManipulators(Timestamp, manipulators);
+            }
+            else
+            {
+                manipulationProcessor.CompleteManipulation(Timestamp);
+            }
+
             if (touches.Count >= 1)
             {
                 for (int i = 0; i < touches.Count; i++ )
@@ -121,28 +130,7 @@ namespace JengaSimulator
                         tagID = touches[i].Id;
                         break;
                     }
-                }
-                if (touches.Count == 2)
-                {
-                    if (point1 == null)
-                    {
-                        point1 = new Manipulator2D(0, touches[0].X, touches[0].Y);
-                        point2 = new Manipulator2D(1, touches[1].X, touches[1].Y);
-                    }
-                    point1.X = touches[0].X;
-                    point1.Y = touches[0].Y;
-
-                    point2.X = touches[1].X;
-                    point2.Y = touches[1].Y;
-
-                    //manipulators = new Manipulator2D[] {point1,point2};
-                    manipulators = new Manipulator2D[] {point2 };
-
-                    manipulationProcessor.Pivot.X = touches[0].X;
-                    manipulationProcessor.Pivot.Y = touches[0].Y;
-                    manipulationProcessor.ProcessManipulators(Timestamp, manipulators);
-                }
-
+                }                
                 
                 touchPosition = touches[0];
                 //First time touch
