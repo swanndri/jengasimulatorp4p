@@ -23,69 +23,62 @@ namespace JengaSimulator
         private float heightAngle;
 
         private IViewManager _viewManager;
-        private IInputManager _inputManager;
+        private IInputManager _inputManager;        
+        private PhysicsManager _physics;
+        private Overlay _HUD;
+        private GestureRecognizer gestureRecognizer;
 
         private readonly GraphicsDeviceManager graphics;
-        private SpriteBatch spriteBatch;
+        private SpriteBatch spriteBatch;       
 
-        private PhysicsManager _physics;
-
-        private TouchPoint _touchPosition, _lastTouchPosition;
-        private TouchTarget touchTarget;
-        private GestureRecognizer gestureRecognizer;
+        private TouchTarget touchTarget;        
 
         private Color backgroundColor = Color.CornflowerBlue;
         private Matrix screenTransform = Matrix.Identity;
 
         private Texture2D _resetButtonTexture;
-        private Texture2D _viewButtonTexture;
-        
+        private Texture2D _viewButtonTexture;        
         private Texture2D _rotationSideSliderTexture;
-        private Rectangle _rotationSideSliderRectangle;
         private Texture2D _rotationBottomSliderTexture;
-        private Rectangle _rotationBottomSliderRectangle;
-
         private Texture2D _rotationSliderBallTexture;
-        private Rectangle _rotationSideSliderBallRectangle;
-        private Rectangle _rotationBottomSliderBallRectangle;
-
-        private Boolean _resetFlag;
-
-        private int _ScreenHeight;
-        private int _ScreenWidth;
-
-        private Overlay _HUD;
+        
         
         /// <summary>
         /// Default constructor.
         /// </summary>
         public App1()
-        {   
+        {
+            Content.RootDirectory = "Content";
+
             graphics = new GraphicsDeviceManager(this);
-            graphics.SynchronizeWithVerticalRetrace = false;
+            graphics.SynchronizeWithVerticalRetrace = false;             
             
             _viewManager = new ViewManager(this);
             _viewManager.BackgroundColor = backgroundColor;
 
-            _inputManager = new InputManager(this);            
+            _inputManager = new InputManager(this);
 
-            _physics = new PhysicsManager(this);            
+            _physics = new PhysicsManager(this);
             this.Components.Add(new PhysicsScene(this, _physics));
-            
+
             gestureRecognizer = new GestureRecognizer(this, _viewManager, _physics);
-            _resetFlag = false;
-            Content.RootDirectory = "Content";
+            
         }
 
         #region UIlistenercallbacks
-        //These methods should really all be made into listeners and but cbf
 
+        /// <summary>
+        /// Called when a button that is registered is pressed. Called once on down press.
+        /// </summary>
         public void onButtonDown(String buttonName) {
             if (buttonName == "reset_button") {
                 CreateScene();
             }            
         }
 
+        /// <summary>
+        /// Called anytime user touches somewhere on a slider bar
+        /// </summary>
         public void onSlide(String sliderName, float slideRatio)
         {
             if (sliderName == "side_slider")
@@ -104,20 +97,6 @@ namespace JengaSimulator
         #endregion
 
         #region Initialization
-
-        private void InitVariables()
-        {
-
-            _ScreenHeight = GraphicsDevice.PresentationParameters.Bounds.Height;
-            _ScreenWidth = GraphicsDevice.PresentationParameters.Bounds.Width;
-            
-            //Create rectangles for slider sprites
-            _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 180, _ScreenHeight / 4, 150, _ScreenHeight / 2);
-            _rotationBottomSliderRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 200, _ScreenWidth / 2, 150);
-            _rotationSideSliderBallRectangle = new Rectangle(_ScreenWidth - 130, _ScreenHeight / 4, 50, 50);
-            _rotationBottomSliderBallRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 165, 75, 75);
-        }
-        
         
         /// <summary>
         /// The target receiving all surface input for the application.
@@ -217,10 +196,75 @@ namespace JengaSimulator
             _rotationSliderBallTexture = Content.Load<Texture2D>(@"Sprites/circle");
         }
 
+        /// <summary>
+        /// UnloadContent will be called once per app and is the place to unload
+        /// all content.
+        /// </summary>
+        protected override void UnloadContent()
+        {
+            // TODO: Unload any non ContentManager content here
+        }
+
+        /// <summary>
+        /// Allows the app to run logic such as updating the world,
+        /// checking for collisions, gathering input and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        /// 
+
+        protected override void Update(GameTime gameTime)
+        {
+            ReadOnlyTouchPointCollection touches = touchTarget.GetState();
+
+            if (touches.Count == 0)
+            {
+                _HUD.checkHitUI(null);
+            }
+            foreach (TouchPoint t in touches)
+            {                
+                _HUD.checkHitUI(t);
+            }
+   
+            gestureRecognizer.processTouchPoints(touches);                
+            
+            _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
+            
+            _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
+
+            base.Update(gameTime);
+            
+        }
+
+        /// <summary>
+        /// This is called when the app should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        /// 
+        
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(backgroundColor);  
+            base.Draw(gameTime);
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        //Theta is angle in radians, radius is radius of sphere
+        private void updateCameraPosition(float rotationAngle, float heightAngle, float radius)
+        {
+
+            double x = radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle);
+            double y = radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle);
+            double z = radius * Math.Cos(heightAngle);
+
+            Vector3 cameraPosition = new Vector3((float)x, (float)y, (float)z);
+            _viewManager.Position = cameraPosition;
+        }
+
         private void CreateScene()
         {
-            InitVariables();
-
             _physics.Clear();
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
 
@@ -245,11 +289,6 @@ namespace JengaSimulator
                 for (int i = 0; i < 3; i++)
                 {
                     var cube = new SolidThing(this, cubeModel);
-
-                    //int randomNumber = random.Next(90, 100);
-                    //float random1 = (float)randomNumber;
-
-                    //float scale = (random1 / 100) * 1.0f;
                     float scale = 1.0f;
                     Quaternion rotation;
 
@@ -271,15 +310,23 @@ namespace JengaSimulator
 
         }
 
-        private void CreateHUD() {
+        private void CreateHUD()
+        {
+            int _ScreenHeight, _ScreenWidth;
+
+            _ScreenHeight = GraphicsDevice.PresentationParameters.Bounds.Height;
+            _ScreenWidth = GraphicsDevice.PresentationParameters.Bounds.Width;
+
+            Rectangle _rotationSideSliderRectangle = new Rectangle(_ScreenWidth - 180, _ScreenHeight / 4, 150, _ScreenHeight / 2);
+            Rectangle _rotationBottomSliderRectangle = new Rectangle(_ScreenWidth / 4, _ScreenHeight - 200, _ScreenWidth / 2, 150);
 
             _HUD = new Overlay(this);
 
-            Button resetButton = new Button(_resetButtonTexture, new Rectangle(0,0,165,70), "reset_button");
+            Button resetButton = new Button(_resetButtonTexture, new Rectangle(0, 0, 165, 70), "reset_button");
             resetButton.addButtonListener(this);
             _HUD.addUIComponent(resetButton);
 
-            SliderBar sideSlider = new SliderBar(_rotationSideSliderTexture, _rotationSliderBallTexture, _rotationSideSliderRectangle,"side_slider", true);
+            SliderBar sideSlider = new SliderBar(_rotationSideSliderTexture, _rotationSliderBallTexture, _rotationSideSliderRectangle, "side_slider", true);
             sideSlider.addSliderListener(this);
             _HUD.addUIComponent(sideSlider);
 
@@ -289,148 +336,6 @@ namespace JengaSimulator
 
 
             this.Components.Add(_HUD);
-        }
-
-        /// <summary>
-        /// UnloadContent will be called once per app and is the place to unload
-        /// all content.
-        /// </summary>
-        protected override void UnloadContent()
-        {
-            // TODO: Unload any non ContentManager content here
-        }
-
-        /// <summary>
-        /// Allows the app to run logic such as updating the world,
-        /// checking for collisions, gathering input and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        /// 
-
-        //Theta is angle in radians, radius is radius of sphere
-        private void updateCameraPosition(float rotationAngle, float heightAngle, float radius)
-        {
-
-            double x = radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle);
-            double y = radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle);
-            double z = radius * Math.Cos(heightAngle);
-
-            Vector3 cameraPosition = new Vector3((float)x, (float)y, (float)z);
-            _viewManager.Position = cameraPosition;
-        }
-
-        protected override void Update(GameTime gameTime)
-        {
-            ReadOnlyTouchPointCollection touches = touchTarget.GetState();
-            _lastTouchPosition = _touchPosition;
-
-            if (touches.Count == 0)
-            {
-                _HUD.checkHitUI(null);
-            }
-            foreach (TouchPoint t in touches)
-            {                
-                _HUD.checkHitUI(t);
-            }
-   
-            if (touches.Count == 0)
-            {
-                _resetFlag = false;
-            }
-
-            //BUTTON CODE - WILL NOT WORK WITH ACTUAL TOUCH
-            if (touches.Count == 1)
-            {
-                _touchPosition = touches[0];                    
-                    
-                    Point p = new Point((int)_touchPosition.CenterX, (int)_touchPosition.CenterY);
-                
-                /*
-                    if (_rotationBottomSliderRectangle.Contains(p))
-                    {
-                        //Console.Out.WriteLine(p);
-
-                        float dFromLeft;
-                        dFromLeft = (float)(p.X - _rotationBottomSliderRectangle.X);
-
-                        float propOfSlider;
-                        propOfSlider = dFromLeft / _rotationBottomSliderRectangle.Width;
-
-                        int distance = (int)(((_ScreenWidth / 4) + dFromLeft) - (propOfSlider * 75));
-                        _rotationBottomSliderBallRectangle = new Rectangle(distance, _ScreenHeight - 165, 75, 75);
-
-                        double radians = System.Convert.ToDouble(MathHelper.ToRadians((propOfSlider * 360)));
-                        this.rotationAngle = (float)radians;
-                        updateCameraPosition(rotationAngle, heightAngle, cameraDistance);
-                    }*/
-            }
-
-
-            gestureRecognizer.processTouchPoints(touches);
-                
-            _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-            
-            //COMMENT OUT FROM HERE
-            /*
-            // object picking
-            if (_inputManager.WasPressed(MouseButton.MiddleButton))
-            {
-                Segment s;
-                s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                float scalar;
-                Vector3 point;
-                var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
-                if (c != null && c is BodySkin)
-                {
-                    _pickedObject = ((BodySkin)c).Owner;
-
-                    _pickedForce = new WorldPointConstraint(_pickedObject, point);
-                    _physics.Add(_pickedForce);
-                    _pickedDistance = scalar;
-                    _pickedObject.IsActive = true;
-                }
-            }
-            else if (_inputManager.MouseState.MiddleButton == ButtonState.Pressed && _pickedObject != null)
-            {
-                Segment s;
-                s.P1 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 0f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                s.P2 = GraphicsDevice.Viewport.Unproject(new Vector3(_inputManager.MouseState.X, _inputManager.MouseState.Y, 1f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                Vector3 diff, point;
-                Vector3.Subtract(ref s.P2, ref s.P1, out diff);
-                Vector3.Multiply(ref diff, _pickedDistance, out diff);
-                Vector3.Add(ref s.P1, ref diff, out point);
-                _pickedForce.WorldPoint = point;
-                _pickedObject.IsActive = true;
-            }
-            else if (_pickedObject != null)
-            {
-                _physics.Remove(_pickedForce);
-                _pickedObject = null;
-            }
-            */
-            //COMMENT OUT TILL HERE
-
-            _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
-
-            base.Update(gameTime);
-            
-        }
-
-        /// <summary>
-        /// This is called when the app should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        /// 
-        
-        protected override void Draw(GameTime gameTime)
-        {
-            GraphicsDevice.Clear(backgroundColor);  
-            base.Draw(gameTime);
         }
 
         #endregion
