@@ -50,11 +50,14 @@ namespace JengaSimulator
         /// </summary>
         public App1()
         {
-            Content.RootDirectory = "Content";
+            this.IsFixedTimeStep = false;
+            TaskManager.IsThreadingEnabled = false;
+
+            Content.RootDirectory = "Content";            
 
             graphics = new GraphicsDeviceManager(this);
-            graphics.SynchronizeWithVerticalRetrace = false;             
-            
+            graphics.SynchronizeWithVerticalRetrace = false;
+
             _viewManager = new ViewManager(this);
             _viewManager.BackgroundColor = backgroundColor;
 
@@ -251,7 +254,8 @@ namespace JengaSimulator
         
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(backgroundColor);  
+            GraphicsDevice.Clear(backgroundColor);
+
             base.Draw(gameTime);
         }
 
@@ -274,7 +278,6 @@ namespace JengaSimulator
         {
             _physics.Clear();
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
-
 
             Model cubeModel = this.Content.Load<Model>("models/jenga_block");
             Model tableModel = this.Content.Load<Model>("models/table");

@@ -17,7 +17,7 @@ namespace Henge3D.Physics
 		const float DefaultLinearDamping = 0.9f;
 		const float DefaultAngularDamping = 0.25f;
 		const float DefaultMinRestitution = 0.5f;
-		const float DefaultDeactivationTime = 1f;
+		const float DefaultDeactivationTime = 2f;
 		const float DefaultActiveLinearThreshold = 0.25f;
 		const float DefaultActiveAngularThreshold = 0.5f;
 		const float DefaultLinearErrorTolerance = 0.001f;
