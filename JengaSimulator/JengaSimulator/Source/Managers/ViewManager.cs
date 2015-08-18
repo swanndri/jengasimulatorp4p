@@ -192,39 +192,25 @@ namespace JengaSimulator
             this.Position = cameraPosition;
         }
 
+        private static double AngleDifference(double angle1, double angle2)
+        {
+            double diff = (angle2 - angle1 + 180) % 360 - 180;
+            diff = diff < -180 ? diff + 360 : diff;
+            diff = diff > 180 ? diff - 360 : diff;
+            return diff;
+        }
+
         private void updateCameraPositionSmoothly(float targetRotation, float targetHeight, float radius)
         {
             float speedFactor = 10f;
-            float rotationDifference = MathHelper.ToDegrees(targetRotation) - MathHelper.ToDegrees(this.rotationAngle);
+            float rotationDifference = (float)(AngleDifference(MathHelper.ToDegrees(targetRotation), MathHelper.ToDegrees(this.rotationAngle)));
             float heightDifference = MathHelper.ToDegrees(targetHeight) - MathHelper.ToDegrees(this.heightAngle);
-
             float newRotation, newHeight;
 
-            newRotation = MathHelper.ToRadians(MathHelper.ToDegrees(this.rotationAngle) + (rotationDifference * speedFactor) / 180);
+            newRotation = MathHelper.ToRadians(MathHelper.ToDegrees(this.rotationAngle) - (rotationDifference * speedFactor) / 180);
             newHeight = MathHelper.ToRadians(MathHelper.ToDegrees(this.heightAngle) + (heightDifference * speedFactor) / 89);
 
-            updateCameraPosition(newRotation, newHeight, radius);     
-            Console.WriteLine(rotationDifference);
-
-            /*float bufferValue = 1.0f;
-
-            float newRotation = MathHelper.ToDegrees(this.rotationAngle);
-            if (this.rotationAngle > (targetRotation + 1.0f) || this.rotationAngle < (targetRotation - 1.0f))
-            {
-                newRotation = MathHelper.ToDegrees(this.rotationAngle) + 5;
-                newRotation = newRotation > 360 ? newRotation - 360 : newRotation;
-                newRotation = newRotation < 0 ? 360 + newRotation : newRotation;
-            }
-
-            float newheightAngle = MathHelper.ToDegrees(this.heightAngle);
-            if (this.heightAngle > (heightAngle + 1.0f) || this.heightAngle < (heightAngle - 1.0f))
-            {
-                newheightAngle = MathHelper.ToDegrees(this.heightAngle) + 5;
-                newheightAngle = newheightAngle > 89 ? newheightAngle - 89 : newheightAngle;
-                newheightAngle = newheightAngle < 0 ? 89 + newheightAngle : newheightAngle;
-            }*/
-
-            //updateCameraPosition(MathHelper.ToRadians(newRotation), MathHelper.ToRadians(newheightAngle), radius);      
+            updateCameraPosition(newRotation, newHeight, radius);       
         }
 
         /// <summary>
