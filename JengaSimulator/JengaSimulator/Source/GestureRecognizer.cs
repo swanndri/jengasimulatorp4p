@@ -98,7 +98,11 @@ namespace JengaSimulator
             lastTouchPosition = touchPosition;
             int tagID = -1;
             int tagValue = -1;
-            
+
+            if (touches[0].IsTagRecognized)
+            {
+                Console.WriteLine("Tag");
+            }
 
             if (touches.Count == 2 && touches[0].IsFingerRecognized && touches[1].IsFingerRecognized)
             {                
