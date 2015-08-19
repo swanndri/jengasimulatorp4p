@@ -37,7 +37,7 @@ namespace JengaSimulator
             this.viewManager = viewManager;
             this.physics = physics;
 
-            Manipulations2D enabledManipulations = Manipulations2D.Rotate;
+            Manipulations2D enabledManipulations = Manipulations2D.Rotate | Manipulations2D.Scale | Manipulations2D.Translate;
             manipulationProcessor = new ManipulationProcessor2D(enabledManipulations);
 
             manipulationProcessor.Pivot = new ManipulationPivot2D();
@@ -53,9 +53,9 @@ namespace JengaSimulator
         private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e){}
 
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
-        {           
-            if (pickedObject != null)
-            {
+        {            
+            if (pickedObject != null){    
+                //Rotations================================================
                 float toRotate = MathHelper.ToDegrees(e.Delta.Rotation);                
                 Quaternion q = pickedObject.Orientation;
 
@@ -75,10 +75,18 @@ namespace JengaSimulator
                 }
 
                 float totalRotation = MathHelper.ToRadians(finalRotation);
-                Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
-                pickedObject.SetWorld(pickedObject.Position, finalOrientation);
+                Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);                
                 this.orientation = finalOrientation;
+
+                //Zooms==================================================
+                Vector3 newPosition = pickedObject.Position;
+                float scaleFactor = 1.0f;
+
+                newPosition.Z = newPosition.Z + 1.0f;
+                Console.WriteLine(newPosition.Z);
                 
+               //Put together=============================================
+               pickedObject.SetWorld(newPosition, finalOrientation);
             }
         }
 
@@ -103,10 +111,14 @@ namespace JengaSimulator
             if (touches.Count == 2 && touches[0].IsFingerRecognized && touches[1].IsFingerRecognized)
             {                
                 Manipulator2D[] manipulators;
-                manipulators = new Manipulator2D[] { new Manipulator2D(1, touches[1].X, touches[1].Y) };
+                manipulators = new Manipulator2D[] { 
+                    new Manipulator2D(1, touches[1].X, touches[1].Y),
+                    new Manipulator2D(3, touches[0].X, touches[0].Y)
+                };
 
                 manipulationProcessor.Pivot.X = touches[0].X;
                 manipulationProcessor.Pivot.Y = touches[0].Y;
+
                 manipulationProcessor.ProcessManipulators(Timestamp, manipulators);
             }
             else
