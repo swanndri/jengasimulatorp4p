@@ -33,9 +33,7 @@ namespace JengaSimulator
         private Matrix _viewMatrix;
         private Matrix _projectionMatrix;
 
-        private Viewport _defaultViewPort;
         private Viewport _miniMapViewPort;
-        private Matrix _miniMapMatrix;
 
         private Color backgroundColor;
 
@@ -175,21 +173,32 @@ namespace JengaSimulator
         private Viewport defaultViewport;
         private Boolean isDefaultViewPort = true;
         private Vector3 positionSave;
+        private Color colorSave;
 
         public void toggleViewPort() {
             Vector3 origin = Vector3.Zero;
             if (isDefaultViewPort)
             {
+                _device.Clear(backgroundColor); 
                 defaultViewport = _device.Viewport;
+                _miniMapViewPort.X = defaultViewport.Width - _miniMapViewPort.Width;
                 _device.Viewport = _miniMapViewPort;
                 positionSave = _position;
-                _position = new Vector3(_position.Y, _position.X, 5);
+
+                float x = (float)(13f * Math.Sin(89-heightAngle) * Math.Cos(360-rotationAngle));
+                float y = (float)(13f * Math.Sin(89-heightAngle) * Math.Sin(360-rotationAngle));
+                float z = (float)(13f * Math.Cos(89-heightAngle));
+
+                _position = new Vector3(x, y, z);
+
                 Matrix.CreateLookAt(
                 ref _position,
                 ref origin,
                 ref _upAxis,
                 out _viewMatrix);
+                
                 isDefaultViewPort = false;
+                
             }
             else
             {
@@ -199,7 +208,7 @@ namespace JengaSimulator
                 ref _position,
                 ref origin,
                 ref _upAxis,
-                out _viewMatrix);
+                out _viewMatrix);                
                 isDefaultViewPort = true;
             }
             

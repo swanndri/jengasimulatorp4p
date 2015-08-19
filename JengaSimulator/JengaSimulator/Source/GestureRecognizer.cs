@@ -23,6 +23,7 @@ namespace JengaSimulator
         private PhysicsManager physics;
 
         private RigidBody pickedObject;
+        private Vector3 pickedObjectOffset;
         private float pickedDistance;
 
         private TouchPoint touchPosition, lastTouchPosition;
@@ -163,6 +164,7 @@ namespace JengaSimulator
                         orientation = pickedObject.Orientation;
                         pickedDistance = scalar;
                         pickedObject.IsActive = true;
+                        pickedObjectOffset = pickedObject.Position - point;                        
                     }
                     //lastOrientation = touches.Count == 1 ? touches[0].Orientation : touches[1].Orientation;
                     lastOrientation = touches[0].Orientation;
@@ -179,7 +181,8 @@ namespace JengaSimulator
                     Vector3.Multiply(ref diff, pickedDistance, out diff);
                     Vector3.Add(ref s.P1, ref diff, out point);
                     pickedObject.SetVelocity(Vector3.Zero, Vector3.Zero);
-                    pickedObject.SetWorld(point, orientation);
+                    
+                    pickedObject.SetWorld(Vector3.Add(point,pickedObjectOffset), orientation);
                     pickedObject.IsActive = true;
                     
                     switch (tagValue)
