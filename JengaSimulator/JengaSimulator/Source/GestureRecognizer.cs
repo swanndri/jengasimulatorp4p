@@ -89,8 +89,12 @@ namespace JengaSimulator
                 Vector3 newPosition = pickedObject.Position;
 
                 direction.Normalize();
-                float scaleConstant = 2.0f;
+                float scaleConstant = 1.5f;
                 float scaleFactor = e.Cumulative.ScaleX;
+
+                Console.WriteLine(scaleFactor);
+                scaleFactor = scaleFactor < 1 ? -(1 / scaleFactor) : scaleFactor;
+                Console.WriteLine("AFTER: " + scaleFactor);
 
                 newPosition = Vector3.Add(Vector3.Multiply(direction, (scaleConstant * scaleFactor)), this.beginPos);
 
@@ -192,7 +196,7 @@ namespace JengaSimulator
                     Vector3 point;
                     var c = physics.BroadPhase.Intersect(ref s, out scalar, out point);
 
-                    if (c != null && c is BodySkin)//&& (((BodySkin)c).Owner).IsMovable)
+                    if (c != null && c is BodySkin && !((SolidThing)((BodySkin)c).Owner).getIsTable())
                     {
                         pickedObject = ((BodySkin)c).Owner;
                         orientation = pickedObject.Orientation;
@@ -212,7 +216,6 @@ namespace JengaSimulator
                     s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.X, touchPosition.Y, 1f),
                         viewManager.Projection, viewManager.View, Matrix.Identity);
 
-                    Console.WriteLine(pickedDistance);
                     Vector3 diff, point;
                     Vector3.Subtract(ref s.P2, ref s.P1, out diff);
                     Vector3.Multiply(ref diff, pickedDistance, out diff);

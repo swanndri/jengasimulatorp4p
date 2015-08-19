@@ -120,7 +120,7 @@ namespace JengaSimulator
             // Set the graphics device buffers.
             graphics.PreferredBackBufferWidth = Program.WindowSize.Width;
             graphics.PreferredBackBufferHeight = Program.WindowSize.Height;
-            //graphics.IsFullScreen = true;
+            graphics.IsFullScreen = true;
             graphics.ApplyChanges();
             // Make sure the window is in the right location.
             Program.PositionWindow();
@@ -254,7 +254,7 @@ namespace JengaSimulator
             Model tableModel = this.Content.Load<Model>("models/table");
             ModelMesh tableMesh = tableModel.Meshes.ElementAt(0);
 
-            SolidThing table = new SolidThing(this, tableModel, false, true);
+            SolidThing table = new SolidThing(this, tableModel, false, true);            
 
             float tableScale = 3f;
             Vector3 tablePosition = new Vector3(0, 0, -1f);
