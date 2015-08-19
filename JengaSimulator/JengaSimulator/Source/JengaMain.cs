@@ -39,7 +39,11 @@ namespace JengaSimulator
         private Texture2D _rotationBottomSliderTexture;
         private Texture2D _rotationSliderBallTexture;
 
-        public Game instance;
+        private float _gameBoundsX;
+        private float _gameBoundsY;
+        private float _gameBoundsZ;
+
+        private Game instance;
         
         
         /// <summary>
@@ -51,7 +55,7 @@ namespace JengaSimulator
             TaskManager.IsThreadingEnabled = false;
             instance = this;
 
-            Content.RootDirectory = "Content";            
+            Content.RootDirectory = "Content";
 
             graphics = new GraphicsDeviceManager(this);
             graphics.SynchronizeWithVerticalRetrace = false;
@@ -64,7 +68,7 @@ namespace JengaSimulator
 
             _gestureRecognizer = new GestureRecognizer(this, _viewManager, _physics);
             _tangibles = new Tangibles(this, _viewManager, _physics);
-            
+
         }
 
         public static Game Instance
@@ -248,15 +252,22 @@ namespace JengaSimulator
 
             Model cubeModel = this.Content.Load<Model>("models/jenga_block");
             Model tableModel = this.Content.Load<Model>("models/table");
+            ModelMesh tableMesh = tableModel.Meshes.ElementAt(0);
 
-            SolidThing table = new SolidThing(this, tableModel, false);
+            SolidThing table = new SolidThing(this, tableModel, false, true);
 
             float tableScale = 3f;
             Vector3 tablePosition = new Vector3(0, 0, -1f);
             Quaternion tableRotation = Quaternion.Identity;
-
             table.SetWorld(tableScale, tablePosition, tableRotation);
             table.Freeze();
+
+            //Initialise game bounds equal to the table
+            _gameBoundsX = tablePosition.X + tableMesh.BoundingSphere.Center.X + tableMesh.BoundingSphere.Radius;
+            _gameBoundsY = tablePosition.Y + tableMesh.BoundingSphere.Center.Y + tableMesh.BoundingSphere.Radius;
+            _gameBoundsZ = tablePosition.Z;
+            
+
             _physics.Add(table);
 
             Random random = new Random();

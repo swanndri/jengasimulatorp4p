@@ -93,15 +93,18 @@ namespace JengaSimulator
                         pickedForce.WorldPoint = point;
                         pickedObject.IsActive = true;
 
+                        //SolidThing po = (SolidThing)pickedObject;
+                        Console.Out.WriteLine("UNFREEEEEEEEEEEEZE");
                         switch (tagID)
                         {
-
+                            
                             //Pin a block
                             case 0:
                                 pickedObject.Freeze();
                                 break;
                             //unPin a block
                             case 1:
+                                
                                 pickedObject.Unfreeze();
                                 break;
                             //Rotate a block
