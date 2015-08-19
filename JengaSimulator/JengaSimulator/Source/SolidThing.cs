@@ -17,7 +17,15 @@ namespace JengaSimulator
         private Matrix[] _meshTransforms;
         private bool _isColorRandom;
         private Vector3 _diffuseColor;
+        private bool _isTable;
         Game game;
+
+        public bool getIsTable()
+        {
+            return _isTable;
+        }
+
+
 
         public Model Model
         {
@@ -29,14 +37,15 @@ namespace JengaSimulator
         }
 
         public SolidThing(Game game, Model model)
-            : this(game, model, true)
+            : this(game, model, true, false)
         {
         }
 
-        public SolidThing(Game game, Model model, bool isColorRandom)
+        public SolidThing(Game game, Model model, bool isColorRandom, bool isTable)
             : base((RigidBodyModel)model.Tag)
         {
             this.game = game;
+            this._isTable = isTable;
             _model = model;
             _meshTransforms = new Matrix[_model.Bones.Count];
             _model.CopyAbsoluteBoneTransformsTo(_meshTransforms);

@@ -32,7 +32,8 @@ namespace JengaSimulator
         private float lastOrientation;
         private Quaternion orientation;
 
-        public GestureRecognizer(Game game, IViewManager viewManager, PhysicsManager physics) {
+        public GestureRecognizer(Game game, IViewManager viewManager, PhysicsManager physics)
+        {
             this.game = game;
             this.viewManager = viewManager;
             this.physics = physics;
@@ -50,7 +51,7 @@ namespace JengaSimulator
 
         /** Manipulation Events ********/
         #region ManipulationEvents
-        private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e){}
+        private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e) { }
 
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
         {            
@@ -90,7 +91,7 @@ namespace JengaSimulator
             }
         }
 
-        private void OnManipulationCompleted(object sender, Manipulation2DCompletedEventArgs e){}
+        private void OnManipulationCompleted(object sender, Manipulation2DCompletedEventArgs e) { }
         #endregion
 
         private long Timestamp
@@ -103,13 +104,14 @@ namespace JengaSimulator
             }
         }
 
-        public void processTouchPoints(ReadOnlyTouchPointCollection touches) {
+        public void processTouchPoints(ReadOnlyTouchPointCollection touches)
+        {
             lastTouchPosition = touchPosition;
             int tagID = -1;
             int tagValue = -1;
 
             if (touches.Count == 2 && touches[0].IsFingerRecognized && touches[1].IsFingerRecognized)
-            {                
+            {
                 Manipulator2D[] manipulators;
                 manipulators = new Manipulator2D[] { 
                     new Manipulator2D(1, touches[1].X, touches[1].Y),
@@ -125,7 +127,7 @@ namespace JengaSimulator
             {
                 manipulationProcessor.CompleteManipulation(Timestamp);
             }
-            
+
             if (touches.Count >= 1)
             {
                 for (int i = 0; i < touches.Count; i++)
@@ -137,7 +139,7 @@ namespace JengaSimulator
                         break;
                     }
                 }
-                
+
                 switch (tagValue)
                 {
                     case 4:
@@ -170,13 +172,13 @@ namespace JengaSimulator
                     Vector3 point;
                     var c = physics.BroadPhase.Intersect(ref s, out scalar, out point);
 
-                    if (c != null && c is BodySkin && (((BodySkin)c).Owner).IsMovable)
+                    if (c != null && c is BodySkin)//&& (((BodySkin)c).Owner).IsMovable)
                     {
                         pickedObject = ((BodySkin)c).Owner;
                         orientation = pickedObject.Orientation;
                         pickedDistance = scalar;
                         pickedObject.IsActive = true;
-                        pickedObjectOffset = pickedObject.Position - point;                        
+                        pickedObjectOffset = pickedObject.Position - point;
                     }
                     //lastOrientation = touches.Count == 1 ? touches[0].Orientation : touches[1].Orientation;
                     lastOrientation = touches[0].Orientation;
@@ -193,21 +195,32 @@ namespace JengaSimulator
                     Vector3.Multiply(ref diff, pickedDistance, out diff);
                     Vector3.Add(ref s.P1, ref diff, out point);
                     pickedObject.SetVelocity(Vector3.Zero, Vector3.Zero);
-                    
-                    pickedObject.SetWorld(Vector3.Add(point,pickedObjectOffset), orientation);
+
+                    pickedObject.SetWorld(Vector3.Add(point, pickedObjectOffset), orientation);
                     pickedObject.IsActive = true;
-                    
+                    SolidThing pickedObjectST = (SolidThing)pickedObject;
+
                     switch (tagValue)
                     {
 
                         //Pin a block
                         case 0:
+                            pickedObject.Unfreeze();
                             pickedObject.Freeze();
                             break;
                         //unPin a block
                         case 1:
-                            pickedObject.Unfreeze();
-                            break;
+                            if (pickedObjectST.getIsTable())
+                            {
+                                Console.Out.WriteLine("istable");
+                                break;
+                            }
+                            else
+                            {
+                                pickedObject.Unfreeze();
+                                break;
+                            }
+
                         //Rotate a block
                         case 20:
                             pickedObject.SetWorld(pickedObject.Position, Quaternion.CreateFromAxisAngle(new Vector3(0, 0, -1.0f), touchPosition.Orientation));
@@ -221,7 +234,7 @@ namespace JengaSimulator
                             direction.Normalize();
                             pickedObject.SetWorld(Vector3.Add(pickedObject.Position, Vector3.Multiply(direction, deltaRotation * 0.03f)));
                             lastOrientation = tagPoint.Orientation;
-                            break;                         
+                            break;
                     }
                 }
                 else if (pickedObject != null)
@@ -239,7 +252,7 @@ namespace JengaSimulator
             {
                 touchPosition = null;
             }
-            
+
         }
     }
 }
