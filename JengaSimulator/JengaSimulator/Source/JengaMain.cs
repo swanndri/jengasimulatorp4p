@@ -18,8 +18,7 @@ namespace JengaSimulator
 {
     public class App1 : Microsoft.Xna.Framework.Game, ButtonListener
     {        
-        private IViewManager _viewManager;
-        private IInputManager _inputManager;        
+        private IViewManager _viewManager;   
         private PhysicsManager _physics;
         private Overlay _HUD;
         private GestureRecognizer _gestureRecognizer;
@@ -59,8 +58,6 @@ namespace JengaSimulator
 
             _viewManager = new ViewManager(this);
             _viewManager.BackgroundColor = backgroundColor;
-
-            _inputManager = new InputManager(this);
 
             _physics = new PhysicsManager(this);
             this.Components.Add(new PhysicsScene(this, _physics));
@@ -220,9 +217,6 @@ namespace JengaSimulator
                 _HUD.checkHitUI(t);
             
             _gestureRecognizer.processTouchPoints(touches);
-            //_tangibles.processTouchPoints(touches);
-           
-            _inputManager.CaptureMouse = this.IsActive && _inputManager.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
             
             _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
 

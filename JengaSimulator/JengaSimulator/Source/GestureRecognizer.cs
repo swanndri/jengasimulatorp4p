@@ -23,20 +23,18 @@ namespace JengaSimulator
         private PhysicsManager physics;
 
         private RigidBody pickedObject;
-        private WorldPointConstraint pickedForce;
         private float pickedDistance;
 
         private TouchPoint touchPosition, lastTouchPosition;
         private ManipulationProcessor2D manipulationProcessor;
 
-        private int _lastSideToTouch;
         private float lastOrientation;
+        private Quaternion orientation;
 
         public GestureRecognizer(Game game, IViewManager viewManager, PhysicsManager physics) {
             this.game = game;
             this.viewManager = viewManager;
             this.physics = physics;
-            this._lastSideToTouch = 0;
 
             Manipulations2D enabledManipulations = Manipulations2D.Rotate;
             manipulationProcessor = new ManipulationProcessor2D(enabledManipulations);
@@ -54,12 +52,11 @@ namespace JengaSimulator
         private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e){}
 
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
-        {
-            float toRotate = MathHelper.ToDegrees(e.Delta.Rotation);
-
+        {           
             if (pickedObject != null)
             {
-                Quaternion q = pickedForce.orientation;
+                float toRotate = MathHelper.ToDegrees(e.Delta.Rotation);                
+                Quaternion q = pickedObject.Orientation;
 
                 double yaw = Math.Atan2(2.0 * (q.Y * q.Z + q.W * q.X), q.W * q.W - q.X * q.X - q.Y * q.Y + q.Z * q.Z);
                 double pitch = Math.Asin(-2.0 * (q.X * q.Z - q.W * q.Y));
@@ -77,7 +74,10 @@ namespace JengaSimulator
                 }
 
                 float totalRotation = MathHelper.ToRadians(finalRotation);
-                pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);          
+                Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
+                pickedObject.SetWorld(pickedObject.Position, finalOrientation);
+                this.orientation = finalOrientation;
+                
             }
         }
 
@@ -98,14 +98,6 @@ namespace JengaSimulator
             lastTouchPosition = touchPosition;
             int tagID = -1;
             int tagValue = -1;
-
-            if (touches.Count >= 1)
-            {
-                if (touches[0].IsTagRecognized)
-                {
-                    Console.WriteLine("Tag");
-                }
-            }
 
             if (touches.Count == 2 && touches[0].IsFingerRecognized && touches[1].IsFingerRecognized)
             {                
@@ -132,7 +124,7 @@ namespace JengaSimulator
                         break;
                     }
                 }
-
+                
                 switch (tagValue)
                 {
                     case 4:
@@ -157,26 +149,26 @@ namespace JengaSimulator
                 if (lastTouchPosition == null)
                 {
                     Segment s;
-                    s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 0f),
+                    s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.X, touchPosition.Y, 0f),
                         viewManager.Projection, viewManager.View, Matrix.Identity);
-                    s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 1f),
+                    s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.X, touchPosition.Y, 1f),
                         viewManager.Projection, viewManager.View, Matrix.Identity);
                     float scalar;
                     Vector3 point;
                     var c = physics.BroadPhase.Intersect(ref s, out scalar, out point);
 
-                    if (c != null && c is BodySkin)
+                    if (c != null && c is BodySkin && (((BodySkin)c).Owner).IsMovable)
                     {
                         pickedObject = ((BodySkin)c).Owner;
-                        pickedForce = new WorldPointConstraint(pickedObject, point);                        
-                        physics.Add(pickedForce);
+                        orientation = pickedObject.Orientation;
                         pickedDistance = scalar;
                         pickedObject.IsActive = true;
                     }
-                    lastOrientation = touches.Count == 1 ? touches[0].Orientation : touches[1].Orientation;
+                    //lastOrientation = touches.Count == 1 ? touches[0].Orientation : touches[1].Orientation;
+                    lastOrientation = touches[0].Orientation;
                 }
                 else if (pickedObject != null)
-                {                    
+                {
                     Segment s;
                     s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 0f),
                         viewManager.Projection, viewManager.View, Matrix.Identity);
@@ -186,9 +178,10 @@ namespace JengaSimulator
                     Vector3.Subtract(ref s.P2, ref s.P1, out diff);
                     Vector3.Multiply(ref diff, pickedDistance, out diff);
                     Vector3.Add(ref s.P1, ref diff, out point);
-                    pickedForce.WorldPoint = point;
+                    pickedObject.SetVelocity(Vector3.Zero, Vector3.Zero);
+                    pickedObject.SetWorld(point, orientation);
                     pickedObject.IsActive = true;
-
+                    
                     switch (tagValue)
                     {
 
@@ -201,8 +194,8 @@ namespace JengaSimulator
                             pickedObject.Unfreeze();
                             break;
                         //Rotate a block
-                        case 2:
-                            pickedForce.orientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, -1.0f), touchPosition.Orientation);
+                        case 20:
+                            pickedObject.SetWorld(pickedObject.Position, Quaternion.CreateFromAxisAngle(new Vector3(0, 0, -1.0f), touchPosition.Orientation));
                             break;
                         //Move a block towards or away from camera
                         case 3:
@@ -211,20 +204,18 @@ namespace JengaSimulator
 
                             Vector3 direction = new Vector3(0, 0, 1.0f);
                             direction.Normalize();
-                            pickedForce.WorldPoint = Vector3.Add(pickedForce.WorldPoint, Vector3.Multiply(direction, deltaRotation * 0.03f));
-
-                            break;                    
+                            pickedObject.SetWorld(Vector3.Add(pickedObject.Position, Vector3.Multiply(direction, deltaRotation * 0.03f)));
+                            lastOrientation = tagPoint.Orientation;
+                            break;                         
                     }
                 }
                 else if (pickedObject != null)
                 {
-                    physics.Remove(pickedForce);
                     pickedObject = null;
                 }
             }
             else if (pickedObject != null)
             {
-                physics.Remove(pickedForce);
                 pickedObject = null;
                 touchPosition = null;
                 lastTouchPosition = null;

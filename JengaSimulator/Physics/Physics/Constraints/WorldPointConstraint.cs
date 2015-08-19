@@ -63,13 +63,15 @@ namespace Henge3D.Physics
 		/// </summary>
 		public override void ProcessVelocity()
 		{
+            
 			RigidBody a = BodyA, b = BodyB;
 
 			// calculate impulse required to halt motion
 			Vector3 impulse;
 			a.GetVelocityAtPoint(ref _worldOffset, out impulse);
 			Vector3.Negate(ref impulse, out impulse);
-			Vector3.Transform(ref impulse, ref _mass, out impulse);
+
+            Vector3.Transform(ref impulse, ref _mass, out impulse);
 
 			// add to accumulated impulse for warm starting (no clamping)
 			Vector3.Multiply(ref impulse, this.Manager.TimeStepInverse, out impulse);
@@ -78,8 +80,9 @@ namespace Henge3D.Physics
 			// apply impulse
 			Vector3.Multiply(ref impulse, this.Manager.TimeStep, out impulse);
 			a.ApplyImpulse(ref impulse, ref _worldOffset);
+            
 		}
-
+        
 		/// <summary>
 		/// Solve the constraint for position.
 		/// </summary>
@@ -95,21 +98,21 @@ namespace Henge3D.Physics
 			Vector3.Subtract(ref _worldOffset, ref a.World.Position, out _worldOffset);
 
 			float error = impulse.Length();
-			if (error <= this.Manager.LinearErrorTolerance)
-				return true;
+            if (error <= this.Manager.LinearErrorTolerance)            
+                return true;           
 
 			// need normalized direction to calculate effective mass
 			Vector3 n;
 			Vector3.Divide(ref impulse, error, out n);
 			float mass = a.MassWorld.EffectiveMass(ref _worldOffset, ref n);
-			Vector3.Multiply(ref impulse, mass * this.Manager.PositionCorrectionFactor, out impulse);
-            
+			Vector3.Multiply(ref impulse, mass * this.Manager.PositionCorrectionFactor, out impulse);            
+             
 			// apply impulse
-			a.ApplyFlashImpulse(ref impulse, ref _worldOffset);
-
-            TransformDelta v = a.Velocity;
-            a.SetWorld(a.Position, this.orientation);
-            a.SetVelocity(v.Linear, Vector3.Zero);
+			a.ApplyFlashImpulse(ref impulse, ref _worldOffset);            
+            
+            //TransformDelta v = a.Velocity;            
+            //a.SetVelocity(v.Linear, Vector3.Zero);
+            //a.SetWorld(a.Position, this.orientation);
 
 			return false;
 		}
