@@ -20,9 +20,7 @@ namespace JengaSimulator
 		static readonly Vector3 DefaultForwardAxis = -Vector3.UnitZ;
 		static readonly Vector3 DefaultSideAxis = Vector3.UnitX;
 
-		private GraphicsDevice _device;
-		private Matrix _viewMatrix;
-		private Matrix _projectionMatrix;
+		private GraphicsDevice _device;		
 		private Vector3 _position;
 		private Vector3 _upAxis = DefaultUpAxis;
 		private Vector3 _forwardAxis = DefaultForwardAxis;
@@ -31,6 +29,13 @@ namespace JengaSimulator
 		private float _yaw = 0f;
 		private float _maxPitch = DefaultMaxPitch;
 		private float _minPitch = DefaultMinPitch;
+
+        private Matrix _viewMatrix;
+        private Matrix _projectionMatrix;
+
+        private Viewport _defaultViewPort;
+        private Viewport _miniMapViewPort;
+        private Matrix _miniMapMatrix;
 
         private Color backgroundColor;
 
@@ -158,11 +163,51 @@ namespace JengaSimulator
 			_device = this.Game.GraphicsDevice;
 			_position = Vector3.Zero;
 			_projectionMatrix = Matrix.Identity;
-		}
 
+            _miniMapViewPort.X = 0;
+            _miniMapViewPort.Y = 0;
+            _miniMapViewPort.Width = 400;
+            _miniMapViewPort.Height = 225;
+            _miniMapViewPort.MaxDepth = 0.9f;
+            _miniMapViewPort.MinDepth = 0.1f;
+        }
+
+        private Viewport defaultViewport;
+        private Boolean isDefaultViewPort = true;
+        private Vector3 positionSave;
+
+        public void toggleViewPort() {
+            Vector3 origin = Vector3.Zero;
+            if (isDefaultViewPort)
+            {
+                defaultViewport = _device.Viewport;
+                _device.Viewport = _miniMapViewPort;
+                positionSave = _position;
+                _position = new Vector3(_position.Y, _position.X, 5);
+                Matrix.CreateLookAt(
+                ref _position,
+                ref origin,
+                ref _upAxis,
+                out _viewMatrix);
+                isDefaultViewPort = false;
+            }
+            else
+            {
+                _position = positionSave;
+                _device.Viewport = defaultViewport;
+                Matrix.CreateLookAt(
+                ref _position,
+                ref origin,
+                ref _upAxis,
+                out _viewMatrix);
+                isDefaultViewPort = true;
+            }
+            
+        }
+        
 		public override void Draw(GameTime gameTime)
-		{
-			_device.Clear(backgroundColor);
+		{            
+			_device.Clear(backgroundColor);           
 
 			Vector3 look = this.Direction;
             Vector3 origin = Vector3.Zero;
@@ -170,11 +215,10 @@ namespace JengaSimulator
 
 			Matrix.CreateLookAt(
 				ref _position,
-				//ref look,
                 ref origin,
 				ref _upAxis,
 				out _viewMatrix);
-
+            
 			base.Draw(gameTime);
 		}
 

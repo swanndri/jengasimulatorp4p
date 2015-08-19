@@ -26,6 +26,7 @@ namespace JengaSimulator
         void SetProjection(float viewPlaneFar);
         void Move(Vector3 delta);
         void updateCameraPosition(float rotationAngle, float heightAngle, float radius);
-        void rotateToSide(int sidesToRotate);   
+        void rotateToSide(int sidesToRotate);
+        void toggleViewPort();
     }
 }
