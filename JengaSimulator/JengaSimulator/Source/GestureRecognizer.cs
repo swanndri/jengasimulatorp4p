@@ -30,6 +30,7 @@ namespace JengaSimulator
         private ManipulationProcessor2D manipulationProcessor;
 
         private float lastOrientation;
+        private Vector3 beginPos;
         private Quaternion orientation;
 
         public GestureRecognizer(Game game, IViewManager viewManager, PhysicsManager physics)
@@ -51,10 +52,14 @@ namespace JengaSimulator
 
         /** Manipulation Events ********/
         #region ManipulationEvents
-        private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e) { }
+        private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e) {
+            if (pickedObject != null)
+                this.beginPos = pickedObject.Position; ;
+        }
 
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
         {            
+            
             if (pickedObject != null){    
                 //Rotations================================================
                 float toRotate = MathHelper.ToDegrees(e.Delta.Rotation);                
@@ -79,13 +84,26 @@ namespace JengaSimulator
                 Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);                
                 this.orientation = finalOrientation;
 
-                //Zooms==================================================
+                //Zooms==================================================                
+                Vector3 direction = viewManager.Position - pickedObject.Position;                
                 Vector3 newPosition = pickedObject.Position;
-                float scaleFactor = 1.0f;
 
-                newPosition.Z = newPosition.Z + 1.0f;
-                Console.WriteLine(newPosition.Z);
-                
+                direction.Normalize();
+                float scaleConstant = 2.0f;
+                float scaleFactor = e.Cumulative.ScaleX;
+
+                newPosition = Vector3.Add(Vector3.Multiply(direction, (scaleConstant * scaleFactor)), this.beginPos);
+
+                Segment s;
+                s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.X, touchPosition.Y, 0f),
+                    viewManager.Projection, viewManager.View, Matrix.Identity);
+                s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.X, touchPosition.Y, 1f),
+                    viewManager.Projection, viewManager.View, Matrix.Identity);
+                float scalar;
+                Vector3 point;
+                var c = physics.BroadPhase.Intersect(ref s, out scalar, out point);
+                pickedDistance = scalar;
+
                //Put together=============================================
                pickedObject.SetWorld(newPosition, finalOrientation);
             }
@@ -109,9 +127,11 @@ namespace JengaSimulator
             lastTouchPosition = touchPosition;
             int tagID = -1;
             int tagValue = -1;
+            Boolean manipulatorControl = false;
 
             if (touches.Count == 2 && touches[0].IsFingerRecognized && touches[1].IsFingerRecognized)
             {
+                manipulatorControl = true;
                 Manipulator2D[] manipulators;
                 manipulators = new Manipulator2D[] { 
                     new Manipulator2D(1, touches[1].X, touches[1].Y),
@@ -179,6 +199,7 @@ namespace JengaSimulator
                         pickedDistance = scalar;
                         pickedObject.IsActive = true;
                         pickedObjectOffset = pickedObject.Position - point;
+                        pickedObject.IsWeightless = true;
                     }
                     //lastOrientation = touches.Count == 1 ? touches[0].Orientation : touches[1].Orientation;
                     lastOrientation = touches[0].Orientation;
@@ -186,17 +207,24 @@ namespace JengaSimulator
                 else if (pickedObject != null)
                 {
                     Segment s;
-                    s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 0f),
+                    s.P1 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.X, touchPosition.Y, 0f),
                         viewManager.Projection, viewManager.View, Matrix.Identity);
-                    s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.CenterX, touchPosition.CenterY, 1f),
+                    s.P2 = game.GraphicsDevice.Viewport.Unproject(new Vector3(touchPosition.X, touchPosition.Y, 1f),
                         viewManager.Projection, viewManager.View, Matrix.Identity);
+
+                    Console.WriteLine(pickedDistance);
                     Vector3 diff, point;
                     Vector3.Subtract(ref s.P2, ref s.P1, out diff);
                     Vector3.Multiply(ref diff, pickedDistance, out diff);
-                    Vector3.Add(ref s.P1, ref diff, out point);
+                    Vector3.Add(ref s.P1, ref diff, out point);                    
                     pickedObject.SetVelocity(Vector3.Zero, Vector3.Zero);
 
-                    pickedObject.SetWorld(Vector3.Add(point, pickedObjectOffset), orientation);
+                    if (!manipulatorControl)
+                    {
+                        Vector3 position = Vector3.Add(point, pickedObjectOffset);
+                        pickedObject.SetWorld(position, orientation);
+                    }
+                    
                     pickedObject.IsActive = true;
                     SolidThing pickedObjectST = (SolidThing)pickedObject;
 
@@ -244,14 +272,17 @@ namespace JengaSimulator
                 }
                 else if (pickedObject != null)
                 {
-                    pickedObject = null;
+                    pickedObject.IsWeightless = false;
+                    pickedObject = null;                    
                 }
             }
             else if (pickedObject != null)
             {
+                pickedObject.IsWeightless = false;
                 pickedObject = null;
                 touchPosition = null;
                 lastTouchPosition = null;
+                
             }
             else
             {
