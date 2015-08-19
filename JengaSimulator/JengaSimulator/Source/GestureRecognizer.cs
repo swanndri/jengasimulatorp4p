@@ -222,7 +222,7 @@ namespace JengaSimulator
                             }
 
                         //Rotate a block
-                        case 20:
+                        case 2:
                             pickedObject.SetWorld(pickedObject.Position, Quaternion.CreateFromAxisAngle(new Vector3(0, 0, -1.0f), touchPosition.Orientation));
                             break;
                         //Move a block towards or away from camera
@@ -235,7 +235,12 @@ namespace JengaSimulator
                             pickedObject.SetWorld(Vector3.Add(pickedObject.Position, Vector3.Multiply(direction, deltaRotation * 0.03f)));
                             lastOrientation = tagPoint.Orientation;
                             break;
+                            
                     }
+
+
+
+
                 }
                 else if (pickedObject != null)
                 {

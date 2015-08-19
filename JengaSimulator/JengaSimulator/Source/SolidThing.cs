@@ -18,6 +18,7 @@ namespace JengaSimulator
         private bool _isColorRandom;
         private Vector3 _diffuseColor;
         private bool _isTable;
+        private bool _stickToTouchPoint;
         Game game;
 
         public bool getIsTable()
@@ -46,6 +47,11 @@ namespace JengaSimulator
         {
             this.game = game;
             this._isTable = isTable;
+            this._stickToTouchPoint = true;
+            if (isTable)
+            {
+                this.Freeze();
+            }
             _model = model;
             _meshTransforms = new Matrix[_model.Bones.Count];
             _model.CopyAbsoluteBoneTransformsTo(_meshTransforms);
@@ -87,5 +93,21 @@ namespace JengaSimulator
                 mesh.Draw();
             }
         }
+
+        ////For use in setting color of block sides to give affordance to user
+        //public void setColour()
+        //{
+        //    foreach (var mesh in _model.Meshes)
+        //    {
+        //        foreach (BasicEffect effect in mesh.Effects)
+        //        {
+        //            //By disabling this we get even lighting
+        //            effect.EnableDefaultLighting();
+        //            effect.AmbientLightColor = Vector3.One * 0.6f;
+        //            effect.SpecularColor = Vector3.One;
+        //            effect.PreferPerPixelLighting = true;
+        //        }
+        //    }
+        //}
     }
 }
