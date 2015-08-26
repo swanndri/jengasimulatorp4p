@@ -98,6 +98,8 @@
     <Reference Include="Microsoft.Surface.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\BlobPair.cs" />
+    <Compile Include="Source\GestureRecognizer2.cs" />
     <Compile Include="Source\Tangibles.cs" />
     <Compile Include="Source\GestureRecognizer.cs" />
     <Compile Include="Source\Managers\InputManager.cs" />

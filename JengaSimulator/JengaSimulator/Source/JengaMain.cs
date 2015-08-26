@@ -21,7 +21,7 @@ namespace JengaSimulator
         private IViewManager _viewManager;   
         private PhysicsManager _physics;
         private Overlay _HUD;
-        private GestureRecognizer _gestureRecognizer;
+        private GestureRecognizer2 _gestureRecognizer;
         private Tangibles _tangibles;
 
         private readonly GraphicsDeviceManager graphics;
@@ -66,7 +66,7 @@ namespace JengaSimulator
             _physics = new PhysicsManager(this);
             this.Components.Add(new PhysicsScene(this, _physics));
 
-            _gestureRecognizer = new GestureRecognizer(this, _viewManager, _physics);
+            _gestureRecognizer = new GestureRecognizer2(this, _viewManager, _physics);
             _tangibles = new Tangibles(this, _viewManager, _physics);
 
         }
@@ -120,7 +120,7 @@ namespace JengaSimulator
             // Set the graphics device buffers.
             graphics.PreferredBackBufferWidth = Program.WindowSize.Width;
             graphics.PreferredBackBufferHeight = Program.WindowSize.Height;
-            graphics.IsFullScreen = true;
+            //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
             // Make sure the window is in the right location.
             Program.PositionWindow();
