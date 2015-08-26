@@ -61,7 +61,7 @@ namespace JengaSimulator
 
             foreach (BlobPair bp in blobPairs)
             {
-                //Console.WriteLine(bp.ToString());
+                Console.WriteLine(bp.ToString());
             }
 
 
@@ -78,9 +78,12 @@ namespace JengaSimulator
             {
                 //Console.WriteLine(touches.Count);
                 TouchPoint touch = touches[i];
-                Console.WriteLine(touch.Id);
+                //Console.WriteLine(touch.Id);
                 if (isBlob(touch))
                 {
+                    Console.WriteLine(touch.Bounds.Left);
+                    Console.WriteLine(touch.Bounds.Right);
+
                     //Console.WriteLine("Yep is a blob");
                     if (touch.MajorAxis > _bigBlobMinRadius * 2 && touch.MajorAxis < _bigBlobMaxRadius * 2)
                     {

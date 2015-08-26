@@ -27,25 +27,22 @@ namespace JengaSimulator
         private float centerX;
         private float centerY;
 
-        private Boolean firstTime = false;
+        private Vector2 lineBetweenBlobs;
         
         
         private float distanceBetweenBlobCentres;
-
-        
-        
-        private float angleOfTangible;
+        private float widthOfLargeBlob;
 
 
         public BlobPair(TouchPoint bigBlob, TouchPoint smallBlob, Vector2 lineVector)
         {
             this.bigBlob = bigBlob;
             this.smallBlob = smallBlob;
-            this.distanceBetweenBlobCentres = lineVector.Length();
+            this.lineBetweenBlobs = lineVector;
+            this.distanceBetweenBlobCentres = lineBetweenBlobs.Length();
 
 
-            
-
+            setWithOfLargeBlob();
             //setName();
             
             setCentreX();
@@ -56,6 +53,16 @@ namespace JengaSimulator
 
 
         }
+
+        private void setWithOfLargeBlob(){
+            //Get vector that is 90 degrees to the line between blobs
+            Vector2 perpVector = new Vector2(lineBetweenBlobs.Y,-1 * lineBetweenBlobs.X);
+
+            //Vector2 normPerpVector = perpVector.Normalize();
+           // Console.Out.WriteLine(perpVector);
+   
+        }
+
 
         private void setCentreX()
         {
@@ -84,31 +91,16 @@ namespace JengaSimulator
         }
 
 
-        //private void setTangibleAngle()
-        //{
-        //    float deltaX = Math.Abs(bigBlob.CenterX - smallBlob.CenterX);
-        //    Console.Out.WriteLine(deltaX);
-        //    float deltaY = Math.Abs(bigBlob.CenterY - smallBlob.CenterY);
-        //    Console.Out.WriteLine(deltaY);
-
-        //    distanceBetweenBlobCentres = (float)Math.Sqrt(Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2));
-
-        //}
-        //private void setName()
-        //{
-        //    if(
-        //}
-
 
         public override string ToString()
         {
             return "Blobpair with"
-                + "\n\t name: " + name
-                + "\n\t center: (X:" + centerX + ", Y:" + centerY + ")"
-                + "\n\t bounds:"
-                + "\n\t\t bigBlob: " + bigBlob.Bounds
-                + "\n\t\t smallBlob:" + smallBlob.Bounds
-                + "\n\t Distance between blobs: " + distanceBetweenBlobCentres;
+                //+ "\n\t name: " + name
+                //+ "\n\t center: (X:" + centerX + ", Y:" + centerY + ")"
+                //+ "\n\t bounds:"
+                + "\n\t\t bigBlob: " + bigBlob.Bounds.Width;
+                //+ "\n\t\t smallBlob:" + smallBlob.Bounds
+                //+ "\n\t Distance between blobs: " + distanceBetweenBlobCentres;
             
         }
     }
