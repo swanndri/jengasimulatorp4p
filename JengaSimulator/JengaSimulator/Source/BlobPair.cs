@@ -29,8 +29,8 @@ namespace JengaSimulator
             this.bigBlob = bigBlob;
             this.smallBlob = smallBlob;
 
-            centerX = bigBlob.X - smallBlob.X;
-            centerY = bigBlob.Y - smallBlob.Y;
+            centerX = bigBlob.X > smallBlob.X ? bigBlob.X - smallBlob.X : smallBlob.X - bigBlob.X;
+            centerY = bigBlob.Y > smallBlob.Y ? bigBlob.Y - smallBlob.Y : smallBlob.Y - bigBlob.Y;
         }
 
         
