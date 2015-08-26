@@ -29,14 +29,41 @@ namespace JengaSimulator
             this.bigBlob = bigBlob;
             this.smallBlob = smallBlob;
 
-            centerX = bigBlob.X > smallBlob.X ? bigBlob.X - smallBlob.X : smallBlob.X - bigBlob.X;
-            centerY = bigBlob.Y > smallBlob.Y ? bigBlob.Y - smallBlob.Y : smallBlob.Y - bigBlob.Y;
+            getCentreX(bigBlob, smallBlob);
+            getCentreY(bigBlob, smallBlob);
+
         }
 
+        private void getCentreX(TouchPoint bigBlob, TouchPoint smallBlob)
+        {
+
+            if (bigBlob.CenterX > smallBlob.CenterX)
+            {
+                centerX = bigBlob.CenterX - (bigBlob.CenterX - smallBlob.CenterX);
+            }
+            else
+            {
+                centerX = smallBlob.CenterX - (smallBlob.CenterX - bigBlob.CenterX);
+            }
+        }
+
+        private void getCentreY(TouchPoint bigBlob, TouchPoint smallBlob)
+        {
+
+            if (bigBlob.CenterY > smallBlob.CenterY)
+            {
+                centerY = bigBlob.CenterY - (bigBlob.CenterY - smallBlob.CenterY);
+            }
+            else
+            {
+                centerY = smallBlob.CenterY - (smallBlob.CenterY - bigBlob.CenterY);
+            }
+        }
         
 
         public override string ToString()
         {
+            //test
             return "Blobpair with center: " + centerX + ", " + centerY;
         }
     }
