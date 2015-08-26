@@ -61,8 +61,10 @@ namespace JengaSimulator
 
             foreach (BlobPair bp in blobPairs)
             {
-                Console.WriteLine(bp.ToString());
+                //Console.WriteLine(bp.ToString());
             }
+
+
         }
 
         private List<BlobPair> getBlobPairs(ReadOnlyTouchPointCollection touches)
@@ -76,19 +78,19 @@ namespace JengaSimulator
             {
                 //Console.WriteLine(touches.Count);
                 TouchPoint touch = touches[i];
-                //Console.WriteLine(touch.ToString());
+                Console.WriteLine(touch.Id);
                 if (isBlob(touch))
                 {
                     //Console.WriteLine("Yep is a blob");
                     if (touch.MajorAxis > _bigBlobMinRadius * 2 && touch.MajorAxis < _bigBlobMaxRadius * 2)
                     {
-                        bigBlobList = addBlobToList(touch, bigBlobList);
+                        bigBlobList.Add(touch);
 
                         //Console.WriteLine("Yep is a bigblob");
                     }
                     else if (touch.MajorAxis > _smallBlobMinRadius * 2 && touch.MajorAxis < _smallBlobMaxRadius * 2)
                     {
-                        smallBlobList = addBlobToList(touch, smallBlobList);
+                        smallBlobList.Add(touch);
                         //Console.WriteLine("smallblob");
                     }
                 }
@@ -101,10 +103,9 @@ namespace JengaSimulator
                 {
                     Vector2 lineVector = new Vector2(bigBlob.CenterX - smallBlob.CenterX, bigBlob.CenterY - smallBlob.CenterY);
 
-                    //Console.WriteLine(lineVector.Length());
                     if (lineVector.Length() > _minDistance && lineVector.Length() < _maxDistance)
                     {
-                        blobPairList.Add(new BlobPair(bigBlob, smallBlob));
+                        blobPairList.Add(new BlobPair(bigBlob, smallBlob, lineVector));
                         continue;
                     }
                 }
@@ -117,28 +118,6 @@ namespace JengaSimulator
         {
             return (!(t.IsFingerRecognized || t.IsTagRecognized));
         }
-
-        private List<TouchPoint> addBlobToList(TouchPoint touch, List<TouchPoint> blobList)
-        {
-            Boolean alreadyInList = false;
-
-            foreach (TouchPoint touchPoint in blobList)
-            {
-                if (touchPoint.Id == touch.Id)
-                {
-                    alreadyInList = true;
-                }
-            }
-
-            if (!alreadyInList)
-            {
-                blobList.Add(touch);
-            }
-
-            return blobList;
-        }
     }
-
-    
 }
 

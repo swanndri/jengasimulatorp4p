@@ -22,19 +22,42 @@ namespace JengaSimulator
         private TouchPoint bigBlob;
         private TouchPoint smallBlob;
 
+        private String name = "default";
+
         private float centerX;
         private float centerY;
 
-        public BlobPair(TouchPoint bigBlob, TouchPoint smallBlob) {
+        private Boolean firstTime = false;
+        
+        
+        private float distanceBetweenBlobCentres;
+
+        
+        
+        private float angleOfTangible;
+
+
+        public BlobPair(TouchPoint bigBlob, TouchPoint smallBlob, Vector2 lineVector)
+        {
             this.bigBlob = bigBlob;
             this.smallBlob = smallBlob;
+            this.distanceBetweenBlobCentres = lineVector.Length();
 
-            getCentreX(bigBlob, smallBlob);
-            getCentreY(bigBlob, smallBlob);
+
+            
+
+            //setName();
+            
+            setCentreX();
+            setCentreY();
+
+            
+
+
 
         }
 
-        private void getCentreX(TouchPoint bigBlob, TouchPoint smallBlob)
+        private void setCentreX()
         {
 
             if (bigBlob.CenterX > smallBlob.CenterX)
@@ -47,7 +70,7 @@ namespace JengaSimulator
             }
         }
 
-        private void getCentreY(TouchPoint bigBlob, TouchPoint smallBlob)
+        private void setCentreY()
         {
 
             if (bigBlob.CenterY > smallBlob.CenterY)
@@ -59,12 +82,34 @@ namespace JengaSimulator
                 centerY = smallBlob.CenterY - (smallBlob.CenterY - bigBlob.CenterY);
             }
         }
-        
+
+
+        //private void setTangibleAngle()
+        //{
+        //    float deltaX = Math.Abs(bigBlob.CenterX - smallBlob.CenterX);
+        //    Console.Out.WriteLine(deltaX);
+        //    float deltaY = Math.Abs(bigBlob.CenterY - smallBlob.CenterY);
+        //    Console.Out.WriteLine(deltaY);
+
+        //    distanceBetweenBlobCentres = (float)Math.Sqrt(Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2));
+
+        //}
+        //private void setName()
+        //{
+        //    if(
+        //}
+
 
         public override string ToString()
         {
-            //test
-            return "Blobpair with center: " + centerX + ", " + centerY;
+            return "Blobpair with"
+                + "\n\t name: " + name
+                + "\n\t center: (X:" + centerX + ", Y:" + centerY + ")"
+                + "\n\t bounds:"
+                + "\n\t\t bigBlob: " + bigBlob.Bounds
+                + "\n\t\t smallBlob:" + smallBlob.Bounds
+                + "\n\t Distance between blobs: " + distanceBetweenBlobCentres;
+            
         }
     }
 }
