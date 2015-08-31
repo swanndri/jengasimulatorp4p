@@ -47,7 +47,7 @@ namespace JengaSimulator
 
             foreach (BlobPair bp in blobPairs)
             {
-                Console.WriteLine(bp.ToString());
+                Console.WriteLine(bp.ToString());                
             }
 
 

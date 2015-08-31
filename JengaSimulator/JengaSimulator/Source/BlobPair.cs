@@ -19,6 +19,7 @@ namespace JengaSimulator
 {
     public class BlobPair
     {
+        public int BlobPairID { get; set; }
         private TouchPoint bigBlob;
         private TouchPoint smallBlob;
 
@@ -31,7 +32,6 @@ namespace JengaSimulator
         private float orientation;
         private Vector2 lineBetweenBlobs;
         
-        
         private float distanceBetweenBlobCentres;
         private float widthOfLargeBlob;
 
@@ -40,9 +40,10 @@ namespace JengaSimulator
         {
             this.bigBlob = bigBlob;
             this.smallBlob = smallBlob;
+            this.BlobPairID = bigBlob.Id;
             this.lineBetweenBlobs = lineVector;
             this.distanceBetweenBlobCentres = lineBetweenBlobs.Length();
-
+            
             //Determine center location for the blob pair
             this.centerX = (smallBlob.CenterX + bigBlob.CenterX) / 2.0f;
             this.centerY = (smallBlob.CenterY + bigBlob.CenterY) / 2.0f;
@@ -71,7 +72,7 @@ namespace JengaSimulator
         public override string ToString()
         {
             return "Blobpair with"
-                //+ "\n\t name: " + name
+                + "\n\t ID: " + this.BlobPairID
                 + "\n\t Center: (X:" + centerX + ", Y:" + centerY + ")"
                 +"\n\t Orientation: " + MathHelper.ToDegrees(this.orientation);
                 //+ "\n\t bounds:"
