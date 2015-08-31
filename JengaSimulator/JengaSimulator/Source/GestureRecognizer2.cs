@@ -23,17 +23,6 @@ namespace JengaSimulator
         private IViewManager viewManager;
         private PhysicsManager physics;
 
-        private RigidBody pickedObject;
-        private Vector3 pickedObjectOffset;
-        private float pickedDistance;
-
-        private TouchPoint touchPosition, lastTouchPosition;
-        private ManipulationProcessor2D manipulationProcessor;
-
-        private float lastOrientation;
-        private Vector3 beginPos;
-        private Quaternion orientation;
-
         private const int _bigBlobMinRadius = 21;
         private const int _bigBlobMaxRadius = 60;
 
@@ -44,9 +33,6 @@ namespace JengaSimulator
         // 3. The distance between the small blob and the big blob should be between minDistance and maxDistance
         private const int _minDistance = 0;
         private const int _maxDistance = 100;
-
-
-
 
         public GestureRecognizer2(Game game, IViewManager viewManager, PhysicsManager physics)
         {
@@ -80,15 +66,20 @@ namespace JengaSimulator
                 TouchPoint touch = touches[i];
                 //Console.WriteLine(touch.Id);
                 if (isBlob(touch))
-                {
-                    Console.WriteLine(touch.Bounds.Left);
-                    Console.WriteLine(touch.Bounds.Right);
-
+                {                    
+                    
+                    //Console.WriteLine("Major: " + touch.MajorAxis);
+                    //Console.WriteLine("Minor: " + touch.MinorAxis);
+                    //Console.WriteLine("X Position: " + touch.CenterX);
+                    //Console.WriteLine("X Position: " + touch.CenterY);
+                    //Console.WriteLine("Orientation: " + touch.Orientation);
+                    //Console.WriteLine("ID: " + touch.Id);
                     //Console.WriteLine("Yep is a blob");
+                     
+
                     if (touch.MajorAxis > _bigBlobMinRadius * 2 && touch.MajorAxis < _bigBlobMaxRadius * 2)
                     {
                         bigBlobList.Add(touch);
-
                         //Console.WriteLine("Yep is a bigblob");
                     }
                     else if (touch.MajorAxis > _smallBlobMinRadius * 2 && touch.MajorAxis < _smallBlobMaxRadius * 2)
