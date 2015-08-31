@@ -27,6 +27,8 @@ namespace JengaSimulator
         private float centerX;
         private float centerY;
 
+        //In radians
+        private float orientation;
         private Vector2 lineBetweenBlobs;
         
         
@@ -40,14 +42,21 @@ namespace JengaSimulator
             this.smallBlob = smallBlob;
             this.lineBetweenBlobs = lineVector;
             this.distanceBetweenBlobCentres = lineBetweenBlobs.Length();
+
+            //Determine center location for the blob pair
             this.centerX = (smallBlob.CenterX + bigBlob.CenterX) / 2.0f;
             this.centerY = (smallBlob.CenterY + bigBlob.CenterY) / 2.0f;
 
+            //Determine orientation for the blob pair. Orientation is angle from vertical position.
+            Vector2 v1 = Vector2.UnitY;
+            Vector2 v2 = new Vector2(lineVector.X, lineVector.Y) ;
+            v2.Normalize();
+            float dot = (v1.X * v2.X) + (v1.Y * v2.Y);
+            float det = (v2.X * v2.Y) - (v1.Y * v2.X);
+            this.orientation = (float)Math.PI + ((float)Math.Atan2(det, dot));
+    
             setWidthOfLargeBlob();
             //setName();
-            
-            //setCentreX();
-            //setCentreY();
         }
 
         private void setWidthOfLargeBlob(){
@@ -63,12 +72,12 @@ namespace JengaSimulator
         {
             return "Blobpair with"
                 //+ "\n\t name: " + name
-                + "\n\t center: (X:" + centerX + ", Y:" + centerY + ")";
+                + "\n\t Center: (X:" + centerX + ", Y:" + centerY + ")"
+                +"\n\t Orientation: " + MathHelper.ToDegrees(this.orientation);
                 //+ "\n\t bounds:"
                 //+ "\n\t\t bigBlob: " + bigBlob.
                 //+ "\n\t\t smallBlob:" + smallBlob.Bounds.Width;
-                //+ "\n\t Distance between blobs: " + distanceBetweenBlobCentres;
-            
+                //+ "\n\t Distance between blobs: " + distanceBetweenBlobCentres;            
         }
     }
 }
