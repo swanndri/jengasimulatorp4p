@@ -13,10 +13,11 @@ using Microsoft.Xna.Framework.Media;
 using Henge3D;
 using Henge3D.Physics;
 using System.Windows.Input.Manipulations;
+using JengaSimulator.Source.Input.InputProcessors;
 
-namespace JengaSimulator
+namespace JengaSimulator.Source.Input.InputProcessors
 {
-    class GestureRecognizer
+    class DefaultProcessor : InputProcessor
     {
         private Game game;
         private IViewManager viewManager;
@@ -33,7 +34,7 @@ namespace JengaSimulator
         private Vector3 beginPos;
         private Quaternion orientation;
 
-        public GestureRecognizer(Game game, IViewManager viewManager, PhysicsManager physics)
+        public DefaultProcessor(Game game, IViewManager viewManager, PhysicsManager physics )
         {
             this.game = game;
             this.viewManager = viewManager;
@@ -126,7 +127,7 @@ namespace JengaSimulator
             }
         }
 
-        public void processTouchPoints(ReadOnlyTouchPointCollection touches)
+        public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs)
         {
             lastTouchPosition = touchPosition;
             int tagID = -1;
@@ -293,5 +294,33 @@ namespace JengaSimulator
             }
 
         }
+
+        #region TouchEvents
+        public void TouchDown(object sender, TouchEventArgs e)
+        {
+            //Console.WriteLine("Touch Down");
+            //Console.WriteLine(e.ToString());
+        }
+        public void TouchHoldGesture(object sender, TouchEventArgs e)
+        {
+            //Console.WriteLine("Touch Hold");
+            //Console.WriteLine(e.ToString());
+        }
+        public void TouchMove(object sender, TouchEventArgs e)
+        {
+            //Console.WriteLine("Touch Move");
+            //Console.WriteLine(e.ToString());
+        }
+        public void TouchTapGesture(object sender, TouchEventArgs e)
+        {
+            //Console.WriteLine("Touch Tap");
+            //Console.WriteLine(e.ToString());
+        }
+        public void TouchUp(object sender, TouchEventArgs e)
+        {
+            //Console.WriteLine("Touch Up");
+            //Console.WriteLine(e.ToString());
+        }
+        #endregion
     }
 }

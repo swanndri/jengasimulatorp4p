@@ -14,55 +14,49 @@ using Henge3D;
 using Henge3D.Physics;
 using System.Windows.Input.Manipulations;
 using JengaSimulator.Source;
+using JengaSimulator.Source.Input.InputProcessors;
 
 namespace JengaSimulator
 {
 	public class InputManager
 	{
-        private Game game;
-        private IViewManager viewManager;
-        private PhysicsManager physics;
+        private Game _game;
+        private IViewManager _viewManager;
+        private PhysicsManager _physics;
+        private InputProcessor _inputProcessor;
 
         List<BlobPair> blobPairs = new List<BlobPair>();
 
         public InputManager(Game game, IViewManager viewManager, PhysicsManager physics)
 		{
-            this.game = game;
-            this.viewManager = viewManager;
-            this.physics = physics;
+            this._game = game;
+            this._viewManager = viewManager;
+            this._physics = physics;
+            //_inputProcessor = new DefaultProcessor(game, viewManager, physics);
+            _inputProcessor = new ImprovedProcessor(game, viewManager, physics);
 		}
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches)
         {
             blobPairs = getBlobPairListFromTouchCollection(touches);
-
-            foreach (BlobPair b in blobPairs)
-            {
-                //printAverageBlobStats(b);
-                //Console.WriteLine(b);
-            }         
+            _inputProcessor.processTouchPoints(touches, blobPairs);
         }
 
         #region TouchEvents
         public void TouchDown(object sender, TouchEventArgs e){
-            //Console.WriteLine("Touch Down");
-            //Console.WriteLine(e.ToString());
+            _inputProcessor.TouchDown(sender, e);
         }
         public void TouchHoldGesture(object sender, TouchEventArgs e) {
-            //Console.WriteLine("Touch Hold");
-            //Console.WriteLine(e.ToString());
+            _inputProcessor.TouchHoldGesture(sender, e);
         }
         public void TouchMove(object sender, TouchEventArgs e) {
-            //Console.WriteLine("Touch Move");
-            //Console.WriteLine(e.ToString());
+            _inputProcessor.TouchMove(sender, e);
         }
         public void TouchTapGesture(object sender, TouchEventArgs e) {
-            //Console.WriteLine("Touch Tap");
-            //Console.WriteLine(e.ToString());
+            _inputProcessor.TouchTapGesture(sender, e);
         }
         public void TouchUp(object sender, TouchEventArgs e) {
-            //Console.WriteLine("Touch Up");
-            //Console.WriteLine(e.ToString());
+            _inputProcessor.TouchUp(sender, e);
         }
         #endregion
 

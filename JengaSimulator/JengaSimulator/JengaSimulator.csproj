@@ -98,10 +98,12 @@
     <Reference Include="Microsoft.Surface.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\Input\InputProcessors\ImprovedProcessor.cs" />
+    <Compile Include="Source\Input\InputProcessors\InputProcessor.cs" />
     <Compile Include="Source\JengaConstants.cs" />
     <Compile Include="Source\Input\BlobPair.cs" />
     <Compile Include="Source\Input\Tangibles.cs" />
-    <Compile Include="Source\Input\GestureRecognizer.cs" />
+    <Compile Include="Source\Input\InputProcessors\DefaultProcessor.cs" />
     <Compile Include="Source\Input\InputManager.cs" />
     <Compile Include="Source\Tangible.cs" />
     <Compile Include="Source\View\IViewManager.cs" />
