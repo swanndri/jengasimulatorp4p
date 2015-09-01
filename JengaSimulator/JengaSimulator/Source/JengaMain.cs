@@ -21,7 +21,7 @@ namespace JengaSimulator
         private IViewManager _viewManager;   
         private PhysicsManager _physics;
         private Overlay _HUD;
-        private GestureRecognizer2 _gestureRecognizer;
+        private InputManager _inputManager;
         private Tangibles _tangibles;
 
         private readonly GraphicsDeviceManager graphics;
@@ -66,7 +66,7 @@ namespace JengaSimulator
             _physics = new PhysicsManager(this);
             this.Components.Add(new PhysicsScene(this, _physics));
 
-            _gestureRecognizer = new GestureRecognizer2(this, _viewManager, _physics);
+            _inputManager = new InputManager(this, _viewManager, _physics);
             _tangibles = new Tangibles(this, _viewManager, _physics);
 
         }
@@ -175,7 +175,12 @@ namespace JengaSimulator
 
             CreateScene();
             CreateHUD();
-            
+
+            touchTarget.TouchDown += _inputManager.TouchDown;
+            touchTarget.TouchHoldGesture += _inputManager.TouchHoldGesture;
+            touchTarget.TouchMove += _inputManager.TouchMove;
+            touchTarget.TouchTapGesture += _inputManager.TouchTapGesture;
+            touchTarget.TouchUp += _inputManager.TouchUp;
         }
 
         /// <summary>
@@ -213,14 +218,14 @@ namespace JengaSimulator
         protected override void Update(GameTime gameTime)
         {
             ReadOnlyTouchPointCollection touches = touchTarget.GetState();
-
+ 
             if (touches.Count == 0)            
                 _HUD.checkHitUI(null);
             
             foreach (TouchPoint t in touches)                            
                 _HUD.checkHitUI(t);
             
-            _gestureRecognizer.processTouchPoints(touches);
+            _inputManager.processTouchPoints(touches);
             
             _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
 
