@@ -17,24 +17,14 @@ namespace JengaSimulator
         private Matrix[] _meshTransforms;
         private bool _isColorRandom;
         private Vector3 _diffuseColor;
+
+        public bool _isSelected;
         private bool _isTable;
-        private bool _stickToTouchPoint;
         Game game;
 
         public bool getIsTable()
         {
             return _isTable;
-        }
-
-
-
-        public Model Model
-        {
-            get
-            {
-                return _model;
-            }
-            set { this._model = value; }
         }
 
         public SolidThing(Game game, Model model)
@@ -47,7 +37,6 @@ namespace JengaSimulator
         {
             this.game = game;
             this._isTable = isTable;
-            this._stickToTouchPoint = true;
             if (isTable)
             {
                 this.Freeze();
@@ -85,9 +74,15 @@ namespace JengaSimulator
                     effect.View = view.View;                    
                     effect.Projection = view.Projection;
                     if (_isColorRandom) effect.DiffuseColor = _diffuseColor;
-                    if (!this.IsActive)
+                    if(_isTable)
+                        effect.DiffuseColor *= 0.5f;
+                    /*if (!this.IsActive)
                     {
                         effect.DiffuseColor *= 0.5f;
+                    }*/
+                    if (_isSelected)
+                    {
+                        effect.DiffuseColor *= 4.0f;
                     }
                 }
                 mesh.Draw();
