@@ -9,6 +9,14 @@ namespace JengaSimulator.Source
     public class JengaConstants
     {
         /*******************************************************************
+         * View and Rotation
+         */
+        public const float PAN_SPEED_DIVISOR = 2.5f;        //Used only in improvedProcessor class
+        public const float HEIGHT_ANGLE_MAX = 1.7f;
+        public const float HEIGHT_ANGLE_MIN = 0.1f;
+        public const float ROTATE_REVERSED = -1.0f;         //1 and -1 only 
+        public const float HEIGHT_REVERSED = -1.0f;         //1 and -1 only 
+        /*******************************************************************
          * Blobs
          */
         // 1. A big blob with WIDTH of size between bigBlobMinWIDTH and bigBlobMaxWIDTH

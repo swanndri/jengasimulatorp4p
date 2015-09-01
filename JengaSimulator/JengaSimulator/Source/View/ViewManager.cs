@@ -5,14 +5,20 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using JengaSimulator.Source.UI;
+using JengaSimulator.Source;
 
 namespace JengaSimulator
 {
     public sealed class ViewManager : DrawableGameComponent, IViewManager, SliderListener
 	{
         private float cameraDistance = 13;
+        public float CameraDistance { get { return cameraDistance; } }
+
         private float rotationAngle;
+        public float RotationAngle { get { return rotationAngle; } }
+
         private float heightAngle;
+        public float HeightAngle { get { return heightAngle; } }
 
 		const float DefaultMaxPitch = float.PositiveInfinity;
 		const float DefaultMinPitch = float.NegativeInfinity;
@@ -235,10 +241,13 @@ namespace JengaSimulator
         //Theta is angle in radians, radius is radius of sphere
         public void updateCameraPosition(float rotationAngle, float heightAngle, float radius)
         {
+            heightAngle = heightAngle < JengaConstants.HEIGHT_ANGLE_MIN ? JengaConstants.HEIGHT_ANGLE_MIN : heightAngle;
+            heightAngle = heightAngle > JengaConstants.HEIGHT_ANGLE_MAX ? JengaConstants.HEIGHT_ANGLE_MAX : heightAngle;
+
             float x = (float)(radius * Math.Sin(heightAngle) * Math.Cos(rotationAngle));
             float y = (float)(radius * Math.Sin(heightAngle) * Math.Sin(rotationAngle));
             float z = (float)(radius * Math.Cos(heightAngle));
-
+            
             this.rotationAngle = rotationAngle;
             this.heightAngle = heightAngle;
             Vector3 cameraPosition = new Vector3(x, y, z);

@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework.Media;
 using Henge3D;
 using Henge3D.Physics;
 using JengaSimulator.Source.UI;
+using JengaSimulator.Source;
 
 namespace JengaSimulator
 {
@@ -170,8 +171,8 @@ namespace JengaSimulator
             
             _viewManager.ForwardAxis = -Vector3.UnitX;
             _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
-            _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);        
-            _viewManager.updateCameraPosition(0, MathHelper.ToRadians(1), 13);
+            _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);
+            _viewManager.updateCameraPosition(0, JengaConstants.HEIGHT_ANGLE_MIN, 13);
 
             CreateScene();
             CreateHUD();
@@ -325,8 +326,7 @@ namespace JengaSimulator
             exitButton.addButtonListener(this);
             _HUD.addUIComponent(exitButton);*/
 
-
-
+            /*
             SliderBar sideSlider = new SliderBar(_rotationSideSliderTexture, _rotationSliderBallTexture, _rotationSideSliderRectangle, "side_slider", true);
             sideSlider.addSliderListener(_viewManager);
             _HUD.addUIComponent(sideSlider);
@@ -334,6 +334,7 @@ namespace JengaSimulator
             SliderBar bottomSlider = new SliderBar(_rotationBottomSliderTexture, _rotationSliderBallTexture, _rotationBottomSliderRectangle, "bottom_slider", false);
             bottomSlider.addSliderListener(_viewManager);
             _HUD.addUIComponent(bottomSlider);
+             * */
 
 
             this.Components.Add(_HUD);

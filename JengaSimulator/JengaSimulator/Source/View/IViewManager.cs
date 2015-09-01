@@ -10,6 +10,10 @@ namespace JengaSimulator
 {
     public interface IViewManager : SliderListener
     {
+        float CameraDistance { get; }
+        float RotationAngle { get; }
+        float HeightAngle { get; }
+
         GraphicsDevice Device { get; }
         Vector3 UpAxis { get; set; }
         Vector3 ForwardAxis { get; set; }
