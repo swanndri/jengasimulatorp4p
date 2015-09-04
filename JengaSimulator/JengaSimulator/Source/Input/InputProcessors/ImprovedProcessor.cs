@@ -25,7 +25,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
         private ManipulationProcessor2D manipulationProcessor;
         private SolidThing selectedBrick;
-
+        private int holdingTouchPointID;
         private Tuple<TouchPoint, long> previousTap;
 
         public ImprovedProcessor(Game game, IViewManager viewManager, PhysicsManager physics )
@@ -36,6 +36,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
             selectedBrick = null;
             previousTap = null;
+            this.holdingTouchPointID = -1;
 
             Manipulations2D enabledManipulations = Manipulations2D.Rotate | Manipulations2D.Scale | Manipulations2D.Translate;
             manipulationProcessor = new ManipulationProcessor2D(enabledManipulations);
@@ -50,14 +51,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
         {
-            if (touches.Count == 1)
-            {
-                Manipulator2D[] manipulators;
-                manipulators = new Manipulator2D[] { 
-                    new Manipulator2D(1, touches[0].X, touches[0].Y)
-                };
-                manipulationProcessor.ProcessManipulators(Timestamp, manipulators);
-            }       
         }
 
         /** Manipulation Events ********/
@@ -68,12 +61,15 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
         {
-            float newHeightAngle = MathHelper.ToRadians((MathHelper.ToDegrees(_viewManager.HeightAngle)
-                + (JengaConstants.HEIGHT_REVERSED * e.Delta.TranslationY / JengaConstants.PAN_SPEED_DIVISOR)));
-            float newRotationAngle = MathHelper.ToRadians((MathHelper.ToDegrees(_viewManager.RotationAngle)
-                + (JengaConstants.ROTATE_REVERSED * e.Delta.TranslationX / JengaConstants.PAN_SPEED_DIVISOR)));
+            if (this.holdingTouchPointID == -1)
+            {
+                float newHeightAngle = MathHelper.ToRadians((MathHelper.ToDegrees(_viewManager.HeightAngle)
+                    + (JengaConstants.HEIGHT_REVERSED * e.Delta.TranslationY / JengaConstants.PAN_SPEED_DIVISOR)));
+                float newRotationAngle = MathHelper.ToRadians((MathHelper.ToDegrees(_viewManager.RotationAngle)
+                    + (JengaConstants.ROTATE_REVERSED * e.Delta.TranslationX / JengaConstants.PAN_SPEED_DIVISOR)));
 
-            _viewManager.updateCameraPosition(newRotationAngle, newHeightAngle, _viewManager.CameraDistance); 
+                _viewManager.updateCameraPosition(newRotationAngle, newHeightAngle, _viewManager.CameraDistance);
+            }
         }
 
         private void OnManipulationCompleted(object sender, Manipulation2DCompletedEventArgs e) { }
@@ -82,12 +78,34 @@ namespace JengaSimulator.Source.Input.InputProcessors
         #region TouchEvents
         public void TouchDown(object sender, TouchEventArgs e)
         {
+            TouchPoint t = e.TouchPoint;
+
+            if (selectedBrick != null)
+            {
+                SolidThing touchedBlock = getTouchedBlock(t);
+                if (touchedBlock != null){
+                    if (touchedBlock.Equals(this.selectedBrick))
+                    {
+                        this.holdingTouchPointID = t.Id;
+                    }
+                }               
+            }
+            
         }
         public void TouchHoldGesture(object sender, TouchEventArgs e)
         {
         }
         public void TouchMove(object sender, TouchEventArgs e)
         {
+            TouchPoint t = e.TouchPoint;
+            if (t.Id != this.holdingTouchPointID)
+            {
+                Manipulator2D[] manipulators;
+                manipulators = new Manipulator2D[] { 
+                    new Manipulator2D(1, t.X, t.Y)
+                };
+                manipulationProcessor.ProcessManipulators(Timestamp, manipulators);
+            }
         }
         public void TouchTapGesture(object sender, TouchEventArgs e)
         {   
@@ -96,30 +114,49 @@ namespace JengaSimulator.Source.Input.InputProcessors
             bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
             if (doubleTap)
             {
-                Segment s;
-                s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 0f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 1f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
-                float scalar;
-                Vector3 point;
-                var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
-
-                if (c != null && c is BodySkin && !((SolidThing)((BodySkin)c).Owner).getIsTable())
+                SolidThing brick = getTouchedBlock(t);
+                if (brick != null)
                 {
                     if (selectedBrick != null)
+                    {
                         selectedBrick._isSelected = false;
-                    selectedBrick = (SolidThing)(((BodySkin)c).Owner);
-                    selectedBrick.IsWeightless = true;
-                    selectedBrick._isSelected = true;
-                }
-            }
+                        if (selectedBrick.Equals(brick))
+                        {
+                            selectedBrick.IsWeightless = false;
+                            selectedBrick = null;
+                        }
+                        else
+                        {
+                            selectedBrick = brick;
+                            selectedBrick.IsWeightless = true;
+                            selectedBrick._isSelected = true;
+                        }
+                    }
+                    else
+                    {
+                        selectedBrick = brick;
+                        selectedBrick.IsWeightless = true;
+                        selectedBrick._isSelected = true;
+                    }
 
-            this.previousTap = currentTap;
+                }
+                this.previousTap = null;
+            }
+            else
+            {
+                this.previousTap = currentTap;
+            }            
         }
         public void TouchUp(object sender, TouchEventArgs e)
         {
+            
+            TouchPoint t = e.TouchPoint;
             manipulationProcessor.CompleteManipulation(Timestamp);
+           
+            if (t.Id == this.holdingTouchPointID)
+            {
+                this.holdingTouchPointID = -1;                   
+            }
         }
         #endregion
 
@@ -149,6 +186,24 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 return true;
             }          
             return false;
+        }
+
+        private SolidThing getTouchedBlock(TouchPoint t)
+        {
+            Segment s;
+            s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 0f),
+                _viewManager.Projection, _viewManager.View, Matrix.Identity);
+            s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 1f),
+                _viewManager.Projection, _viewManager.View, Matrix.Identity);
+            float scalar;
+            Vector3 point;
+            var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
+
+            if (c != null && c is BodySkin && !((SolidThing)((BodySkin)c).Owner).getIsTable())
+            {
+                return (SolidThing)(((BodySkin)c).Owner);                
+            }
+            return null;
         }
 
         #endregion
