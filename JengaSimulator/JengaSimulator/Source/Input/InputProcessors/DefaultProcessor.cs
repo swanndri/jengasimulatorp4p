@@ -127,7 +127,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
             }
         }
 
-        public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs)
+        public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
         {
             lastTouchPosition = touchPosition;
             int tagID = -1;

@@ -9,6 +9,12 @@ namespace JengaSimulator.Source
     public class JengaConstants
     {
         /*******************************************************************
+         * DoubleTap Config
+         */
+        public const float BOUNDS_BUFFER_SIZE = 50.0f;
+        public const long MAX_TICK_DIFFERENCE = 8000000;
+
+        /*******************************************************************
          * View and Rotation
          */
         public const float PAN_SPEED_DIVISOR = 2.5f;        //Used only in improvedProcessor class
@@ -42,10 +48,10 @@ namespace JengaSimulator.Source
         public static List<Tangible> REGISTERED_TANGIBLES = new List<Tangible>()
         {       
             new Tangible("Jenga Block", 46.63271f, 13.65318f, 30.3775f),
-            new Tangible("Jenga Block2", 41.54224f, 15.97482f, 41.32901f),
-            new Tangible("Black Parallelogram", 46.0526f, 23.72978f, 39.95073f),
-            new Tangible("Blue Triangle", 53.18616f, 21.81044f, 47.44673f)
-
+            new Tangible("Jenga Stack", 41.54224f, 15.97482f, 41.32901f),
+            new Tangible("Cork Screw", 46.0526f, 23.72978f, 39.95073f),
+            new Tangible("Freeze", 53.18616f, 21.81044f, 47.44673f),
+            new Tangible("Un-Freeze", 67.18616f, 15.81044f, 35.44673f)
         };
     }
     

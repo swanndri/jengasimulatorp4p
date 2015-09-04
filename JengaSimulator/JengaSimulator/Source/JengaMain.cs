@@ -226,7 +226,7 @@ namespace JengaSimulator
             foreach (TouchPoint t in touches)                            
                 _HUD.checkHitUI(t);
             
-            _inputManager.processTouchPoints(touches);
+            _inputManager.processTouchPoints(touches, gameTime);
             
             _physics.Integrate((float)gameTime.ElapsedGameTime.TotalSeconds);
 

@@ -19,7 +19,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
 {
     interface InputProcessor
     {
-        void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs);
+        void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime);
 
         void TouchDown(object sender, TouchEventArgs e);
         void TouchHoldGesture(object sender, TouchEventArgs e);
