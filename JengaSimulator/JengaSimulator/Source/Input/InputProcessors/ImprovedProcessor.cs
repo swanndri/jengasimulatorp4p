@@ -148,6 +148,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         if (selectedBrick.Item1.Equals(brick.Item1))
                         {
                             selectedBrick.Item1.IsWeightless = false;
+                            selectedBrick.Item1.IsActive = true;
                             selectedBrick.Item1._isSelected = false;
                             selectedBrick = null;
                         }
@@ -156,6 +157,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         {
                             selectedBrick.Item1.IsWeightless = false;
                             selectedBrick.Item1._isSelected = false;
+                            selectedBrick.Item1.IsActive = true;
                             selectedBrick = brick;
                             selectedBrick.Item1.IsWeightless = true;
                             selectedBrick.Item1._isSelected = true;
