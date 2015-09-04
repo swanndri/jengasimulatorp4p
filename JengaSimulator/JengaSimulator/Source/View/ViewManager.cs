@@ -11,7 +11,9 @@ namespace JengaSimulator
 {
     public sealed class ViewManager : DrawableGameComponent, IViewManager, SliderListener
 	{
-        private float cameraDistance = 13;
+        Vector3 mainLookAt = JengaConstants.MAIN_CAMERA_LOOKAT;
+
+        private float cameraDistance = JengaConstants.CAMERA_HEIGHT;
         public float CameraDistance { get { return cameraDistance; } }
 
         private float rotationAngle;
@@ -181,8 +183,7 @@ namespace JengaSimulator
         private Vector3 positionSave;
         private Color colorSave;
 
-        public void toggleViewPort() {
-            Vector3 origin = Vector3.Zero;
+        public void toggleViewPort() {            
             if (isDefaultViewPort)
             {
                 _device.Clear(backgroundColor); 
@@ -197,9 +198,10 @@ namespace JengaSimulator
 
                 _position = new Vector3(x, y, z);
 
+
                 Matrix.CreateLookAt(
                 ref _position,
-                ref origin,
+                ref mainLookAt,
                 ref _upAxis,
                 out _viewMatrix);
                 
@@ -212,7 +214,7 @@ namespace JengaSimulator
                 _device.Viewport = defaultViewport;
                 Matrix.CreateLookAt(
                 ref _position,
-                ref origin,
+                ref mainLookAt,
                 ref _upAxis,
                 out _viewMatrix);                
                 isDefaultViewPort = true;
@@ -221,19 +223,7 @@ namespace JengaSimulator
         }
         
 		public override void Draw(GameTime gameTime)
-		{            
-			_device.Clear(backgroundColor);           
-
-			Vector3 look = this.Direction;
-            Vector3 origin = Vector3.Zero;
-			Vector3.Add(ref _position, ref look, out look);
-
-			Matrix.CreateLookAt(
-				ref _position,
-                ref origin,
-				ref _upAxis,
-				out _viewMatrix);
-            
+		{                        
 			base.Draw(gameTime);
 		}
 

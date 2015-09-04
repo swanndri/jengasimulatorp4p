@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using JengaSimulator.Source;
+using Microsoft.Xna.Framework;
 
 namespace JengaSimulator.Source
 {
@@ -15,8 +16,11 @@ namespace JengaSimulator.Source
         public const long MAX_TICK_DIFFERENCE = 8000000;
 
         /*******************************************************************
-         * View and Rotation
+         * CAMERA
          */
+        public const int CAMERA_HEIGHT = 20;
+        public static readonly Vector3 MAIN_CAMERA_LOOKAT = new Vector3(0, 0, 3.5f);
+
         public const float PAN_SPEED_DIVISOR = 2.5f;        //Used only in improvedProcessor class
         public const float HEIGHT_ANGLE_MAX = 1.7f;
         public const float HEIGHT_ANGLE_MIN = 0.1f;

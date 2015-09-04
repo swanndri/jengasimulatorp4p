@@ -172,7 +172,7 @@ namespace JengaSimulator
             _viewManager.ForwardAxis = -Vector3.UnitX;
             _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
             _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);
-            _viewManager.updateCameraPosition(0, JengaConstants.HEIGHT_ANGLE_MIN, 13);
+            _viewManager.updateCameraPosition(0, JengaConstants.HEIGHT_ANGLE_MIN, JengaConstants.CAMERA_HEIGHT);
 
             CreateScene();
             CreateHUD();
@@ -256,13 +256,13 @@ namespace JengaSimulator
             _physics.Clear();
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
 
-            Model cubeModel = this.Content.Load<Model>("models/jenga_block");
+            Model cubeModel = this.Content.Load<Model>("models/square_block");
             Model tableModel = this.Content.Load<Model>("models/table");
             ModelMesh tableMesh = tableModel.Meshes.ElementAt(0);
 
             SolidThing table = new SolidThing(this, tableModel, false, true);            
 
-            float tableScale = 3f;
+            float tableScale = 1.5f;
             Vector3 tablePosition = new Vector3(0, 0, -1f);
             Quaternion tableRotation = Quaternion.Identity;
             table.SetWorld(tableScale, tablePosition, tableRotation);
@@ -283,19 +283,20 @@ namespace JengaSimulator
                 for (int i = 0; i < 3; i++)
                 {
                     var cube = new SolidThing(this, cubeModel);
+                    
                     float scale = 1.0f;
                     Quaternion rotation;
 
                     if (j % 2 == 1)
                     {
                         rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(90));
-                        cube.SetWorld(scale, new Vector3(0, i - 1, j * 0.5f), rotation);
+                        cube.SetWorld(scale, new Vector3(0, i - 1, j * 1.0f), rotation);
 
                     }
                     else
                     {
                         rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(0));
-                        cube.SetWorld(scale, new Vector3(i - 1, 0, j * 0.5f), rotation);
+                        cube.SetWorld(scale, new Vector3(i - 1, 0, j * 1.0f), rotation);
                     }
                     _physics.Add(cube);
                 }
@@ -341,7 +342,7 @@ namespace JengaSimulator
         }
 
         #endregion
-
+        
         #region IDisposable
 
         protected override void Dispose(bool disposing)
@@ -369,5 +370,6 @@ namespace JengaSimulator
         }
 
         #endregion
+      
     }
 }
