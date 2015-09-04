@@ -86,21 +86,30 @@ namespace JengaSimulator.Source.Input.InputProcessors
             if (selectedBrick != null)
             {
                 Tuple<SolidThing, Quaternion, float, Vector3> touchedBlock = getTouchedBlock(t);
-                if (touchedBlock != null){
+                if (touchedBlock != null)
+                {
                     if (touchedBlock.Item1.Equals(this.selectedBrick.Item1))
                     {
                         this.selectedBrick = touchedBlock;
                         this.holdingTouchPointID = t.Id;
                     }
-                }               
-            }            
+                }
+                else
+                {
+                    this.manipulationProcessor.CompleteManipulation(Timestamp);
+                }
+            }
+            else
+            {
+                this.manipulationProcessor.CompleteManipulation(Timestamp);
+            }
         }
         public void TouchHoldGesture(object sender, TouchEventArgs e)
         {
         }
         public void TouchMove(object sender, TouchEventArgs e)
         {
-            TouchPoint t = e.TouchPoint;
+            TouchPoint t = e.TouchPoint;            
             //MOVING CAMERA
             if (t.Id != this.holdingTouchPointID)
             {
