@@ -93,9 +93,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 float scaleConstant = 1.5f;
                 float scaleFactor = e.Cumulative.ScaleX;
 
-                //Console.WriteLine(scaleFactor);
+                
                 scaleFactor = scaleFactor < 1 ? -(1 / scaleFactor) : scaleFactor;
-                //Console.WriteLine("AFTER: " + scaleFactor);
+                
 
                 newPosition = Vector3.Add(Vector3.Multiply(direction, (scaleConstant * scaleFactor)), this.beginPos);
 
@@ -244,7 +244,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         case 1:
                             if (pickedObjectST.getIsTable())
                             {
-                                Console.Out.WriteLine("istable");
+                        
                                 break;
                             }
                             else
@@ -298,28 +298,18 @@ namespace JengaSimulator.Source.Input.InputProcessors
         #region TouchEvents
         public void TouchDown(object sender, TouchEventArgs e)
         {
-            //Console.WriteLine("Touch Down");
-            //Console.WriteLine(e.ToString());
         }
         public void TouchHoldGesture(object sender, TouchEventArgs e)
         {
-            //Console.WriteLine("Touch Hold");
-            //Console.WriteLine(e.ToString());
         }
         public void TouchMove(object sender, TouchEventArgs e)
-        {
-            //Console.WriteLine("Touch Move");
-            //Console.WriteLine(e.ToString());
+        {           
         }
         public void TouchTapGesture(object sender, TouchEventArgs e)
         {
-            //Console.WriteLine("Touch Tap");
-            //Console.WriteLine(e.ToString());
         }
         public void TouchUp(object sender, TouchEventArgs e)
         {
-            //Console.WriteLine("Touch Up");
-            //Console.WriteLine(e.ToString());
         }
         #endregion
     }

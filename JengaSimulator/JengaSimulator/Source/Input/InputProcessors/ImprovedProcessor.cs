@@ -25,7 +25,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
         private ManipulationProcessor2D manipulationProcessor;
 
-        private List<TouchPoint> activeTouchPoints;
+        private List<int> activeCameraTouchPointIDs;
+        private List<int> activeBlockTouchPointIDs;
+
         //Reference to actual object, initial orientation, pickeddistance and picked object offset
         private Tuple <SolidThing, Quaternion, float, Vector3> selectedBrick;        
         private Tuple <TouchPoint, long> previousTap;
@@ -41,7 +43,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
             selectedBrick = null;
             previousTap = null;
             this.holdingTouchPointID = -1;
-            this.activeTouchPoints = new List<TouchPoint>();
+            this.activeCameraTouchPointIDs = new List<int>();
+            this.activeBlockTouchPointIDs = new List<int>();
 
             Manipulations2D enabledManipulations = Manipulations2D.Rotate | Manipulations2D.Scale | Manipulations2D.Translate;
             manipulationProcessor = new ManipulationProcessor2D(enabledManipulations);
@@ -56,6 +59,27 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
         {
+            if (activeCameraTouchPointIDs.Count > 0)
+            {
+                Manipulator2D[] manipulators = null;
+
+                int id = activeCameraTouchPointIDs.ElementAt(0);
+                foreach (TouchPoint t in touches)
+                {
+                    if (t.Id == id)
+                    {
+                        manipulators = new Manipulator2D[]{
+                            new Manipulator2D(t.Id, t.X, t.Y)
+                        };
+                        break;
+                    }
+                }
+                try
+                {
+                    manipulationProcessor.ProcessManipulators(Timestamp, manipulators);
+                }
+                catch (NullReferenceException e) { }
+            }
         }
 
         /** Manipulation Events ********/
@@ -65,7 +89,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
 
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
-        {       
+        { 
+            
             if (this.holdingTouchPointID == -1)
             {
                 float newHeightAngle = MathHelper.ToRadians((MathHelper.ToDegrees(_viewManager.HeightAngle)
@@ -85,7 +110,14 @@ namespace JengaSimulator.Source.Input.InputProcessors
         {
             TouchPoint t = e.TouchPoint;
 
-            if (selectedBrick != null)
+            //If there is nothing selected we can assume this touch point is for camera. (There is the case where this touch
+            //down corresponds to the tap gesture but it won't manipulate the camera for long if that is the case anyway.
+            if (selectedBrick == null)
+            {
+                this.activeCameraTouchPointIDs.Add(t.Id);
+                this.manipulationProcessor.CompleteManipulation(Timestamp);
+            }
+            else
             {
                 Tuple<SolidThing, Quaternion, float, Vector3> touchedBlock = getTouchedBlock(t);
                 if (touchedBlock != null)
@@ -98,12 +130,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 }
                 else
                 {
-                    this.manipulationProcessor.CompleteManipulation(Timestamp);
+                    //this.manipulationProcessor.CompleteManipulation(Timestamp);
                 }
-            }
-            else
-            {
-                this.manipulationProcessor.CompleteManipulation(Timestamp);
             }
         }
         public void TouchHoldGesture(object sender, TouchEventArgs e)
@@ -111,24 +139,20 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
         public void TouchMove(object sender, TouchEventArgs e)
         {
-            TouchPoint t = e.TouchPoint;            
+            TouchPoint t = e.TouchPoint;
             //MOVING CAMERA
             if (t.Id != this.holdingTouchPointID)
             {
-                Manipulator2D[] manipulators;
-                manipulators = new Manipulator2D[] { 
-                    new Manipulator2D(1, t.X, t.Y)
-                };
-                manipulationProcessor.ProcessManipulators(Timestamp, manipulators);
+
             }
             //MOVING BLOCKS
             else
             {
                 Segment s;
                 s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 0f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                    _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
                 s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 1f),
-                    _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                    _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
 
                 Vector3 diff, point;
                 Vector3.Subtract(ref s.P2, ref s.P1, out diff);
@@ -136,54 +160,55 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 Vector3.Add(ref s.P1, ref diff, out point);
 
                 Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
+
                 selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
                 selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
                 selectedBrick.Item1.IsActive = true;
             }
         }
         public void TouchTapGesture(object sender, TouchEventArgs e)
-        {   
+        {
             TouchPoint t = e.TouchPoint;
             Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
             bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
             //if (doubleTap)
             //{
-                Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t);
-                //If we touched a block
-                if (brick != null)
+            Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t);
+            //If we touched a block
+            if (brick != null)
+            {
+                //If we are currently holding a block
+                if (selectedBrick != null)
                 {
-                    //If we are currently holding a block
-                    if (selectedBrick != null)
-                    {                        
-                        //if we touched the same block we want to deselct it
-                        if (selectedBrick.Item1.Equals(brick.Item1))
-                        {
-                            selectedBrick.Item1.IsWeightless = false;
-                            selectedBrick.Item1.IsActive = true;
-                            selectedBrick.Item1._isSelected = false;
-                            selectedBrick = null;
-                        }
-                        //If we touched a new block with an block currently selected.
-                        else
-                        {
-                            selectedBrick.Item1.IsWeightless = false;
-                            selectedBrick.Item1._isSelected = false;
-                            selectedBrick.Item1.IsActive = true;
-                            selectedBrick = brick;
-                            selectedBrick.Item1.IsWeightless = true;
-                            selectedBrick.Item1._isSelected = true;
-                        }
+                    //if we touched the same block we want to deselct it
+                    if (selectedBrick.Item1.Equals(brick.Item1))
+                    {
+                        selectedBrick.Item1.IsWeightless = false;
+                        selectedBrick.Item1.IsActive = true;
+                        selectedBrick.Item1._isSelected = false;
+                        selectedBrick = null;
                     }
-                    //If no block selected then select this one
+                    //If we touched a new block with an block currently selected.
                     else
                     {
+                        selectedBrick.Item1.IsWeightless = false;
+                        selectedBrick.Item1._isSelected = false;
+                        selectedBrick.Item1.IsActive = true;
                         selectedBrick = brick;
                         selectedBrick.Item1.IsWeightless = true;
                         selectedBrick.Item1._isSelected = true;
                     }
-
                 }
-                this.previousTap = null;
+                //If no block selected then select this one
+                else
+                {
+                    selectedBrick = brick;
+                    selectedBrick.Item1.IsWeightless = true;
+                    selectedBrick.Item1._isSelected = true;
+                }
+
+            }
+            this.previousTap = null;
             //}
             //else
             //{
@@ -192,10 +217,18 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
         public void TouchUp(object sender, TouchEventArgs e)
         {
-            
             TouchPoint t = e.TouchPoint;
-            manipulationProcessor.CompleteManipulation(Timestamp);
-           
+
+            //Remove touchpoint from active point lists
+            lock (activeCameraTouchPointIDs)
+            {
+                activeCameraTouchPointIDs.Remove(t.Id);
+            }
+            if (activeCameraTouchPointIDs.Count == 0)
+            {
+                this.manipulationProcessor.CompleteManipulation(Timestamp);
+            }
+
             if (t.Id == this.holdingTouchPointID)
             {
                 this.holdingTouchPointID = -1;                   
@@ -235,9 +268,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
         {
             Segment s;
             s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 0f),
-                _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
             s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 1f),
-                _viewManager.Projection, _viewManager.View, Matrix.Identity);
+                _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
             float scalar;
             Vector3 point;
             var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);

@@ -22,6 +22,7 @@ namespace JengaSimulator
         Matrix Projection { get; set; }
         Color BackgroundColor { get; set; }
         Matrix View { get; }
+        Matrix DefaultView { get; }
         float MaxPitch { get; set; }
         float MinPitch { get; set; }
         float Pitch { get; set; }

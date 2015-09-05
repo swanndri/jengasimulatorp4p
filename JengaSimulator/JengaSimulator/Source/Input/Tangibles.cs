@@ -94,7 +94,7 @@ namespace JengaSimulator
                         pickedObject.IsActive = true;
 
                         //SolidThing po = (SolidThing)pickedObject;
-                        Console.Out.WriteLine("UNFREEEEEEEEEEEEZE");
+                        //Console.Out.WriteLine("UNFREEEEEEEEEEEEZE");
                         switch (tagID)
                         {
                             

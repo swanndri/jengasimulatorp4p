@@ -89,7 +89,7 @@ namespace JengaSimulator
             }
             probabilities = probabilities.OrderByDescending(x => x.Item2).ToList();
             
-            
+            /*
             Console.WriteLine("---------------BEGIN---------------------");
             foreach (Tuple<Tangible, float> t in probabilities){
                 Console.WriteLine(t.Item1.Name + " : " + t.Item2 + "%"); 
@@ -99,7 +99,7 @@ namespace JengaSimulator
                 " percent certainty.");
 
             Console.WriteLine("---------------END-----------------------");
-            
+            */
 
             
             thisBlobPairTangible = probabilities[0].Item1;

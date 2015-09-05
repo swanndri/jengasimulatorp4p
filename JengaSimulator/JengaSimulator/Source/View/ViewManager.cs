@@ -39,6 +39,7 @@ namespace JengaSimulator
 		private float _minPitch = DefaultMinPitch;
 
         private Matrix _viewMatrix;
+        private Matrix _dViewMatrix;
         private Matrix _projectionMatrix;
 
         private Viewport _miniMapViewPort;
@@ -102,7 +103,9 @@ namespace JengaSimulator
 
 		public Matrix Projection { get { return _projectionMatrix; } set { _projectionMatrix = value; } }
 
-		public Matrix View { get { return _viewMatrix; } }
+		public Matrix View { get {            
+            return _viewMatrix; } }
+        public Matrix DefaultView { get { return _viewMatrix; } }
 
 		public float MaxPitch { get { return _maxPitch; } set { _maxPitch = value; } }
 
@@ -183,9 +186,11 @@ namespace JengaSimulator
         private Vector3 positionSave;
         private Color colorSave;
 
-        public void toggleViewPort() {            
+        public void toggleViewPort() {    
+           
             if (isDefaultViewPort)
             {
+                //For minimap drawing
                 _device.Clear(backgroundColor); 
                 defaultViewport = _device.Viewport;
                 _miniMapViewPort.X = defaultViewport.Width - _miniMapViewPort.Width;
@@ -210,20 +215,27 @@ namespace JengaSimulator
             }
             else
             {
+                //for main drawing
                 _position = positionSave;
                 _device.Viewport = defaultViewport;
                 Matrix.CreateLookAt(
                 ref _position,
                 ref mainLookAt,
                 ref _upAxis,
-                out _viewMatrix);                
+                out _dViewMatrix);                
                 isDefaultViewPort = true;
             }
             
         }
         
 		public override void Draw(GameTime gameTime)
-		{                        
+		{
+            Matrix.CreateLookAt(
+                ref _position,
+                ref mainLookAt,
+                ref _upAxis,
+                out _viewMatrix);
+
 			base.Draw(gameTime);
 		}
 
