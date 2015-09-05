@@ -24,7 +24,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
         private PhysicsManager _physics;
 
         private ManipulationProcessor2D manipulationProcessor;
-        
+
+        private List<TouchPoint> activeTouchPoints;
         //Reference to actual object, initial orientation, pickeddistance and picked object offset
         private Tuple <SolidThing, Quaternion, float, Vector3> selectedBrick;        
         private Tuple <TouchPoint, long> previousTap;
@@ -40,6 +41,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
             selectedBrick = null;
             previousTap = null;
             this.holdingTouchPointID = -1;
+            this.activeTouchPoints = new List<TouchPoint>();
 
             Manipulations2D enabledManipulations = Manipulations2D.Rotate | Manipulations2D.Scale | Manipulations2D.Translate;
             manipulationProcessor = new ManipulationProcessor2D(enabledManipulations);
@@ -63,7 +65,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
 
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
-        {
+        {       
             if (this.holdingTouchPointID == -1)
             {
                 float newHeightAngle = MathHelper.ToRadians((MathHelper.ToDegrees(_viewManager.HeightAngle)
