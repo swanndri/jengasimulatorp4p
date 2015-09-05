@@ -109,28 +109,21 @@ namespace JengaSimulator.Source.Input.InputProcessors
         public void TouchDown(object sender, TouchEventArgs e)
         {
             TouchPoint t = e.TouchPoint;
+            Tuple<SolidThing, Quaternion, float, Vector3> touchedBlock = getTouchedBlock(t);
 
-            //If there is nothing selected we can assume this touch point is for camera. (There is the case where this touch
-            //down corresponds to the tap gesture but it won't manipulate the camera for long if that is the case anyway.
-            if (selectedBrick == null)
+            //Conditions for camera movement
+            if (selectedBrick == null || touchedBlock == null || !selectedBrick.Item1.Equals(touchedBlock.Item1))
             {
                 this.activeCameraTouchPointIDs.Add(t.Id);
                 this.manipulationProcessor.CompleteManipulation(Timestamp);
             }
+            //
             else
-            {
-                Tuple<SolidThing, Quaternion, float, Vector3> touchedBlock = getTouchedBlock(t);
-                if (touchedBlock != null)
+            {               
+                if (this.selectedBrick != null && touchedBlock.Item1.Equals(this.selectedBrick.Item1))
                 {
-                    if (touchedBlock.Item1.Equals(this.selectedBrick.Item1))
-                    {
-                        this.selectedBrick = touchedBlock;
-                        this.holdingTouchPointID = t.Id;
-                    }
-                }
-                else
-                {
-                    //this.manipulationProcessor.CompleteManipulation(Timestamp);
+                    this.selectedBrick = touchedBlock;
+                    this.holdingTouchPointID = t.Id;
                 }
             }
         }
@@ -171,8 +164,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
             TouchPoint t = e.TouchPoint;
             Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
             bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
-            //if (doubleTap)
-            //{
+            if (doubleTap)
+            {
             Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t);
             //If we touched a block
             if (brick != null)
@@ -209,11 +202,11 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
             }
             this.previousTap = null;
-            //}
-            //else
-            //{
-            //    this.previousTap = currentTap;
-            //}            
+            }
+            else
+            {
+                this.previousTap = currentTap;
+            }            
         }
         public void TouchUp(object sender, TouchEventArgs e)
         {
