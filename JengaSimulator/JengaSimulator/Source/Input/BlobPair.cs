@@ -28,9 +28,13 @@ namespace JengaSimulator
         public TouchPoint SmallBlob { get { return smallBlob; } }
 
         private float centerX, centerY;
+        public float CenterX { get { return centerX; } }
+        public float CenterY { get { return centerY; } }
         private float distanceBetweenBlobCentres;
         public float DistanceBetweenBlobCentres { get { return distanceBetweenBlobCentres; } }
+        
         private float orientation;                      //NOTE: In radians
+        public float Orientation { get { return orientation; } }
 
         private Vector2 lineBetweenBlobs;
 

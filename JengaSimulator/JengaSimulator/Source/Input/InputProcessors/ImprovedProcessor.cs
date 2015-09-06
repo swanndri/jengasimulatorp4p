@@ -63,7 +63,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
-        {        
+        {   
             //Get center positions of all finger touchpoints
             float x = 0, y = 0;
             int count = 0;
@@ -196,24 +196,27 @@ namespace JengaSimulator.Source.Input.InputProcessors
         public void TouchDown(object sender, TouchEventArgs e)
         {
             TouchPoint t = e.TouchPoint;
-            this.activeTouchPoints.Add(t.Id, t);
-
-            Tuple<SolidThing, Quaternion, float, Vector3> touchedBlock = getTouchedBlock(t.X, t.Y);
-            
-            //Conditions for camera movement
-            if (selectedBrick == null || touchedBlock == null || !selectedBrick.Item1.Equals(touchedBlock.Item1))
+            if (t.IsFingerRecognized)
             {
-                this.manipulationProcessor.CompleteManipulation(Timestamp);
-            }
-            //Else we are moving a block (or possibly selecting it)
-            else
-            {               
-                if (this.selectedBrick != null && touchedBlock.Item1.Equals(this.selectedBrick.Item1))
+                this.activeTouchPoints.Add(t.Id, t);
+
+                Tuple<SolidThing, Quaternion, float, Vector3> touchedBlock = getTouchedBlock(t.X, t.Y);
+
+                //Conditions for camera movement
+                if (selectedBrick == null || touchedBlock == null || !selectedBrick.Item1.Equals(touchedBlock.Item1))
                 {
-                    this.selectedBrick = touchedBlock;
-                    this.holdingTouchPointIds.Add(t.Id);
-                    this.holdingTouchPointID = t.Id;
-                    this.holdingTouchPoint = t;
+                    this.manipulationProcessor.CompleteManipulation(Timestamp);
+                }
+                //Else we are moving a block (or possibly selecting it)
+                else
+                {
+                    if (this.selectedBrick != null && touchedBlock.Item1.Equals(this.selectedBrick.Item1))
+                    {
+                        this.selectedBrick = touchedBlock;
+                        this.holdingTouchPointIds.Add(t.Id);
+                        this.holdingTouchPointID = t.Id;
+                        this.holdingTouchPoint = t;
+                    }
                 }
             }
         }
@@ -224,101 +227,111 @@ namespace JengaSimulator.Source.Input.InputProcessors
         {            
             TouchPoint t = e.TouchPoint;
 
-            //MOVING BLOCKS
-            if (t.Id == this.holdingTouchPointID)
+            if (t.IsFingerRecognized)
             {
-                try
+                //MOVING BLOCKS
+                if (t.Id == this.holdingTouchPointID)
                 {
-                    this.holdingTouchPoint = t;
-                    rotateOrZoom = false;
+                    try
+                    {
+                        this.holdingTouchPoint = t;
+                        rotateOrZoom = false;
 
-                    Segment s;
-                    s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 0f),
-                        _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
-                    s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 1f),
-                        _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+                        Segment s;
+                        s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 0f),
+                            _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+                        s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 1f),
+                            _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
 
-                    Vector3 diff, point;
-                    Vector3.Subtract(ref s.P2, ref s.P1, out diff);
-                    Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
-                    Vector3.Add(ref s.P1, ref diff, out point);
+                        Vector3 diff, point;
+                        Vector3.Subtract(ref s.P2, ref s.P1, out diff);
+                        Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
+                        Vector3.Add(ref s.P1, ref diff, out point);
 
-                    Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
+                        Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
 
-                    selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
-                    selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
-                    selectedBrick.Item1.IsActive = true;
+                        selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
+                        selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
+                        selectedBrick.Item1.IsActive = true;
+                    }
+                    catch (NullReferenceException)
+                    {
+                        //IDK why it was throwing null here.
+                    }
                 }
-                catch (NullReferenceException) { 
-                    //IDK why it was throwing null here.
-                }
-            }            
+            }
         }
         public void TouchTapGesture(object sender, TouchEventArgs e)
         {
             TouchPoint t = e.TouchPoint;
-            Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
-           
-            bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
-            if (doubleTap)
+            if (t.IsFingerRecognized)
             {
-            Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t.X, t.Y);
-            //If we touched a block
-            if (brick != null)
-            {
-                //If we are currently holding a block
-                if (selectedBrick != null)
+                Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
+
+                bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
+                if (doubleTap)
                 {
-                    //if we touched the same block we want to deselct it
-                    if (selectedBrick.Item1.Equals(brick.Item1))
+                    Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t.X, t.Y);
+                    //If we touched a block
+                    if (brick != null)
                     {
-                        selectedBrick.Item1.IsWeightless = false;
-                        selectedBrick.Item1.IsActive = true;
-                        selectedBrick.Item1._isSelected = false;
-                        selectedBrick = null;
+                        //If we are currently holding a block
+                        if (selectedBrick != null)
+                        {
+                            //if we touched the same block we want to deselct it
+                            if (selectedBrick.Item1.Equals(brick.Item1))
+                            {
+                                selectedBrick.Item1.IsWeightless = false;
+                                selectedBrick.Item1.IsActive = true;
+                                selectedBrick.Item1._isSelected = false;
+                                selectedBrick = null;
+                            }
+                            //If we touched a new block with an block currently selected.
+                            else
+                            {
+                                selectedBrick.Item1.IsWeightless = false;
+                                selectedBrick.Item1._isSelected = false;
+                                selectedBrick.Item1.IsActive = true;
+                                selectedBrick = brick;
+                                selectedBrick.Item1.IsWeightless = true;
+                                selectedBrick.Item1._isSelected = true;
+                            }
+                        }
+                        //If no block selected then select this one
+                        else
+                        {
+                            selectedBrick = brick;
+                            selectedBrick.Item1.IsWeightless = true;
+                            selectedBrick.Item1._isSelected = true;
+                        }
                     }
-                    //If we touched a new block with an block currently selected.
-                    else
-                    {
-                        selectedBrick.Item1.IsWeightless = false;
-                        selectedBrick.Item1._isSelected = false;
-                        selectedBrick.Item1.IsActive = true;
-                        selectedBrick = brick;
-                        selectedBrick.Item1.IsWeightless = true;
-                        selectedBrick.Item1._isSelected = true;
-                    }
+                    this.previousTap = null;
                 }
-                //If no block selected then select this one
                 else
                 {
-                    selectedBrick = brick;
-                    selectedBrick.Item1.IsWeightless = true;
-                    selectedBrick.Item1._isSelected = true;
+                    this.previousTap = currentTap;
                 }
             }
-                this.previousTap = null;
-            }
-            else
-            {
-                this.previousTap = currentTap;
-            }            
         }
         public void TouchUp(object sender, TouchEventArgs e)
         {
             TouchPoint t = e.TouchPoint;
-            holdingTouchPointIds.Remove(t.Id);
+            if (t.IsFingerRecognized)
+            {
+                holdingTouchPointIds.Remove(t.Id);
 
-            //Remove touchpoint from active point lists
-            lock (activeTouchPoints)
-            {
-                activeTouchPoints.Remove(t.Id);
-            }
-            this.manipulationProcessor.CompleteManipulation(Timestamp);
-            
-            if (t.Id == this.holdingTouchPointID)
-            {
-                this.holdingTouchPointID = -1;
-                this.holdingTouchPoint = null;
+                //Remove touchpoint from active point lists
+                lock (activeTouchPoints)
+                {
+                    activeTouchPoints.Remove(t.Id);
+                }
+                this.manipulationProcessor.CompleteManipulation(Timestamp);
+
+                if (t.Id == this.holdingTouchPointID)
+                {
+                    this.holdingTouchPointID = -1;
+                    this.holdingTouchPoint = null;
+                }
             }
         }
         #endregion
