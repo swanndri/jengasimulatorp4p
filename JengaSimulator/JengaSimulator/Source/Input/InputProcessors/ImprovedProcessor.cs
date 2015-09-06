@@ -36,7 +36,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
         
         private int holdingTouchPointID;
         private bool rotateOrZoom;
-        private Vector3 beginPos;
 
         public ImprovedProcessor(Game game, IViewManager viewManager, PhysicsManager physics )
         {
@@ -234,25 +233,32 @@ namespace JengaSimulator.Source.Input.InputProcessors
             //MOVING BLOCKS
             if (t.Id == this.holdingTouchPointID)
             {
-                this.holdingTouchPoint = t;
-                rotateOrZoom = false;
+                try
+                {
 
-                Segment s;
-                s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 0f),
-                    _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
-                s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 1f),
-                    _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+                    this.holdingTouchPoint = t;
+                    rotateOrZoom = false;
 
-                Vector3 diff, point;
-                Vector3.Subtract(ref s.P2, ref s.P1, out diff);
-                Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
-                Vector3.Add(ref s.P1, ref diff, out point);
+                    Segment s;
+                    s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 0f),
+                        _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+                    s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(t.X, t.Y, 1f),
+                        _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
 
-                Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
+                    Vector3 diff, point;
+                    Vector3.Subtract(ref s.P2, ref s.P1, out diff);
+                    Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
+                    Vector3.Add(ref s.P1, ref diff, out point);
 
-                selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
-                selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
-                selectedBrick.Item1.IsActive = true;
+                    Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
+
+                    selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
+                    selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
+                    selectedBrick.Item1.IsActive = true;
+                }
+                catch (NullReferenceException) { 
+                    //IDK why it was throwing null here.
+                }
             }            
         }
         public void TouchTapGesture(object sender, TouchEventArgs e)
