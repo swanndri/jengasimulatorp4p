@@ -24,17 +24,17 @@ namespace JengaSimulator.Source.Input.InputProcessors
         private PhysicsManager _physics;
 
         private ManipulationProcessor2D manipulationProcessor;
+        
         private Dictionary<int, TouchPoint> activeTouchPoints;      //All active touch points in the original config (they do not update!)
-        private List<int> holdingTouchPointIds;                //All touchpoints that are in contact with the selected block.
-
+        private List<int> holdingTouchPointIds;                     //All touchpoints that are in contact with the selected block.
+        
         private TouchPoint holdingTouchPoint;
 
-        //Reference to actual object, initial orientation, pickeddistance and picked object offset
+        //SolidThing Object, Initial Orientation, Picked Distance and TouchPoint Offset
         private Tuple <SolidThing, Quaternion, float, Vector3> selectedBrick;        
         private Tuple <TouchPoint, long> previousTap;
-        //Id of touchpoint. Offset to block coordinates (So we pick up block from edge or whereever user clicked on block)
-        
-        private int holdingTouchPointID;
+
+        private int holdingTouchPointID;                //Id of touchpoint.
         private bool rotateOrZoom;
 
         public ImprovedProcessor(Game game, IViewManager viewManager, PhysicsManager physics )
@@ -63,15 +63,20 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
-        {
-            float x = 0,y = 0;
+        {        
+            //Get center positions of all finger touchpoints
+            float x = 0, y = 0;
             int count = 0;
+            int firstID = -1;
 
             foreach (TouchPoint activeTouchPoint in touches)
             {
-                x += activeTouchPoint.X;
-                y += activeTouchPoint.Y;
-                count++;
+                if (activeTouchPoint.IsFingerRecognized){
+                    x += activeTouchPoint.X;
+                    y += activeTouchPoint.Y;
+                    firstID = activeTouchPoint.Id;
+                    count++;
+                }
             }
 
             x = x / count;
@@ -107,21 +112,10 @@ namespace JengaSimulator.Source.Input.InputProcessors
             else if (holdingTouchPointID == -1)
             {
                 rotateOrZoom = false;
-                if (activeTouchPoints.Count > 0)
+                if (activeTouchPoints.Count > 0 && count > 0)
                 {
                     Manipulator2D[] manipulators = null;
-
-                    int id = activeTouchPoints.ElementAt(0).Value.Id;       // TODO FIX INVALUD OPERATION EXCEPTION
-                    foreach (TouchPoint t in touches)
-                    {
-                        if (t.Id == id)
-                        {
-                            manipulators = new Manipulator2D[]{
-                                new Manipulator2D(t.Id, t.X, t.Y)
-                            };
-                            break;
-                        }
-                    }
+                    manipulators = new Manipulator2D[]{new Manipulator2D(firstID, x, y)};
                     try
                     {
                         manipulationProcessor.ProcessManipulators(Timestamp, manipulators);
@@ -235,7 +229,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
             {
                 try
                 {
-
                     this.holdingTouchPoint = t;
                     rotateOrZoom = false;
 
@@ -320,10 +313,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
             {
                 activeTouchPoints.Remove(t.Id);
             }
-            if (activeTouchPoints.Count == 0)
-            {
-                this.manipulationProcessor.CompleteManipulation(Timestamp);
-            }
+            this.manipulationProcessor.CompleteManipulation(Timestamp);
             
             if (t.Id == this.holdingTouchPointID)
             {
