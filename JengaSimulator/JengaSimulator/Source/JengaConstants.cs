@@ -10,11 +10,14 @@ namespace JengaSimulator.Source
     public class JengaConstants
     {
         /*******************************************************************
-         * DoubleTap Config
+         * Gestures Tweaks
          */
+        //DoubleTap Config
         public const float BOUNDS_BUFFER_SIZE = 50.0f;
         public const long MAX_TICK_DIFFERENCE = 8000000;
-
+        //Block moving away and towards speed factor. (Greater is faster)
+        //In range 0(doesnt move) to infinity (probably crash)
+        public const float FORWARD_BACK_BLOCK_SPEED = 2.0f;
         /*******************************************************************
          * CAMERA
          */

@@ -24,7 +24,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
         private PhysicsManager _physics;
 
         private ManipulationProcessor2D manipulationProcessor;
-
         private Dictionary<int, TouchPoint> activeTouchPoints;
 
         //Reference to actual object, initial orientation, pickeddistance and picked object offset
@@ -33,7 +32,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
         //Id of touchpoint. Offset to block coordinates (So we pick up block from edge or whereever user clicked on block)
         private int holdingTouchPointID;
         private bool rotateOrZoom;
-        
+        private Vector3 beginPos;
+
         public ImprovedProcessor(Game game, IViewManager viewManager, PhysicsManager physics )
         {
             this._game = game;
@@ -59,14 +59,13 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
         {            
-            float x = 0;
-            float y = 0;
+            float x = 0,y = 0;
             int count = 0;
 
-            foreach (KeyValuePair<int, TouchPoint> activeTouchPoint in activeTouchPoints)
+            foreach (TouchPoint activeTouchPoint in touches)
             {
-                x += activeTouchPoint.Value.X;
-                y += activeTouchPoint.Value.Y;
+                x += activeTouchPoint.X;
+                y += activeTouchPoint.Y;
                 count++;
             }
 
@@ -91,7 +90,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     rotateOrZoom = true;
                     manipulationProcessor.Pivot.X = selectedBrick.Item1.Position.X;
                     manipulationProcessor.Pivot.Y = selectedBrick.Item1.Position.Y;
-                    manipulationProcessor.ProcessManipulators(Timestamp, manipulators);                    
+                    manipulationProcessor.ProcessManipulators(Timestamp, manipulators);         //TODO FIXED COLLECTION MODIFIED                   
                 }
                 catch (NullReferenceException e) {}
             }
@@ -125,10 +124,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
         /** Manipulation Events ********/
         #region ManipulationEvents
-        private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e)
-        {
-        }
-
+        private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e){ }
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
         {
             if (!rotateOrZoom)
@@ -140,8 +136,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
                 _viewManager.updateCameraPosition(newRotationAngle, newHeightAngle, _viewManager.CameraDistance);
             }else{
-                //Console.WriteLine("ROTATE OR ZOOM");
-                
                 //Rotations================================================
                 float toRotate = MathHelper.ToDegrees(e.Delta.Rotation);
                 Quaternion q = selectedBrick.Item1.Orientation;
@@ -163,15 +157,23 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
                 float totalRotation = MathHelper.ToRadians(finalRotation);
                 Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
-                
                 selectedBrick =
                     new Tuple<SolidThing, Quaternion, float, Vector3>
                         (selectedBrick.Item1, finalOrientation, selectedBrick.Item3, selectedBrick.Item4);
-            
-                selectedBrick.Item1.SetWorld(selectedBrick.Item1.Position, selectedBrick.Item2);
+
+                //Zooms==================================================   
+                Vector3 newPosition = selectedBrick.Item1.Position;
+
+                Vector3 direction = _viewManager.Position - selectedBrick.Item1.Position;                               
+                direction.Normalize();
+
+                float deltaAdd = 1 - e.Delta.ScaleX;
+                deltaAdd *= JengaConstants.FORWARD_BACK_BLOCK_SPEED;
+                newPosition = Vector3.Add(Vector3.Multiply(direction, deltaAdd), selectedBrick.Item1.Position);                
+
+                selectedBrick.Item1.SetWorld(newPosition, selectedBrick.Item2);
             }
         }
-
         private void OnManipulationCompleted(object sender, Manipulation2DCompletedEventArgs e) {}
         #endregion
 
@@ -221,7 +223,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
                 Vector3 diff, point;
                 Vector3.Subtract(ref s.P2, ref s.P1, out diff);
-                Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);
+                Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
                 Vector3.Add(ref s.P1, ref diff, out point);
 
                 Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
@@ -236,9 +238,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
             TouchPoint t = e.TouchPoint;
             Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
            
-            //bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
-            //if (doubleTap)
-            //{
+            bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
+            if (doubleTap)
+            {
             Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t.X, t.Y);
             //If we touched a block
             if (brick != null)
@@ -273,12 +275,12 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     selectedBrick.Item1._isSelected = true;
                 }
             }
-            this.previousTap = null;
-            //}
-            //else
-            //{
-            //    this.previousTap = currentTap;
-            //}            
+                this.previousTap = null;
+            }
+            else
+            {
+                this.previousTap = currentTap;
+            }            
         }
         public void TouchUp(object sender, TouchEventArgs e)
         {
