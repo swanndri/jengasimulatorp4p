@@ -58,7 +58,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
-        {            
+        {
             float x = 0,y = 0;
             int count = 0;
 
@@ -77,6 +77,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
             //Rotation or zoom block
             if (selectedBrick != null && middleBlock != null && selectedBrick.Item1.Equals(middleBlock.Item1) && activeTouchPoints.Count > 1)
             {
+                //holdingTouchPointID = -1;
                 List<Manipulator2D> manipulatorList = new List<Manipulator2D>();
                 foreach (TouchPoint t in touches)
                 {    
@@ -206,13 +207,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
         public void TouchMove(object sender, TouchEventArgs e)
         {
             TouchPoint t = e.TouchPoint;
-            //MOVING CAMERA
-            if (t.Id != this.holdingTouchPointID)
-            {
-              
-            }
+
             //MOVING BLOCKS
-            else
+            if (t.Id == this.holdingTouchPointID)
             {
                 rotateOrZoom = false;
                 Segment s;

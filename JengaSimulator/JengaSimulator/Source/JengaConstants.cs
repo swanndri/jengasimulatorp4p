@@ -26,7 +26,7 @@ namespace JengaSimulator.Source
 
         public const float PAN_SPEED_DIVISOR = 2.5f;        //Used only in improvedProcessor class
         public const float HEIGHT_ANGLE_MAX = 1.7f;
-        public const float HEIGHT_ANGLE_MIN = 0.1f;
+        public const float HEIGHT_ANGLE_MIN = 0.01f;
         public const float ROTATE_REVERSED = -1.0f;         //1 and -1 only 
         public const float HEIGHT_REVERSED = -1.0f;         //1 and -1 only 
         /*******************************************************************
