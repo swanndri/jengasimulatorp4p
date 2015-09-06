@@ -24,7 +24,6 @@ namespace JengaSimulator
         private RigidBody pickedObject;
         private WorldPointConstraint pickedForce;
         private float pickedDistance;
-        private int _lastSideToTouch;
 
         private float lastOrientation;
 
@@ -35,7 +34,6 @@ namespace JengaSimulator
             this.game = game;
             this.viewManager = viewManager;
             this.physics = physics;
-            this._lastSideToTouch = 0;
         }
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches)

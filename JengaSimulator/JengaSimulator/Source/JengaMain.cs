@@ -146,7 +146,6 @@ namespace JengaSimulator
             touchTarget = new TouchTarget(Window.Handle, EventThreadChoice.OnBackgroundThread);
             touchTarget.EnableInput();
         }
-
         #endregion
 
         #region Overridden Game Methods

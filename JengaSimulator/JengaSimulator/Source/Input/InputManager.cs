@@ -39,7 +39,7 @@ namespace JengaSimulator
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, GameTime gameTime)
         {
             blobPairs = getBlobPairListFromTouchCollection(touches);
-            _inputProcessor.processTouchPoints(touches, blobPairs, gameTime);
+            //_inputProcessor.processTouchPoints(touches, blobPairs, gameTime);
         }
 
         #region TouchEvents
@@ -64,38 +64,56 @@ namespace JengaSimulator
 
         public List<BlobPair> getBlobPairListFromTouchCollection(ReadOnlyTouchPointCollection touches)
         {
+            List<TouchPoint> blobTouchPointList = new List<TouchPoint>();
+
             List<TouchPoint> bigBlobList = new List<TouchPoint>();
             List<TouchPoint> smallBlobList = new List<TouchPoint>();
             List<BlobPair> blobPairList = new List<BlobPair>();
-
-            //---------------------------------------------------------
-            //Add blobs to two lists: big blob list and small blob list            
-            for (int i = 0; i < touches.Count; i++)
+            
+            //Firstly get every touch point that is a blob and put it in a list.
+            foreach (TouchPoint t in touches)
             {
-                TouchPoint touch = touches[i];
-                if (isBlob(touch))
+                if (isBlob(t))
                 {
-                    if (touch.MajorAxis > JengaConstants.BIG_BLOB_MIN_WIDTH && touch.MajorAxis < JengaConstants.BIG_BLOB_MAX_WIDTH)
-                        bigBlobList.Add(touch);
-                    else if (touch.MajorAxis > JengaConstants.SMALL_BLOB_MIN_WIDTH && touch.MajorAxis < JengaConstants.SMALL_BLOB_MAX_WIDTH)
-                        smallBlobList.Add(touch);
+                    blobTouchPointList.Add(t);
+                }
+            }
+            //Order the touchpoints from largest major axis to smallest.
+            blobTouchPointList = blobTouchPointList.OrderByDescending(x => x.MajorAxis).ToList();
+
+            for (int i = 0; i < blobTouchPointList.Count; i++)
+            {
+                if (i >= blobTouchPointList.Count / 2){
+                    smallBlobList.Add(blobTouchPointList.ElementAt(i));
+                }else{
+                    bigBlobList.Add(blobTouchPointList.ElementAt(i));
                 }
             }
 
-            //---------------------------------------------------------
-            //Create blob pairs from bloblists.
-            foreach (TouchPoint bigBlob in bigBlobList)
+            if (smallBlobList.Count != bigBlobList.Count)
             {
-                foreach (TouchPoint smallBlob in smallBlobList)
-                {
-                    Vector2 lineVector = new Vector2(bigBlob.CenterX - smallBlob.CenterX, bigBlob.CenterY - smallBlob.CenterY);
+                return blobPairList;
+            }
 
-                    if (lineVector.Length() > JengaConstants.BLOB_MIN_DISTANCE && lineVector.Length() < JengaConstants.BLOB_MAX_DISTANCE)
-                    {
-                        blobPairList.Add(new BlobPair(bigBlob, smallBlob, lineVector));
-                        continue;
-                    }
+            List<Tuple<float, TouchPoint, TouchPoint>> vectorDistances = new List<Tuple<float, TouchPoint, TouchPoint>>();
+
+            for (int i = 0; i < bigBlobList.Count; i++) {
+                for (int j = 0; j < smallBlobList.Count; j++) { 
+                    TouchPoint one = bigBlobList.ElementAt(i);
+                    TouchPoint two = smallBlobList.ElementAt(j);
+                    Vector2 lineBetweenBlobs = new Vector2(one.X - two.X, one.Y - two.Y);
+
+                    vectorDistances.Add(new Tuple<float,TouchPoint,TouchPoint>(lineBetweenBlobs.Length(), one, two));
                 }
+            }
+            vectorDistances = vectorDistances.OrderBy(x => x.Item1).ToList();
+
+            for (int i = 0; i < bigBlobList.Count; i++ )
+            {
+                Vector2 lineVector = new Vector2(vectorDistances[i].Item2.CenterX - vectorDistances[i].Item3.CenterX,
+                    vectorDistances[i].Item2.CenterY - vectorDistances[i].Item3.CenterY);
+                
+                blobPairList.Add(new BlobPair(vectorDistances[i].Item2, vectorDistances[i].Item3, lineVector));
             }
             return blobPairList;
         }

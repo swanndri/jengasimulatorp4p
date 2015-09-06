@@ -184,7 +184,6 @@ namespace JengaSimulator
         private Viewport defaultViewport;
         private Boolean isDefaultViewPort = true;
         private Vector3 positionSave;
-        private Color colorSave;
 
         public void toggleViewPort() {    
            
