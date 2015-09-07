@@ -20,7 +20,7 @@ namespace JengaSimulator
     public class BlobPair
     {
         public Tangible thisBlobPairTangible;
-
+        
         public int BlobPairID { get; set; }
 
         private TouchPoint bigBlob, smallBlob;
@@ -30,6 +30,10 @@ namespace JengaSimulator
         private float centerX, centerY;
         public float CenterX { get { return centerX; } }
         public float CenterY { get { return centerY; } }
+
+        private float probability;
+        public float Probability { get { return probability; } }
+
         private float distanceBetweenBlobCentres;
         public float DistanceBetweenBlobCentres { get { return distanceBetweenBlobCentres; } }
         
@@ -102,14 +106,14 @@ namespace JengaSimulator
             //    Console.WriteLine(t.Item1.Name + " : " + t.Item2 + "%"); 
             //}
             //Console.WriteLine("---------------Final---------------------");
-            /*
-            Console.WriteLine("Tangible is: " + probabilities[0].Item1.Name + " with " + (probabilities[0].Item2 * 100) +
+            
+            /*Console.WriteLine("Tangible is: " + probabilities[0].Item1.Name + " with " + (probabilities[0].Item2 * 100) +
                 " percent certainty.");
             */
             //Console.WriteLine("---------------END-----------------------");
-            
 
-            
+
+            this.probability = probabilities[0].Item2;
             thisBlobPairTangible = probabilities[0].Item1;
         } 
     }

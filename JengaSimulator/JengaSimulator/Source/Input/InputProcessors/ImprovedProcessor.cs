@@ -79,6 +79,13 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         double roll = Math.Atan2(2.0 * (q.X * q.Y + q.W * q.Z), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z);
 
                         float totalRotation = bp.Orientation;
+                        
+                        float cameraRotationOffset = MathHelper.ToDegrees(_viewManager.RotationAngle) % 360;
+
+                        cameraRotationOffset = cameraRotationOffset < 0 ? 360 + cameraRotationOffset : cameraRotationOffset;
+                        cameraRotationOffset = 360 - cameraRotationOffset;
+
+                        totalRotation = MathHelper.ToRadians(MathHelper.ToDegrees(bp.Orientation) - cameraRotationOffset);
 
                         Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
                         selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
@@ -95,7 +102,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
                         Vector3.Add(ref s.P1, ref diff, out point);
 
-                        Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
+                        //Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
+                        Vector3 position = point;
 
                         selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
                         selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
@@ -257,7 +265,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
             if (t.IsFingerRecognized)
             {
                 //MOVING BLOCKS
-                if (t.Id == this.holdingTouchPointID)
+                if (t.Id == this.holdingTouchPointID && !rotateOrZoom)
                 {
                     try
                     {
@@ -296,8 +304,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
 
                 bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
-                //if (doubleTap)
-                //{
+                if (doubleTap)
+                {
                     Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t.X, t.Y);
                     //If we touched a block
                     if (brick != null)
@@ -333,11 +341,11 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         }
                     }
                     this.previousTap = null;
-                //}
-                //else
-                //{
-                //    this.previousTap = currentTap;
-                //}
+                }
+                else
+                {
+                    this.previousTap = currentTap;
+                }
             }
         }
         public void TouchUp(object sender, TouchEventArgs e)

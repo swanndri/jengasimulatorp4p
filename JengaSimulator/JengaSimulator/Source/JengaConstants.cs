@@ -18,7 +18,7 @@ namespace JengaSimulator.Source
         public const long MIN_TICK_DIFFERENCE = 8000000;
         //Block moving away and towards speed factor. (Greater is faster)
         //In range 0(doesnt move) to infinity (probably crash)
-        public const float FORWARD_BACK_BLOCK_SPEED = 4.0f;
+        public const float FORWARD_BACK_BLOCK_SPEED = 1.0f;
         //This constant makes the two zoom gestures the same fineness. larger means less movement
         //Range: 0.9 - 1
         public const float FORWARD_BACK_SCALE_CONSTANT = 0.999f;     
@@ -55,6 +55,7 @@ namespace JengaSimulator.Source
         public const float BIG_BLOB_WEIGHTING = 1.0f;
         public const float SMALL_BLOB_WEIGHTING = 1.0f;
         public const float DISTANCE_WEIGHTING = 1.0f;
+        public const float PROBABILITY_THRESHOLD = 0.75f;
 
         public static List<Tangible> REGISTERED_TANGIBLES = new List<Tangible>()
         {   

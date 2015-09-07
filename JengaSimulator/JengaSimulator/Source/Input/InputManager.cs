@@ -121,8 +121,10 @@ namespace JengaSimulator
             {
                 Vector2 lineVector = new Vector2(vectorDistances[i].Item2.CenterX - vectorDistances[i].Item3.CenterX,
                     vectorDistances[i].Item2.CenterY - vectorDistances[i].Item3.CenterY);
-                
-                blobPairList.Add(new BlobPair(vectorDistances[i].Item2, vectorDistances[i].Item3, lineVector));
+
+                BlobPair tangible = new BlobPair(vectorDistances[i].Item2, vectorDistances[i].Item3, lineVector);
+                if( tangible.Probability > JengaConstants.PROBABILITY_THRESHOLD)
+                    blobPairList.Add(tangible);
             }
             return blobPairList;
         }
