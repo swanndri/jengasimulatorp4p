@@ -35,6 +35,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
         private Tuple <TouchPoint, long> previousTap;
 
         private int holdingTouchPointID;                //Id of touchpoint.
+        private float lastCorkScrewOrientation;
         private bool rotateOrZoom;
 
         public ImprovedProcessor(Game game, IViewManager viewManager, PhysicsManager physics )
@@ -51,6 +52,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
             this.holdingTouchPointIds = new List<int>();
             this.holdingTouchPoint = null;
 
+            this.lastCorkScrewOrientation = -1;
+
             Manipulations2D enabledManipulations = Manipulations2D.Rotate | Manipulations2D.Scale | Manipulations2D.Translate;
             manipulationProcessor = new ManipulationProcessor2D(enabledManipulations);
 
@@ -63,7 +66,44 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
 
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
-        {   
+        {
+            foreach (BlobPair bp in blobPairs)
+            {                
+                if (bp.thisBlobPairTangible.Name.Equals("Jenga Block")){
+                    if (selectedBrick != null)
+                    {
+                        Quaternion q = selectedBrick.Item1.Orientation;
+
+                        double yaw = Math.Atan2(2.0 * (q.Y * q.Z + q.W * q.X), q.W * q.W - q.X * q.X - q.Y * q.Y + q.Z * q.Z);
+                        double pitch = Math.Asin(-2.0 * (q.X * q.Z - q.W * q.Y));
+                        double roll = Math.Atan2(2.0 * (q.X * q.Y + q.W * q.Z), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z);
+
+                        float totalRotation = bp.Orientation;
+
+                        Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
+                        selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
+                            (selectedBrick.Item1, finalOrientation, selectedBrick.Item3, selectedBrick.Item4);
+
+                        Segment s;
+                        s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(bp.CenterX, bp.CenterY, 0f),
+                            _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+                        s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(bp.CenterX, bp.CenterY, 1f),
+                            _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+
+                        Vector3 diff, point;
+                        Vector3.Subtract(ref s.P2, ref s.P1, out diff);
+                        Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
+                        Vector3.Add(ref s.P1, ref diff, out point);
+
+                        Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
+
+                        selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
+                        selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
+                        selectedBrick.Item1.IsActive = true;
+                    }
+                }
+            }           
+            //==========================================================================
             //Get center positions of all finger touchpoints
             float x = 0, y = 0;
             int count = 0;
@@ -172,21 +212,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 deltaAdd *= JengaConstants.FORWARD_BACK_BLOCK_SPEED;
                 newPosition = Vector3.Add(Vector3.Multiply(direction, deltaAdd), selectedBrick.Item1.Position);
 
+                selectedBrick.Item1.IsActive = true;
                 selectedBrick.Item1.SetWorld(newPosition, selectedBrick.Item2);
-
-                /*
-                float distance;
-                if (e.Delta.ScaleX > 1){
-                    distance = (2 - JengaConstants.FORWARD_BACK_SCALE_CONSTANT) * selectedBrick.Item3;
-                }else if (e.Delta.ScaleX < 1){
-                    distance = JengaConstants.FORWARD_BACK_SCALE_CONSTANT * selectedBrick.Item3;             
-                }else{
-                    distance = selectedBrick.Item3;
-                }                
-                
-                selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
-                        (selectedBrick.Item1, finalOrientation,distance , selectedBrick.Item4);
-                 */
             }
         }
         private void OnManipulationCompleted(object sender, Manipulation2DCompletedEventArgs e) {}
@@ -269,8 +296,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
 
                 bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
-                if (doubleTap)
-                {
+                //if (doubleTap)
+                //{
                     Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t.X, t.Y);
                     //If we touched a block
                     if (brick != null)
@@ -306,11 +333,11 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         }
                     }
                     this.previousTap = null;
-                }
-                else
-                {
-                    this.previousTap = currentTap;
-                }
+                //}
+                //else
+                //{
+                //    this.previousTap = currentTap;
+                //}
             }
         }
         public void TouchUp(object sender, TouchEventArgs e)

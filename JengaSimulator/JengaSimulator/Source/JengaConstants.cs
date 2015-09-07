@@ -58,12 +58,8 @@ namespace JengaSimulator.Source
 
         public static List<Tangible> REGISTERED_TANGIBLES = new List<Tangible>()
         {   
-            new Tangible("Jenga Block", 41.41071f, 19.84369f, 35.39117f),
-            new Tangible("SIDE 5", 26f, 54f, 49f),
-            //new Tangible("Cork Screw", 46.0526f, 23.72978f, 39.95073f),
-            //new Tangible("Freeze", 53.18616f, 21.81044f, 47.44673f),
-            //new Tangible("Un-Freeze", 67.18616f, 15.81044f, 35.44673f),
-            new Tangible("SIDE 4", 47f, 19f, 42f)
+            new Tangible("Jenga Block", 42f,26f,21f,12f,37f),
+            new Tangible("Cork Screw", 24f,16f,9.5f,8.5f, 27f)
         };
     }
     

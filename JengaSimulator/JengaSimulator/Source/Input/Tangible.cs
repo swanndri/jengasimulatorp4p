@@ -10,20 +10,26 @@ namespace JengaSimulator.Source
         private String name;
         public String Name { get { return name; } }
 
-        private float smallBlobWidth;
-        public float SmallBlobWidth { get { return smallBlobWidth; } }
+        private float smallBlobMajor;
+        public float SmallBlobMajor { get { return smallBlobMajor; } }
+        private float smallBlobMinor;
+        public float SmallBlobMinor { get { return smallBlobMinor; } }
 
-        private float bigBlobWidth;
-        public float BigBlobWidth { get { return bigBlobWidth; } }
+        private float bigBlobMajor;
+        public float BigBlobMajor { get { return bigBlobMajor; } }
+        private float bigBlobMinor;
+        public float BigBlobMinor { get { return bigBlobMinor; } }
 
         private float distanceBetweenBlobs;
         public float DistanceBetweenBlobs { get { return distanceBetweenBlobs; } }
 
-        public Tangible(String name, float bigBlobWidth, float smallBlobWidth, float distanceBetweenBlobs)
+        public Tangible(String name, float bigBlobMajor, float bigBlobMinor, float smallBlobMajor, float smallBlobMinor, float distanceBetweenBlobs)
         {
             this.name = name;
-            this.smallBlobWidth = smallBlobWidth;
-            this.bigBlobWidth = bigBlobWidth;
+            this.smallBlobMajor = smallBlobMajor;
+            this.smallBlobMinor = smallBlobMinor;
+            this.bigBlobMinor = bigBlobMinor;
+            this.bigBlobMajor = bigBlobMajor;
             this.distanceBetweenBlobs = distanceBetweenBlobs;
         }
     }

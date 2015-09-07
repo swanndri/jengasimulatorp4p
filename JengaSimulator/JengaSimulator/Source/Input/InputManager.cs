@@ -40,6 +40,15 @@ namespace JengaSimulator
         {
             blobPairs = getBlobPairListFromTouchCollection(touches);            
             _inputProcessor.processTouchPoints(touches, blobPairs, gameTime);
+
+            /*
+            foreach (BlobPair bp in blobPairs)
+            {
+                Console.WriteLine("LARGE BLOB: " + bp.BigBlob.MajorAxis + " : " + bp.BigBlob.MinorAxis + 
+                    " SMALL BLOB: " + bp.SmallBlob.MajorAxis + " : " + bp.SmallBlob.MinorAxis
+                    + " DISTANCE: " + bp.DistanceBetweenBlobCentres);
+            }
+            */
         }
 
         #region TouchEvents

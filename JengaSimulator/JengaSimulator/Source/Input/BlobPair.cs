@@ -51,13 +51,9 @@ namespace JengaSimulator
             this.centerY = (smallBlob.CenterY + bigBlob.CenterY) / 2.0f;
 
             //Determine orientation for the blob pair. Orientation is angle from vertical position.
-            Vector2 v1 = Vector2.UnitY;
             Vector2 v2 = new Vector2(lineVector.X, lineVector.Y) ;
             v2.Normalize();
-            float dot = (v1.X * v2.X) + (v1.Y * v2.Y);
-            float det = (v2.X * v2.Y) - (v1.Y * v2.X);
-            this.orientation = (float)Math.PI + ((float)Math.Atan2(det, dot));
-
+            this.orientation = (float)(2 * Math.PI) -((float)Math.PI + ((float)Math.Atan2(v2.Y, v2.X)));
             determineTangible();
         }
 
@@ -79,8 +75,15 @@ namespace JengaSimulator
 
             for (int i = 0; i < JengaConstants.REGISTERED_TANGIBLES.Count; i++)
             {
-                float bigBlobCloseness = (1.0f - Math.Abs(((this.BigBlob.MajorAxis - JengaConstants.REGISTERED_TANGIBLES[i].BigBlobWidth) / this.BigBlob.MajorAxis)));
-                float smallBlobCloseness = (1.0f - Math.Abs(((this.SmallBlob.MajorAxis - JengaConstants.REGISTERED_TANGIBLES[i].SmallBlobWidth) / this.SmallBlob.MajorAxis)));
+                float bigBlobMajorCloseness = (1.0f - Math.Abs(((this.BigBlob.MajorAxis - JengaConstants.REGISTERED_TANGIBLES[i].BigBlobMajor) / this.BigBlob.MajorAxis)));
+                float bigBlobMinorCloseness = (1.0f - Math.Abs(((this.BigBlob.MinorAxis - JengaConstants.REGISTERED_TANGIBLES[i].BigBlobMinor) / this.BigBlob.MinorAxis)));
+                
+                float smallBlobMajorCloseness = (1.0f - Math.Abs(((this.SmallBlob.MajorAxis - JengaConstants.REGISTERED_TANGIBLES[i].SmallBlobMajor) / this.SmallBlob.MajorAxis)));
+                float smallBlobMinorCloseness = (1.0f - Math.Abs(((this.SmallBlob.MinorAxis - JengaConstants.REGISTERED_TANGIBLES[i].SmallBlobMinor) / this.SmallBlob.MinorAxis)));
+
+                float bigBlobCloseness = (bigBlobMajorCloseness * 0.5f) + (bigBlobMinorCloseness * 0.5f);
+                float smallBlobCloseness = (smallBlobMajorCloseness * 0.5f) + (smallBlobMinorCloseness * 0.5f);
+
                 float distanceCloseness = (1.0f - Math.Abs(((this.distanceBetweenBlobCentres - JengaConstants.REGISTERED_TANGIBLES[i].DistanceBetweenBlobs) / this.distanceBetweenBlobCentres)));
 
                 float totalWeighting = JengaConstants.SMALL_BLOB_WEIGHTING + JengaConstants.BIG_BLOB_WEIGHTING + JengaConstants.DISTANCE_WEIGHTING;
@@ -93,17 +96,18 @@ namespace JengaSimulator
             }
             probabilities = probabilities.OrderByDescending(x => x.Item2).ToList();
             
+           
+            //Console.WriteLine("---------------BEGIN---------------------");
+            //foreach (Tuple<Tangible, float> t in probabilities){
+            //    Console.WriteLine(t.Item1.Name + " : " + t.Item2 + "%"); 
+            //}
+            //Console.WriteLine("---------------Final---------------------");
             /*
-            Console.WriteLine("---------------BEGIN---------------------");
-            foreach (Tuple<Tangible, float> t in probabilities){
-                Console.WriteLine(t.Item1.Name + " : " + t.Item2 + "%"); 
-            }
-            Console.WriteLine("---------------Final---------------------");
             Console.WriteLine("Tangible is: " + probabilities[0].Item1.Name + " with " + (probabilities[0].Item2 * 100) +
                 " percent certainty.");
-
-            Console.WriteLine("---------------END-----------------------");
             */
+            //Console.WriteLine("---------------END-----------------------");
+            
 
             
             thisBlobPairTangible = probabilities[0].Item1;
