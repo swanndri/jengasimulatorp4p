@@ -15,6 +15,7 @@ namespace JengaSimulator.Source
         //DoubleTap Config
         public const float BOUNDS_BUFFER_SIZE = 50.0f;
         public const long MAX_TICK_DIFFERENCE = 8000000;
+        public const long MIN_TICK_DIFFERENCE = 8000000;
         //Block moving away and towards speed factor. (Greater is faster)
         //In range 0(doesnt move) to infinity (probably crash)
         public const float FORWARD_BACK_BLOCK_SPEED = 4.0f;
@@ -56,12 +57,13 @@ namespace JengaSimulator.Source
         public const float DISTANCE_WEIGHTING = 1.0f;
 
         public static List<Tangible> REGISTERED_TANGIBLES = new List<Tangible>()
-        {       
-            new Tangible("Jenga Block", 46.63271f, 13.65318f, 30.3775f),
-            new Tangible("Jenga Stack", 41.54224f, 15.97482f, 41.32901f),
-            new Tangible("Cork Screw", 46.0526f, 23.72978f, 39.95073f),
-            new Tangible("Freeze", 53.18616f, 21.81044f, 47.44673f),
-            new Tangible("Un-Freeze", 67.18616f, 15.81044f, 35.44673f)
+        {   
+            new Tangible("Jenga Block", 41.41071f, 19.84369f, 35.39117f),
+            new Tangible("SIDE 5", 26f, 54f, 49f),
+            //new Tangible("Cork Screw", 46.0526f, 23.72978f, 39.95073f),
+            //new Tangible("Freeze", 53.18616f, 21.81044f, 47.44673f),
+            //new Tangible("Un-Freeze", 67.18616f, 15.81044f, 35.44673f),
+            new Tangible("SIDE 4", 47f, 19f, 42f)
         };
     }
     

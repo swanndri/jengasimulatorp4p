@@ -319,7 +319,7 @@ namespace JengaSimulator
                     break;
             }                
             //updateCameraPosition(rotationAngle, (float)heightAngle, 13f);
-            updateCameraPositionSmoothly(rotationAngle, (float)heightAngle, 13f);
+            updateCameraPositionSmoothly(rotationAngle, (float)heightAngle, cameraDistance);
         }
 	}
 }

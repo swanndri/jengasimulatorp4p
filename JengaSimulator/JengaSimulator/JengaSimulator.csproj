@@ -105,7 +105,7 @@
     <Compile Include="Source\Input\Tangibles.cs" />
     <Compile Include="Source\Input\InputProcessors\DefaultProcessor.cs" />
     <Compile Include="Source\Input\InputManager.cs" />
-    <Compile Include="Source\Tangible.cs" />
+    <Compile Include="Source\Input\Tangible.cs" />
     <Compile Include="Source\View\IViewManager.cs" />
     <Compile Include="Source\Physics\PhysicsScene.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
