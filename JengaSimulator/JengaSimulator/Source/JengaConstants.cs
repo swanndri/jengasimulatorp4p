@@ -75,6 +75,8 @@ namespace JengaSimulator.Source
         public const long STACK_SIDE_2 = 01;
         public const long STACK_SIDE_3 = 03;
         public const long STACK_SIDE_4 = 05;
+
+        public const float MAX_TANGIBLE_DISTANCE = 4f;
     }
     
 }

@@ -36,6 +36,11 @@ namespace JengaSimulator
             _inputProcessor = new ImprovedProcessor(game, viewManager, physics);
 		}
 
+        public void initialize()
+        {
+            _inputProcessor.initialize();
+        }
+
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, GameTime gameTime)
         {
             blobPairs = getBlobPairListFromTouchCollection(touches);            

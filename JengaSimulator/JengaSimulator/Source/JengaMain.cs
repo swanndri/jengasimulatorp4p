@@ -254,7 +254,7 @@ namespace JengaSimulator
         {
             _physics.Clear();
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
-
+            _inputManager.initialize();
             Model cubeModel = this.Content.Load<Model>("models/square_block");
             Model tableModel = this.Content.Load<Model>("models/table");
             ModelMesh tableMesh = tableModel.Meshes.ElementAt(0);
@@ -300,11 +300,7 @@ namespace JengaSimulator
                     _physics.Add(cube);
                 }
             }
-
-
         }
-
-
 
         private void CreateHUD()
         {

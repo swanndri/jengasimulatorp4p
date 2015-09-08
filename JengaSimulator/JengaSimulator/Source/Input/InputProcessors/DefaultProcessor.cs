@@ -50,6 +50,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
             manipulationProcessor.Delta += OnManipulationDelta;
             manipulationProcessor.Completed += OnManipulationCompleted;
         }
+        public void initialize()
+        {
+        }
 
         /** Manipulation Events ********/
         #region ManipulationEvents

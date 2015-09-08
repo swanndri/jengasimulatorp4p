@@ -26,5 +26,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
         void TouchMove(object sender, TouchEventArgs e);
         void TouchTapGesture(object sender, TouchEventArgs e);
         void TouchUp(object sender, TouchEventArgs e);
+
+        void initialize();
     }
 }

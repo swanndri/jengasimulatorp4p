@@ -44,7 +44,11 @@ namespace JengaSimulator.Source.Input.InputProcessors
             this._game = game;
             this._viewManager = viewManager;
             this._physics = physics;
+            initialize();
+        }
 
+        public void initialize()
+        {
             this.selectedBrick = null;
             this.previousTap = null;
             this.blockTangibleLastInContact = null;
@@ -54,7 +58,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
             this.activeTouchPoints = new Dictionary<int, TouchPoint>();
             this.holdingTouchPointIds = new List<int>();
-            
+
             this.lastCorkScrewOrientation = -1;
 
             Manipulations2D enabledManipulations = Manipulations2D.Rotate | Manipulations2D.Scale | Manipulations2D.Translate;
@@ -67,7 +71,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
             manipulationProcessor.Delta += OnManipulationDelta;
             manipulationProcessor.Completed += OnManipulationCompleted;
         }
-
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
         {
             foreach (BlobPair bp in blobPairs)
@@ -83,7 +86,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         double roll = Math.Atan2(2.0 * (q.X * q.Y + q.W * q.Z), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z);
 
                         float totalRotation = bp.Orientation;
-                        
+
                         float cameraRotationOffset = MathHelper.ToDegrees(_viewManager.RotationAngle) % 360;
 
                         cameraRotationOffset = cameraRotationOffset < 0 ? 360 + cameraRotationOffset : cameraRotationOffset;
@@ -92,7 +95,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         totalRotation = MathHelper.ToRadians(MathHelper.ToDegrees(bp.Orientation) - cameraRotationOffset);
 
                         Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
-                        
+
                         Segment s;
                         s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(bp.CenterX, bp.CenterY, 0f),
                             _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
@@ -104,14 +107,19 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
                         Vector3.Add(ref s.P1, ref diff, out point);
 
-                        Vector3 position = point;
+                        Console.WriteLine(this.selectedBrick.Item4);
+                        Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
+                        //Vector3 position = point;
 
-                        selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
-                        selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
-                        selectedBrick.Item1.IsActive = true;
+                        if (!(Vector3.Subtract(position, selectedBrick.Item1.Position).Length() > JengaConstants.MAX_TANGIBLE_DISTANCE))
+                        {
+                            selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
+                                (selectedBrick.Item1, finalOrientation, selectedBrick.Item3, selectedBrick.Item4);
 
-                        selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
-                            (selectedBrick.Item1, finalOrientation, selectedBrick.Item3, selectedBrick.Item4);
+                            selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
+                            selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
+                            selectedBrick.Item1.IsActive = true;                            
+                        }
                     }
                 }
             }
@@ -261,9 +269,10 @@ namespace JengaSimulator.Source.Input.InputProcessors
         public void TouchDown(object sender, TouchEventArgs e)
         {
             TouchPoint t = e.TouchPoint;
-            bool fakeTap = wasFakeTap(t);
+            //bool fakeTap = wasFakeTap(t);
 
-            if (t.IsFingerRecognized && !fakeTap)
+            //if (t.IsFingerRecognized && !fakeTap)ake
+            if (t.IsFingerRecognized)
             {
                 this.activeTouchPoints.Add(t.Id, t);
 
@@ -285,8 +294,15 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     }
                 }
             }
-            else if (fakeTap)
+            else if (!t.IsTagRecognized)
             {
+                Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t.X, t.Y);
+                if (selectedBrick == null && brick != null)
+                {
+                    selectedBrick = brick;
+                    selectedBrick.Item1.IsWeightless = true;
+                    selectedBrick.Item1._isSelected = true;
+                }
             }
         }
         public void TouchHoldGesture(object sender, TouchEventArgs e)
@@ -301,6 +317,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
             {
                 //MOVING BLOCKS
                 if (t.Id == this.holdingTouchPointID && !rotateOrZoom)
+                //if(t.Id == this.holdingTouchPointID)
                 {
                     try
                     {
@@ -318,7 +335,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         Vector3.Add(ref s.P1, ref diff, out point);
 
                         Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
-
                         selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
                         selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
                         selectedBrick.Item1.IsActive = true;
@@ -342,8 +358,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 if (doubleTap)
                 {
                     //Faketap detects if double tap was triggered by tangible
-                    bool fakeTap = wasFakeTap(t);                    
-
+                    bool fakeTap = wasFakeTap(t);
                     if (!fakeTap)
                     {
                         Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t.X, t.Y);
@@ -381,6 +396,10 @@ namespace JengaSimulator.Source.Input.InputProcessors
                             }
                         }
                         this.previousTap = null;
+                    }
+                    else
+                    {
+
                     }
                 }
                 else
