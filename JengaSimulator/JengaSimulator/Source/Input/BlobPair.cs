@@ -75,8 +75,7 @@ namespace JengaSimulator
         //Helper Methods
 
         private void determineTangible() {     
-            List<Tuple<Tangible, float>> probabilities = new List<Tuple<Tangible, float>>();            
-
+            List<Tuple<Tangible, float>> probabilities = new List<Tuple<Tangible, float>>();
             for (int i = 0; i < JengaConstants.REGISTERED_TANGIBLES.Count; i++)
             {
                 float bigBlobMajorCloseness = (1.0f - Math.Abs(((this.BigBlob.MajorAxis - JengaConstants.REGISTERED_TANGIBLES[i].BigBlobMajor) / this.BigBlob.MajorAxis)));
@@ -107,9 +106,9 @@ namespace JengaSimulator
             //}
             //Console.WriteLine("---------------Final---------------------");
             
-            /*Console.WriteLine("Tangible is: " + probabilities[0].Item1.Name + " with " + (probabilities[0].Item2 * 100) +
-                " percent certainty.");
-            */
+            //Console.WriteLine("Tangible is: " + probabilities[0].Item1.Name + " with " + (probabilities[0].Item2 * 100) +
+            //    " percent certainty.");
+            
             //Console.WriteLine("---------------END-----------------------");
 
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Surface;
 using Microsoft.Surface.Core;
 using Microsoft.Xna.Framework;
@@ -28,11 +29,11 @@ namespace JengaSimulator.Source.Input.InputProcessors
         private Dictionary<int, TouchPoint> activeTouchPoints;      //All active touch points in the original config (they do not update!)
         private List<int> holdingTouchPointIds;                     //All touchpoints that are in contact with the selected block.
         
-        private TouchPoint holdingTouchPoint;
-
         //SolidThing Object, Initial Orientation, Picked Distance and TouchPoint Offset
         private Tuple <SolidThing, Quaternion, float, Vector3> selectedBrick;        
         private Tuple <TouchPoint, long> previousTap;
+
+        private Tuple<BlobPair, long> blockTangibleLastInContact; 
 
         private int holdingTouchPointID;                //Id of touchpoint.
         private float lastCorkScrewOrientation;
@@ -44,14 +45,16 @@ namespace JengaSimulator.Source.Input.InputProcessors
             this._viewManager = viewManager;
             this._physics = physics;
 
-            selectedBrick = null;
-            previousTap = null;
-            rotateOrZoom = false;
+            this.selectedBrick = null;
+            this.previousTap = null;
+            this.blockTangibleLastInContact = null;
+
+            this.rotateOrZoom = false;
             this.holdingTouchPointID = -1;
+
             this.activeTouchPoints = new Dictionary<int, TouchPoint>();
             this.holdingTouchPointIds = new List<int>();
-            this.holdingTouchPoint = null;
-
+            
             this.lastCorkScrewOrientation = -1;
 
             Manipulations2D enabledManipulations = Manipulations2D.Rotate | Manipulations2D.Scale | Manipulations2D.Translate;
@@ -70,6 +73,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
             foreach (BlobPair bp in blobPairs)
             {                
                 if (bp.thisBlobPairTangible.Name.Equals("Jenga Block")){
+                    this.blockTangibleLastInContact = new Tuple<BlobPair, long>(bp, Timestamp);
                     if (selectedBrick != null)
                     {
                         Quaternion q = selectedBrick.Item1.Orientation;
@@ -149,7 +153,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
                 try
                 {
-                    rotateOrZoom = true;                    
+                    rotateOrZoom = true;
                     manipulationProcessor.Pivot.X = selectedBrick.Item1.Position.X;
                     manipulationProcessor.Pivot.Y = selectedBrick.Item1.Position.Y;                    
                     manipulationProcessor.ProcessManipulators(Timestamp, manipulators);         //TODO FIXED COLLECTION MODIFIED                   
@@ -173,7 +177,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
             }
         }
 
-        /** Manipulation Events ********/
         #region ManipulationEvents
         private void OnManipulationStarted(object sender, Manipulation2DStartedEventArgs e){ }
         private void OnManipulationDelta(object sender, Manipulation2DDeltaEventArgs e)
@@ -250,7 +253,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         this.selectedBrick = touchedBlock;
                         this.holdingTouchPointIds.Add(t.Id);
                         this.holdingTouchPointID = t.Id;
-                        this.holdingTouchPoint = t;
                     }
                 }
             }
@@ -261,6 +263,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
         public void TouchMove(object sender, TouchEventArgs e)
         {            
             TouchPoint t = e.TouchPoint;
+            long currentTime = Timestamp;
 
             if (t.IsFingerRecognized)
             {
@@ -269,7 +272,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 {
                     try
                     {
-                        this.holdingTouchPoint = t;
                         rotateOrZoom = false;
 
                         Segment s;
@@ -304,43 +306,67 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
 
                 bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
+                
                 if (doubleTap)
                 {
-                    Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t.X, t.Y);
-                    //If we touched a block
-                    if (brick != null)
+                    //Faketap detects if double tap was triggered by tangible
+                    bool fakeTap = false;
+                    Thread.Sleep(75);                    
+                    if (this.blockTangibleLastInContact != null)
                     {
-                        //If we are currently holding a block
-                        if (selectedBrick != null)
+                        long timeDifference = Timestamp - this.blockTangibleLastInContact.Item2;
+                        Console.WriteLine(timeDifference);
+                        if (timeDifference < JengaConstants.TIME_BETWEEN_FAKE_TOUCH_AND_TANGIBLE)
                         {
-                            //if we touched the same block we want to deselct it
-                            if (selectedBrick.Item1.Equals(brick.Item1))
+                            int x = (int)(this.blockTangibleLastInContact.Item1.CenterX - (JengaConstants.HIT_BOX_SIZE *0.5));
+                            int y = (int)(this.blockTangibleLastInContact.Item1.CenterY - (JengaConstants.HIT_BOX_SIZE * 0.5));
+                            Rectangle hitBox = new Rectangle(x, y, JengaConstants.HIT_BOX_SIZE, JengaConstants.HIT_BOX_SIZE);
+                            Console.WriteLine(hitBox + " : " + t.CenterX + " : " + t.CenterY);
+                            if (hitBox.Contains(new Point((int)t.CenterX, (int)t.CenterY)))
                             {
-                                selectedBrick.Item1.IsWeightless = false;
-                                selectedBrick.Item1.IsActive = true;
-                                selectedBrick.Item1._isSelected = false;
-                                selectedBrick = null;
+                                fakeTap = true;
                             }
-                            //If we touched a new block with an block currently selected.
+                        }
+                    }
+
+                    if (!fakeTap)
+                    {
+                        Tuple<SolidThing, Quaternion, float, Vector3> brick = getTouchedBlock(t.X, t.Y);
+                        //If we touched a block
+                        if (brick != null)
+                        {
+                            //If we are currently holding a block
+                            if (selectedBrick != null)
+                            {
+                                //if we touched the same block we want to deselct it
+                                if (selectedBrick.Item1.Equals(brick.Item1))
+                                {
+                                    selectedBrick.Item1.IsWeightless = false;
+                                    selectedBrick.Item1.IsActive = true;
+                                    selectedBrick.Item1._isSelected = false;
+                                    selectedBrick = null;
+                                }
+                                //If we touched a new block with an block currently selected.
+                                else
+                                {
+                                    selectedBrick.Item1.IsWeightless = false;
+                                    selectedBrick.Item1._isSelected = false;
+                                    selectedBrick.Item1.IsActive = true;
+                                    selectedBrick = brick;
+                                    selectedBrick.Item1.IsWeightless = true;
+                                    selectedBrick.Item1._isSelected = true;
+                                }
+                            }
+                            //If no block selected then select this one
                             else
                             {
-                                selectedBrick.Item1.IsWeightless = false;
-                                selectedBrick.Item1._isSelected = false;
-                                selectedBrick.Item1.IsActive = true;
                                 selectedBrick = brick;
                                 selectedBrick.Item1.IsWeightless = true;
                                 selectedBrick.Item1._isSelected = true;
                             }
                         }
-                        //If no block selected then select this one
-                        else
-                        {
-                            selectedBrick = brick;
-                            selectedBrick.Item1.IsWeightless = true;
-                            selectedBrick.Item1._isSelected = true;
-                        }
+                        this.previousTap = null;
                     }
-                    this.previousTap = null;
                 }
                 else
                 {
@@ -362,12 +388,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 }
                 this.manipulationProcessor.CompleteManipulation(Timestamp);
 
-                if (t.Id == this.holdingTouchPointID)
-                {
+                if (t.Id == this.holdingTouchPointID)                
                     this.holdingTouchPointID = -1;
-                    this.holdingTouchPoint = null;
-                }
-            }
+            }            
         }
         #endregion
 
@@ -387,6 +410,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 return false;
             TouchPoint previousPoint = previous.Item1;
             TouchPoint currentPoint = current.Item1;
+            
             if (currentPoint.CenterX > previousPoint.CenterX - JengaConstants.BOUNDS_BUFFER_SIZE
                 && currentPoint.CenterX < previousPoint.CenterX + JengaConstants.BOUNDS_BUFFER_SIZE
                 && currentPoint.CenterY > previousPoint.CenterY - JengaConstants.BOUNDS_BUFFER_SIZE

@@ -14,11 +14,11 @@ namespace JengaSimulator.Source
          */
         //DoubleTap Config
         public const float BOUNDS_BUFFER_SIZE = 50.0f;
-        public const long MAX_TICK_DIFFERENCE = 8000000;
-        public const long MIN_TICK_DIFFERENCE = 8000000;
+        public const long MAX_TICK_DIFFERENCE = 6000000;
+        //public const long MIN_TICK_DIFFERENCE = 6000000;
         //Block moving away and towards speed factor. (Greater is faster)
         //In range 0(doesnt move) to infinity (probably crash)
-        public const float FORWARD_BACK_BLOCK_SPEED = 1.0f;
+        public const float FORWARD_BACK_BLOCK_SPEED = 5.0f;
         //This constant makes the two zoom gestures the same fineness. larger means less movement
         //Range: 0.9 - 1
         public const float FORWARD_BACK_SCALE_CONSTANT = 0.999f;     
@@ -62,6 +62,12 @@ namespace JengaSimulator.Source
             new Tangible("Jenga Block", 42f,26f,21f,12f,37f),
             new Tangible("Cork Screw", 24f,16f,9.5f,8.5f, 27f)
         };
+
+
+        public const long TIME_BETWEEN_FAKE_TOUCH_AND_TANGIBLE = 70;
+        public const long TIME_BETWEEN_BLOCK_TANGIBLE_AND_SELECT = 10;
+        public const int HIT_BOX_SIZE = 450;
+
     }
     
 }
