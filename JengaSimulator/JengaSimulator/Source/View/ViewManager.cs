@@ -301,20 +301,20 @@ namespace JengaSimulator
             double heightAngle = MathHelper.ToRadians(89);
             switch (sidesToRotate)
             {
-                case 4:
+                case 0:
                     heightAngle = System.Convert.ToDouble(MathHelper.ToRadians(1));
                     rotationAngle = MathHelper.ToRadians(270.0f);
                     break;
-                case 5:
+                case 1:
                     rotationAngle = MathHelper.ToRadians(0f);
                     break;
-                case 6:
+                case 2:
                     rotationAngle = MathHelper.ToRadians(90.0f);
                     break;
-                case 7:
+                case 3:
                     rotationAngle = MathHelper.ToRadians(180.0f);
                     break;                    
-                case 8:
+                case 4:
                     rotationAngle = MathHelper.ToRadians(270.0f);
                     break;
             }                

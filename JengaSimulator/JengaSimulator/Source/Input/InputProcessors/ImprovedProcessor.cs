@@ -92,9 +92,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         totalRotation = MathHelper.ToRadians(MathHelper.ToDegrees(bp.Orientation) - cameraRotationOffset);
 
                         Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
-                        selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
-                            (selectedBrick.Item1, finalOrientation, selectedBrick.Item3, selectedBrick.Item4);
-
+                        
                         Segment s;
                         s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(bp.CenterX, bp.CenterY, 0f),
                             _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
@@ -106,15 +104,43 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
                         Vector3.Add(ref s.P1, ref diff, out point);
 
-                        //Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
                         Vector3 position = point;
 
                         selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
                         selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
                         selectedBrick.Item1.IsActive = true;
+
+                        selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
+                            (selectedBrick.Item1, finalOrientation, selectedBrick.Item3, selectedBrick.Item4);
                     }
                 }
-            }           
+            }
+            //==========================================================================
+            foreach (TouchPoint t in touches)
+            {
+                if (t.IsTagRecognized)
+                {
+                    switch (t.Tag.Value)
+                    {
+                        case JengaConstants.STACK_SIDE_0:
+                            _viewManager.rotateToSide(0);
+                            break;
+                        case JengaConstants.STACK_SIDE_1:
+                            _viewManager.rotateToSide(1);
+                            break;
+                        case JengaConstants.STACK_SIDE_2:
+                            _viewManager.rotateToSide(2);
+                            break;
+                        case JengaConstants.STACK_SIDE_3:
+                            _viewManager.rotateToSide(3);
+                            break;
+                        case JengaConstants.STACK_SIDE_4:
+                            _viewManager.rotateToSide(4);
+                            break;
+
+                    }
+                }
+            }
             //==========================================================================
             //Get center positions of all finger touchpoints
             float x = 0, y = 0;
@@ -145,8 +171,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 //holdingTouchPointID = -1;
                 List<Manipulator2D> manipulatorList = new List<Manipulator2D>();
                 foreach (TouchPoint t in touches)
-                {    
-                    manipulatorList.Add(new Manipulator2D(t.Id, t.X, t.Y));
+                {   
+                    if (t.IsFingerRecognized)
+                        manipulatorList.Add(new Manipulator2D(t.Id, t.X, t.Y));
                 }
                 Manipulator2D[] manipulators = null;
                 manipulators = manipulatorList.ToArray();
@@ -234,7 +261,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
         public void TouchDown(object sender, TouchEventArgs e)
         {
             TouchPoint t = e.TouchPoint;
-            if (t.IsFingerRecognized)
+            bool fakeTap = wasFakeTap(t);
+
+            if (t.IsFingerRecognized && !fakeTap)
             {
                 this.activeTouchPoints.Add(t.Id, t);
 
@@ -255,6 +284,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         this.holdingTouchPointID = t.Id;
                     }
                 }
+            }
+            else if (fakeTap)
+            {
             }
         }
         public void TouchHoldGesture(object sender, TouchEventArgs e)
@@ -310,24 +342,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 if (doubleTap)
                 {
                     //Faketap detects if double tap was triggered by tangible
-                    bool fakeTap = false;
-                    Thread.Sleep(75);                    
-                    if (this.blockTangibleLastInContact != null)
-                    {
-                        long timeDifference = Timestamp - this.blockTangibleLastInContact.Item2;
-                        Console.WriteLine(timeDifference);
-                        if (timeDifference < JengaConstants.TIME_BETWEEN_FAKE_TOUCH_AND_TANGIBLE)
-                        {
-                            int x = (int)(this.blockTangibleLastInContact.Item1.CenterX - (JengaConstants.HIT_BOX_SIZE *0.5));
-                            int y = (int)(this.blockTangibleLastInContact.Item1.CenterY - (JengaConstants.HIT_BOX_SIZE * 0.5));
-                            Rectangle hitBox = new Rectangle(x, y, JengaConstants.HIT_BOX_SIZE, JengaConstants.HIT_BOX_SIZE);
-                            Console.WriteLine(hitBox + " : " + t.CenterX + " : " + t.CenterY);
-                            if (hitBox.Contains(new Point((int)t.CenterX, (int)t.CenterY)))
-                            {
-                                fakeTap = true;
-                            }
-                        }
-                    }
+                    bool fakeTap = wasFakeTap(t);                    
 
                     if (!fakeTap)
                     {
@@ -420,6 +435,26 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 this.previousTap = null;
                 return true;
             }          
+            return false;
+        }
+
+        private bool wasFakeTap(TouchPoint t)
+        {
+            Thread.Sleep(75);
+            if (this.blockTangibleLastInContact != null)
+            {
+                long timeDifference = Timestamp - this.blockTangibleLastInContact.Item2;
+                if (timeDifference < JengaConstants.TIME_BETWEEN_FAKE_TOUCH_AND_TANGIBLE)
+                {
+                    int x = (int)(this.blockTangibleLastInContact.Item1.CenterX - (JengaConstants.HIT_BOX_SIZE * 0.5));
+                    int y = (int)(this.blockTangibleLastInContact.Item1.CenterY - (JengaConstants.HIT_BOX_SIZE * 0.5));
+                    Rectangle hitBox = new Rectangle(x, y, JengaConstants.HIT_BOX_SIZE, JengaConstants.HIT_BOX_SIZE);
+                    if (hitBox.Contains(new Point((int)t.CenterX, (int)t.CenterY)))
+                    {
+                        return true;
+                    }
+                }
+            }
             return false;
         }
 
