@@ -237,7 +237,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 float deltaAdd = 1 - e.Delta.ScaleX;
                 deltaAdd *= JengaConstants.FORWARD_BACK_BLOCK_SPEED;
                 newPosition = Vector3.Add(Vector3.Multiply(direction, deltaAdd), selectedBrick.Item1.Position);
-                if (Vector3.Subtract(_viewManager.Position, newPosition).Length() > JengaConstants.MIN_CAMERA_DISTANCE)
+                if (Vector3.Subtract(_viewManager.Position, newPosition).Length() > JengaConstants.MIN_CAMERA_DISTANCE
+                    || Vector3.Subtract(_viewManager.Position, newPosition).Length() > Vector3.Subtract(_viewManager.Position, selectedBrick.Item1.Position).Length())
+                   
                 {
                     selectedBrick.Item1.IsActive = true;
                     selectedBrick.Item1.SetWorld(newPosition, selectedBrick.Item2);
@@ -264,6 +266,10 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 if (selectedBrick == null || touchedBlock == null || !selectedBrick.Item1.Equals(touchedBlock.Item1))
                 {
                     this.manipulationProcessor.CompleteManipulation(Timestamp);
+                    if (selectedBrick != null)
+                    {
+                        this.selectedBrick.Item1.LinearVelocity = Vector3.Zero;
+                    }
                 }
                 //Else we are moving a block (or possibly selecting it)
                 else
@@ -404,7 +410,10 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     activeTouchPoints.Remove(t.Id);
                 }
                 this.manipulationProcessor.CompleteManipulation(Timestamp);
-
+                if (selectedBrick != null)
+                {
+                    this.selectedBrick.Item1.LinearVelocity = Vector3.Zero;
+                }
                 if (t.Id == this.holdingTouchPointID)
                 {
                     this.holdingTouchPointID = -1;
@@ -460,6 +469,19 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 Vector3 offset = Vector3.Multiply(this.selectedBrick.Item4, scaleFactor);
                 Vector3 position = Vector3.Add(point, offset);
 
+                if (!((_viewManager.Position - position).Length() > JengaConstants.MIN_CAMERA_DISTANCE 
+                    && JengaConstants.TAP_BLOCK_TO_RAISE) 
+                    || Vector3.Subtract(_viewManager.Position, position).Length() > Vector3.Subtract(_viewManager.Position, selectedBrick.Item1.Position).Length())
+                
+                {
+                    Vector3 newItem4 = Vector3.Subtract(this.selectedBrick.Item1.Position, point);
+
+                    Vector3 direction = Vector3.Subtract(_viewManager.Position, point);
+                    direction.Normalize();
+
+                    Vector3 newOffset = direction * (Vector3.Dot(direction, newItem4));
+                    position = Vector3.Add(point, newOffset);
+                }
 
                 if (!(Vector3.Subtract(position, selectedBrick.Item1.Position).Length() > JengaConstants.MAX_TANGIBLE_DISTANCE))
                 {
@@ -488,9 +510,12 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     direction.Normalize();
                     float deltaAdd = deltaDegrees * JengaConstants.TANGIBLE_ZOOM_SCALE_FACTOR;
                     newPosition = Vector3.Add(Vector3.Multiply(direction, deltaAdd), selectedBrick.Item1.Position);
-
-                    selectedBrick.Item1.IsActive = true;
-                    selectedBrick.Item1.SetWorld(newPosition, selectedBrick.Item2);
+                    if (Vector3.Subtract(_viewManager.Position, newPosition).Length() > JengaConstants.MIN_CAMERA_DISTANCE
+                        || Vector3.Subtract(_viewManager.Position, newPosition).Length() > Vector3.Subtract(_viewManager.Position, selectedBrick.Item1.Position).Length())
+                    {
+                        selectedBrick.Item1.IsActive = true;
+                        selectedBrick.Item1.SetWorld(newPosition, selectedBrick.Item2);
+                    }
                 }
             }
 

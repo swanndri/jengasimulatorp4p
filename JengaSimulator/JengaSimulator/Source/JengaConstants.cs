@@ -10,6 +10,13 @@ namespace JengaSimulator.Source
     public class JengaConstants
     {
         /*******************************************************************
+         * OPTIONS MENU
+         */
+
+        //public bool IS_DOUBLE_TAP = true;
+        public const bool TAP_BLOCK_TO_RAISE = false;
+
+        /*******************************************************************
          * Gestures Tweaks
          */
         //DoubleTap Config
@@ -65,7 +72,6 @@ namespace JengaSimulator.Source
             new Tangible("Cork Screw", 24f,16f,9.5f,8.5f, 27f),
             new Tangible("Fine Camera", 54f,46f,11f,8.5f, 55f)
         };
-
 
         public const long TIME_BETWEEN_FAKE_TOUCH_AND_TANGIBLE = 70;
         public const long TIME_BETWEEN_BLOCK_TANGIBLE_AND_SELECT = 10;
