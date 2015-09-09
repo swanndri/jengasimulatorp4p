@@ -33,8 +33,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
         private Tuple <SolidThing, Quaternion, float, Vector3> selectedBrick;        
         private Tuple <TouchPoint, long> previousTap;
 
-        private Tuple<BlobPair, long> blockTangibleLastInContact; 
+        private Tuple<BlobPair, long> blockTangibleLastInContact;
 
+        private BlobPair lastFineCameraInformation;
         private int holdingTouchPointID;                //Id of touchpoint.
         private float lastCorkScrewOrientation;
         private bool rotateOrZoom;
@@ -48,12 +49,12 @@ namespace JengaSimulator.Source.Input.InputProcessors
             initialize();
         }
 
-
         public void initialize()
         {
             this.selectedBrick = null;
             this.previousTap = null;
             this.blockTangibleLastInContact = null;
+            this.lastFineCameraInformation = null;
 
             this.rotateOrZoom = false;
             this.holdingTouchPointID = -1;
@@ -73,9 +74,11 @@ namespace JengaSimulator.Source.Input.InputProcessors
             manipulationProcessor.Delta += OnManipulationDelta;
             manipulationProcessor.Completed += OnManipulationCompleted;
         }
+
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
         {
             bool corkScrewOnTable = false;
+            bool fineCameraOnTable = false;
             foreach (BlobPair bp in blobPairs)
             {             
                 switch (bp.thisBlobPairTangible.Name){
@@ -86,11 +89,17 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         processCorkScrewTangible(bp);
                         corkScrewOnTable = true;
                         break;
+                    case("Fine Camera"):
+                        processFineCamera(bp);
+                        fineCameraOnTable = true;
+                        break;
                 }
             }
 
             if (!corkScrewOnTable)
                 this.lastCorkScrewOrientation = -1;
+            if (!fineCameraOnTable)
+                this.lastFineCameraInformation = null;
 
             //==========================================================================
             foreach (TouchPoint t in touches)
@@ -400,78 +409,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
         #endregion
 
-        #region Helper Methods
-        private long Timestamp
-        {
-            get
-            {
-                // Get timestamp in 100-nanosecond units. 
-                double nanosecondsPerTick = 1000000000.0 / System.Diagnostics.Stopwatch.Frequency;
-                return (long)(System.Diagnostics.Stopwatch.GetTimestamp() / nanosecondsPerTick / 100.0);
-            }
-        }
-
-        private bool wasDoubleTap(Tuple<TouchPoint, long> previous, Tuple<TouchPoint, long> current){
-            if (previous == null || current == null)
-                return false;
-            TouchPoint previousPoint = previous.Item1;
-            TouchPoint currentPoint = current.Item1;
-            
-            if (currentPoint.CenterX > previousPoint.CenterX - JengaConstants.BOUNDS_BUFFER_SIZE
-                && currentPoint.CenterX < previousPoint.CenterX + JengaConstants.BOUNDS_BUFFER_SIZE
-                && currentPoint.CenterY > previousPoint.CenterY - JengaConstants.BOUNDS_BUFFER_SIZE
-                && currentPoint.CenterY < previousPoint.CenterY + JengaConstants.BOUNDS_BUFFER_SIZE
-                && (current.Item2 - previous.Item2) < JengaConstants.MAX_TICK_DIFFERENCE)
-            {
-                this.previousTap = null;
-                return true;
-            }          
-            return false;
-        }
-
-        private bool wasFakeTap(TouchPoint t)
-        {
-            Thread.Sleep(75);
-            if (this.blockTangibleLastInContact != null)
-            {
-                long timeDifference = Timestamp - this.blockTangibleLastInContact.Item2;
-                if (timeDifference < JengaConstants.TIME_BETWEEN_FAKE_TOUCH_AND_TANGIBLE)
-                {
-                    int x = (int)(this.blockTangibleLastInContact.Item1.CenterX - (JengaConstants.HIT_BOX_SIZE * 0.5));
-                    int y = (int)(this.blockTangibleLastInContact.Item1.CenterY - (JengaConstants.HIT_BOX_SIZE * 0.5));
-                    Rectangle hitBox = new Rectangle(x, y, JengaConstants.HIT_BOX_SIZE, JengaConstants.HIT_BOX_SIZE);
-                    if (hitBox.Contains(new Point((int)t.CenterX, (int)t.CenterY)))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        private Tuple<SolidThing, Quaternion, float, Vector3> getTouchedBlock(float x, float y)
-        {
-            Segment s;            
-            s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(x, y, 0f),
-                _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
-            s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(x, y, 1f),
-                _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
-            float scalar;
-            Vector3 point;
-            var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
-            
-            if (c != null && c is BodySkin && !((SolidThing)((BodySkin)c).Owner).getIsTable())
-            {
-                SolidThing selectedObject = (SolidThing)(((BodySkin)c).Owner);
-                Quaternion initialRotation = selectedObject.Orientation;
-                float pickedDistance = scalar;
-                Vector3 offset = selectedObject.Position - point;
-
-                return new Tuple<SolidThing, Quaternion, float, Vector3>(selectedObject, initialRotation, pickedDistance,offset);                
-            }
-            return null;
-        }
-
+        #region Tangible Processing Helpers
         private void processBlockTangible(BlobPair bp)
         {
             this.blockTangibleLastInContact = new Tuple<BlobPair, long>(bp, Timestamp);
@@ -494,7 +432,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 float cameraRotationOffset = MathHelper.ToDegrees(_viewManager.RotationAngle) % 360;
                 cameraRotationOffset = cameraRotationOffset < 0 ? 360 + cameraRotationOffset : cameraRotationOffset;
                 cameraRotationOffset = 360 - cameraRotationOffset;
-                
+
                 totalRotation = MathHelper.ToRadians(MathHelper.ToDegrees(bp.Orientation) - cameraRotationOffset);
 
                 Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
@@ -525,7 +463,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 }
             }
         }
-
         private void processCorkScrewTangible(BlobPair bp)
         {
             if (this.selectedBrick != null)
@@ -549,6 +486,108 @@ namespace JengaSimulator.Source.Input.InputProcessors
             }
 
             this.lastCorkScrewOrientation = bp.Orientation;
+        }
+        private void processFineCamera(BlobPair bp)
+        {
+            bool leftRightDisabled = false;
+
+            if (this.lastFineCameraInformation != null)
+            {
+                float deltaDegrees = MathHelper.ToDegrees(bp.Orientation - this.lastFineCameraInformation.Orientation);
+                deltaDegrees = deltaDegrees > 180 ? (float)(deltaDegrees - 360) : deltaDegrees;
+                deltaDegrees = deltaDegrees < -180 ? (float)(deltaDegrees + 360) : deltaDegrees;
+                deltaDegrees *= -1;
+
+                float deltaX = bp.CenterX - this.lastFineCameraInformation.CenterX;
+                float deltaY = bp.CenterY - this.lastFineCameraInformation.CenterY;
+
+                float newHeightAngle = MathHelper.ToRadians((MathHelper.ToDegrees(_viewManager.HeightAngle)
+                        + (JengaConstants.HEIGHT_REVERSED * deltaY / JengaConstants.PAN_SPEED_DIVISOR)));
+
+                float newRotationAngle;
+                if (leftRightDisabled)
+                {
+                    newRotationAngle = (float)(Math.PI - bp.Orientation);
+                }
+                else
+                {
+                    newRotationAngle = MathHelper.ToRadians((MathHelper.ToDegrees(_viewManager.RotationAngle)
+                        + (JengaConstants.ROTATE_REVERSED * deltaX) / JengaConstants.PAN_SPEED_DIVISOR) + deltaDegrees);
+                }
+                
+                _viewManager.updateCameraPosition(newRotationAngle, newHeightAngle, _viewManager.CameraDistance);
+            }
+            this.lastFineCameraInformation = bp;
+        }
+        #endregion
+
+        #region General Methods
+        private long Timestamp
+        {
+            get
+            {
+                // Get timestamp in 100-nanosecond units. 
+                double nanosecondsPerTick = 1000000000.0 / System.Diagnostics.Stopwatch.Frequency;
+                return (long)(System.Diagnostics.Stopwatch.GetTimestamp() / nanosecondsPerTick / 100.0);
+            }
+        }
+        private bool wasDoubleTap(Tuple<TouchPoint, long> previous, Tuple<TouchPoint, long> current){
+            if (previous == null || current == null)
+                return false;
+            TouchPoint previousPoint = previous.Item1;
+            TouchPoint currentPoint = current.Item1;
+            
+            if (currentPoint.CenterX > previousPoint.CenterX - JengaConstants.BOUNDS_BUFFER_SIZE
+                && currentPoint.CenterX < previousPoint.CenterX + JengaConstants.BOUNDS_BUFFER_SIZE
+                && currentPoint.CenterY > previousPoint.CenterY - JengaConstants.BOUNDS_BUFFER_SIZE
+                && currentPoint.CenterY < previousPoint.CenterY + JengaConstants.BOUNDS_BUFFER_SIZE
+                && (current.Item2 - previous.Item2) < JengaConstants.MAX_TICK_DIFFERENCE)
+            {
+                this.previousTap = null;
+                return true;
+            }          
+            return false;
+        }
+        private bool wasFakeTap(TouchPoint t)
+        {
+            Thread.Sleep(75);
+            if (this.blockTangibleLastInContact != null)
+            {
+                long timeDifference = Timestamp - this.blockTangibleLastInContact.Item2;
+                if (timeDifference < JengaConstants.TIME_BETWEEN_FAKE_TOUCH_AND_TANGIBLE)
+                {
+                    int x = (int)(this.blockTangibleLastInContact.Item1.CenterX - (JengaConstants.HIT_BOX_SIZE * 0.5));
+                    int y = (int)(this.blockTangibleLastInContact.Item1.CenterY - (JengaConstants.HIT_BOX_SIZE * 0.5));
+                    Rectangle hitBox = new Rectangle(x, y, JengaConstants.HIT_BOX_SIZE, JengaConstants.HIT_BOX_SIZE);
+                    if (hitBox.Contains(new Point((int)t.CenterX, (int)t.CenterY)))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        private Tuple<SolidThing, Quaternion, float, Vector3> getTouchedBlock(float x, float y)
+        {
+            Segment s;            
+            s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(x, y, 0f),
+                _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+            s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(x, y, 1f),
+                _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+            float scalar;
+            Vector3 point;
+            var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
+            
+            if (c != null && c is BodySkin && !((SolidThing)((BodySkin)c).Owner).getIsTable())
+            {
+                SolidThing selectedObject = (SolidThing)(((BodySkin)c).Owner);
+                Quaternion initialRotation = selectedObject.Orientation;
+                float pickedDistance = scalar;
+                Vector3 offset = selectedObject.Position - point;
+
+                return new Tuple<SolidThing, Quaternion, float, Vector3>(selectedObject, initialRotation, pickedDistance,offset);                
+            }
+            return null;
         }
         #endregion
     }
