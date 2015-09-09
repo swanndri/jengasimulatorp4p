@@ -96,7 +96,7 @@ namespace JengaSimulator
         /// The target receiving all surface input for the application.
         /// </summary>
         protected TouchTarget TouchTarget
-        {
+        {            
             get { return touchTarget; }
         }
 

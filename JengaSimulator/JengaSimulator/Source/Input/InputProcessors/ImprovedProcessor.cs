@@ -498,6 +498,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 deltaDegrees = deltaDegrees < -180 ? (float)(deltaDegrees + 360) : deltaDegrees;
                 deltaDegrees *= -1;
 
+
                 float deltaX = bp.CenterX - this.lastFineCameraInformation.CenterX;
                 float deltaY = bp.CenterY - this.lastFineCameraInformation.CenterY;
 
