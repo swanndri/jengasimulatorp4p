@@ -472,7 +472,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 if (!((_viewManager.Position - position).Length() > JengaConstants.MIN_CAMERA_DISTANCE 
                     && JengaConstants.TAP_BLOCK_TO_RAISE) 
                     || Vector3.Subtract(_viewManager.Position, position).Length() > Vector3.Subtract(_viewManager.Position, selectedBrick.Item1.Position).Length())
-                
                 {
                     Vector3 newItem4 = Vector3.Subtract(this.selectedBrick.Item1.Position, point);
 
