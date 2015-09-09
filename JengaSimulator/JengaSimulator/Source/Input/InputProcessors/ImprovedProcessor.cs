@@ -309,7 +309,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
             {
                 //MOVING BLOCKS
                 if (t.Id == this.holdingTouchPointID && !rotateOrZoom)
-                //if(t.Id == this.holdingTouchPointID)
                 {
                     try
                     {

@@ -165,7 +165,7 @@ namespace JengaSimulator
             _viewManager.ForwardAxis = -Vector3.UnitX;
             _viewManager.MinPitch = MathHelper.ToRadians(-89.9f);
             _viewManager.MaxPitch = MathHelper.ToRadians(89.9f);
-            _viewManager.updateCameraPosition(0, JengaConstants.HEIGHT_ANGLE_MIN, JengaConstants.CAMERA_HEIGHT);
+            _viewManager.updateCameraPosition(JengaConstants.INITIAL_CAMERA_ROTATION, JengaConstants.INITIAL_CAMERA_HEIGHT, JengaConstants.CAMERA_HEIGHT);
 
             CreateScene();
             CreateHUD();
