@@ -465,23 +465,22 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 Vector3.Subtract(ref s.P2, ref s.P1, out diff);
                 Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
                 Vector3.Add(ref s.P1, ref diff, out point);
-
                 Vector3 offset = Vector3.Multiply(this.selectedBrick.Item4, scaleFactor);
                 Vector3 position = Vector3.Add(point, offset);
 
-                if (!((_viewManager.Position - position).Length() > JengaConstants.MIN_CAMERA_DISTANCE 
-                    && JengaConstants.TAP_BLOCK_TO_RAISE) 
-                    || Vector3.Subtract(_viewManager.Position, position).Length() > Vector3.Subtract(_viewManager.Position, selectedBrick.Item1.Position).Length())
-                {
+                //**************************
+                /*if (!((_viewManager.Position - position).Length() > JengaConstants.MIN_CAMERA_DISTANCE 
+                    && JengaConstants.TAP_BLOCK_TO_RAISE)){
+                */
+                /*
                     Vector3 newItem4 = Vector3.Subtract(this.selectedBrick.Item1.Position, point);
-
                     Vector3 direction = Vector3.Subtract(_viewManager.Position, point);
                     direction.Normalize();
 
                     Vector3 newOffset = direction * (Vector3.Dot(direction, newItem4));
-                    position = Vector3.Add(point, newOffset);
-                }
-
+                    position = Vector3.Add(point, newOffset);*/
+                //}
+                
                 if (!(Vector3.Subtract(position, selectedBrick.Item1.Position).Length() > JengaConstants.MAX_TANGIBLE_DISTANCE))
                 {
                     selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
