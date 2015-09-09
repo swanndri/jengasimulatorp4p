@@ -82,9 +82,9 @@ namespace JengaSimulator.Source
 
         //Distance tangible can be away from digital block
         public const float MAX_TANGIBLE_DISTANCE = 5f;
-
         public const float TANGIBLE_ZOOM_SCALE_FACTOR = 0.02f;
-        
+
+        public const float MIN_CAMERA_DISTANCE = 11.0f;
     }
     
 }

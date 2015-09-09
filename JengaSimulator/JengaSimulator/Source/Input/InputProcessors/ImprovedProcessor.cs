@@ -230,16 +230,18 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
                         (selectedBrick.Item1, finalOrientation, selectedBrick.Item3, selectedBrick.Item4);
 
-                //Zooms==================================================
+                //Zooms==================================================                
                 Vector3 newPosition = selectedBrick.Item1.Position;
                 Vector3 direction = _viewManager.Position - selectedBrick.Item1.Position;                               
                 direction.Normalize();
                 float deltaAdd = 1 - e.Delta.ScaleX;
                 deltaAdd *= JengaConstants.FORWARD_BACK_BLOCK_SPEED;
                 newPosition = Vector3.Add(Vector3.Multiply(direction, deltaAdd), selectedBrick.Item1.Position);
-
-                selectedBrick.Item1.IsActive = true;
-                selectedBrick.Item1.SetWorld(newPosition, selectedBrick.Item2);
+                if (Vector3.Subtract(_viewManager.Position, newPosition).Length() > JengaConstants.MIN_CAMERA_DISTANCE)
+                {
+                    selectedBrick.Item1.IsActive = true;
+                    selectedBrick.Item1.SetWorld(newPosition, selectedBrick.Item2);
+                }
             }
         }
         private void OnManipulationCompleted(object sender, Manipulation2DCompletedEventArgs e) {}
@@ -403,8 +405,14 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 }
                 this.manipulationProcessor.CompleteManipulation(Timestamp);
 
-                if (t.Id == this.holdingTouchPointID)                
+                if (t.Id == this.holdingTouchPointID)
+                {
                     this.holdingTouchPointID = -1;
+                    if (this.selectedBrick != null)
+                    {
+                        this.selectedBrick.Item1.LinearVelocity = Vector3.Zero;
+                    }
+                }
             }            
         }
         #endregion
@@ -421,9 +429,10 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 double pitch = Math.Asin(-2.0 * (q.X * q.Z - q.W * q.Y));
                 double roll = Math.Atan2(2.0 * (q.X * q.Y + q.W * q.Z), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z);
 
-                //float scaleFactor = ((Timestamp - begin) / JengaConstants.TIME_FOR_BLOCK_TO_CENTER);
-                //scaleFactor = scaleFactor > 1 ? 1 : scaleFactor;
-                float scaleFactor = 0;
+                float scaleFactor = ((Timestamp - begin) / JengaConstants.TIME_FOR_BLOCK_TO_CENTER);
+                scaleFactor = scaleFactor > 1 ? 1 : scaleFactor;
+                scaleFactor = 1 - scaleFactor;
+                //float scaleFactor = 0;
                 float totalRotation;
 
                 //roll = roll < 0 ? (roll + (2 * Math.PI)) : roll;
