@@ -168,11 +168,13 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 {
                     rotateOrZoom = true;
                     manipulationProcessor.Pivot.X = selectedBrick.Item1.Position.X;
-                    manipulationProcessor.Pivot.Y = selectedBrick.Item1.Position.Y;                    
+                    manipulationProcessor.Pivot.Y = selectedBrick.Item1.Position.Y;
                     manipulationProcessor.ProcessManipulators(Timestamp, manipulators);         //TODO FIXED COLLECTION MODIFIED                   
                 }
-                catch (NullReferenceException e) {
+                catch (NullReferenceException e)
+                {
                 }
+                catch (InvalidOperationException e) { }
             }
             //Otherwise if we arent moving the block, move camera
             else if (holdingTouchPointID == -1)
@@ -298,8 +300,9 @@ namespace JengaSimulator.Source.Input.InputProcessors
         {
         }
         public void TouchMove(object sender, TouchEventArgs e)
-        {            
+        {      
             TouchPoint t = e.TouchPoint;
+
             long currentTime = Timestamp;
 
             if (t.IsFingerRecognized)
@@ -324,6 +327,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         Vector3.Add(ref s.P1, ref diff, out point);
 
                         Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
+
                         selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
                         selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
                         selectedBrick.Item1.IsActive = true;
