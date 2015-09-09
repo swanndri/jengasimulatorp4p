@@ -13,15 +13,16 @@ namespace JengaSimulator.Source
          * Gestures Tweaks
          */
         //DoubleTap Config
-        public const float BOUNDS_BUFFER_SIZE = 50.0f;
-        public const long MAX_TICK_DIFFERENCE = 6000000;
-        //public const long MIN_TICK_DIFFERENCE = 6000000;
+        public const float BOUNDS_BUFFER_SIZE = 50.0f;              //How close the double tap can be to each other
+        public const long MAX_TICK_DIFFERENCE = 6000000;            //How long between tap gestures counts as a double tap
+
         //Block moving away and towards speed factor. (Greater is faster)
         //In range 0(doesnt move) to infinity (probably crash)
         public const float FORWARD_BACK_BLOCK_SPEED = 5.0f;
         //This constant makes the two zoom gestures the same fineness. larger means less movement
         //Range: 0.9 - 1
         public const float FORWARD_BACK_SCALE_CONSTANT = 0.999f;     
+
         /*******************************************************************
          * CAMERA
          */
@@ -33,6 +34,7 @@ namespace JengaSimulator.Source
         public const float HEIGHT_ANGLE_MIN = 0.01f;
         public const float ROTATE_REVERSED = -1.0f;         //1 and -1 only 
         public const float HEIGHT_REVERSED = -1.0f;         //1 and -1 only 
+
         /*******************************************************************
          * Blobs
          */
@@ -60,7 +62,8 @@ namespace JengaSimulator.Source
         public static List<Tangible> REGISTERED_TANGIBLES = new List<Tangible>()
         {   
             new Tangible("Jenga Block", 42f,26f,21f,12f,37f),
-            new Tangible("Cork Screw", 24f,16f,9.5f,8.5f, 27f)
+            new Tangible("Cork Screw", 24f,16f,9.5f,8.5f, 27f),
+            new Tangible("Fine Camera", 54f,46f,11f,8.5f, 55f)
         };
 
 
@@ -77,7 +80,10 @@ namespace JengaSimulator.Source
         public const long STACK_SIDE_3 = 03;
         public const long STACK_SIDE_4 = 05;
 
-        public const float MAX_TANGIBLE_DISTANCE = 4f;
+        //Distance tangible can be away from digital block
+        public const float MAX_TANGIBLE_DISTANCE = 5f;
+
+        public const float TANGIBLE_ZOOM_SCALE_FACTOR = 0.02f;
     }
     
 }

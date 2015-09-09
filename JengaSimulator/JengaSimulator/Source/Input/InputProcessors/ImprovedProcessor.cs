@@ -75,60 +75,23 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
         public void processTouchPoints(ReadOnlyTouchPointCollection touches, List<BlobPair> blobPairs, GameTime gameTime)
         {
+            bool corkScrewOnTable = false;
             foreach (BlobPair bp in blobPairs)
-            {                
-                if (bp.thisBlobPairTangible.Name.Equals("Jenga Block")){
-                    this.blockTangibleLastInContact = new Tuple<BlobPair, long>(bp, Timestamp);
-                    if (selectedBrick != null)
-                    {
-                        Quaternion q = selectedBrick.Item1.Orientation;
-
-                        double yaw = Math.Atan2(2.0 * (q.Y * q.Z + q.W * q.X), q.W * q.W - q.X * q.X - q.Y * q.Y + q.Z * q.Z);
-                        double pitch = Math.Asin(-2.0 * (q.X * q.Z - q.W * q.Y));
-                        double roll = Math.Atan2(2.0 * (q.X * q.Y + q.W * q.Z), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z);
-
-                        float totalRotation = bp.Orientation;
-
-                        float cameraRotationOffset = MathHelper.ToDegrees(_viewManager.RotationAngle) % 360;
-
-                        cameraRotationOffset = cameraRotationOffset < 0 ? 360 + cameraRotationOffset : cameraRotationOffset;
-                        cameraRotationOffset = 360 - cameraRotationOffset;
-
-                        totalRotation = MathHelper.ToRadians(MathHelper.ToDegrees(bp.Orientation) - cameraRotationOffset);
-
-                        Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
-
-                        Segment s;
-                        s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(bp.CenterX, bp.CenterY, 0f),
-                            _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
-                        s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(bp.CenterX, bp.CenterY, 1f),
-                            _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
-
-                        Vector3 diff, point;
-                        Vector3.Subtract(ref s.P2, ref s.P1, out diff);
-                        Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
-                        Vector3.Add(ref s.P1, ref diff, out point);
-
-                        float scaleFactor = ((Timestamp - begin) / JengaConstants.TIME_FOR_BLOCK_TO_CENTER);
-                        scaleFactor = scaleFactor > 1 ? 1 : scaleFactor;
-                        scaleFactor = 1 - scaleFactor;
-
-                        Vector3 offset = Vector3.Multiply(this.selectedBrick.Item4, scaleFactor);
-                        Vector3 position = Vector3.Add(point, offset);
-
-
-                        if (!(Vector3.Subtract(position, selectedBrick.Item1.Position).Length() > JengaConstants.MAX_TANGIBLE_DISTANCE))
-                        {
-                            selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
-                                (selectedBrick.Item1, finalOrientation, selectedBrick.Item3, selectedBrick.Item4);
-
-                            selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
-                            selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
-                            selectedBrick.Item1.IsActive = true;
-                        }
-                    }
+            {             
+                switch (bp.thisBlobPairTangible.Name){
+                    case("Jenga Block"):
+                        processBlockTangible(bp);
+                        break;
+                     case("Cork Screw"):
+                        processCorkScrewTangible(bp);
+                        corkScrewOnTable = true;
+                        break;
                 }
             }
+
+            if (!corkScrewOnTable)
+                this.lastCorkScrewOrientation = -1;
+
             //==========================================================================
             foreach (TouchPoint t in touches)
             {
@@ -199,7 +162,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     manipulationProcessor.Pivot.Y = selectedBrick.Item1.Position.Y;                    
                     manipulationProcessor.ProcessManipulators(Timestamp, manipulators);         //TODO FIXED COLLECTION MODIFIED                   
                 }
-                catch (NullReferenceException e) {}
+                catch (NullReferenceException e) {
+                }
             }
             //Otherwise if we arent moving the block, move camera
             else if (holdingTouchPointID == -1)
@@ -214,6 +178,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         manipulationProcessor.ProcessManipulators(Timestamp, manipulators);
                     }
                     catch (NullReferenceException e) { }
+                    catch (InvalidOperationException e) { }
                 }
             }
         }
@@ -309,7 +274,6 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     selectedBrick.Item1.IsWeightless = true;
                     selectedBrick.Item1._isSelected = true;
                     begin = Timestamp;
-                    Console.WriteLine("BEGIN");
                 }
             }
         }
@@ -508,6 +472,84 @@ namespace JengaSimulator.Source.Input.InputProcessors
             return null;
         }
 
+        private void processBlockTangible(BlobPair bp)
+        {
+            this.blockTangibleLastInContact = new Tuple<BlobPair, long>(bp, Timestamp);
+            if (selectedBrick != null)
+            {
+                Quaternion q = selectedBrick.Item1.Orientation;
+
+                double yaw = Math.Atan2(2.0 * (q.Y * q.Z + q.W * q.X), q.W * q.W - q.X * q.X - q.Y * q.Y + q.Z * q.Z);
+                double pitch = Math.Asin(-2.0 * (q.X * q.Z - q.W * q.Y));
+                double roll = Math.Atan2(2.0 * (q.X * q.Y + q.W * q.Z), q.W * q.W + q.X * q.X - q.Y * q.Y - q.Z * q.Z);
+
+                //float scaleFactor = ((Timestamp - begin) / JengaConstants.TIME_FOR_BLOCK_TO_CENTER);
+                //scaleFactor = scaleFactor > 1 ? 1 : scaleFactor;
+                float scaleFactor = 0;
+                float totalRotation;
+
+                //roll = roll < 0 ? (roll + (2 * Math.PI)) : roll;
+                //totalRotation = (float)(((bp.Orientation - roll) * scaleFactor) + roll);
+
+                float cameraRotationOffset = MathHelper.ToDegrees(_viewManager.RotationAngle) % 360;
+                cameraRotationOffset = cameraRotationOffset < 0 ? 360 + cameraRotationOffset : cameraRotationOffset;
+                cameraRotationOffset = 360 - cameraRotationOffset;
+                
+                totalRotation = MathHelper.ToRadians(MathHelper.ToDegrees(bp.Orientation) - cameraRotationOffset);
+
+                Quaternion finalOrientation = Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1.0f), totalRotation);
+
+                Segment s;
+                s.P1 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(bp.CenterX, bp.CenterY, 0f),
+                    _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+                s.P2 = _game.GraphicsDevice.Viewport.Unproject(new Vector3(bp.CenterX, bp.CenterY, 1f),
+                    _viewManager.Projection, _viewManager.DefaultView, Matrix.Identity);
+
+                Vector3 diff, point;
+                Vector3.Subtract(ref s.P2, ref s.P1, out diff);
+                Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
+                Vector3.Add(ref s.P1, ref diff, out point);
+
+                Vector3 offset = Vector3.Multiply(this.selectedBrick.Item4, scaleFactor);
+                Vector3 position = Vector3.Add(point, offset);
+
+
+                if (!(Vector3.Subtract(position, selectedBrick.Item1.Position).Length() > JengaConstants.MAX_TANGIBLE_DISTANCE))
+                {
+                    selectedBrick = new Tuple<SolidThing, Quaternion, float, Vector3>
+                        (selectedBrick.Item1, finalOrientation, selectedBrick.Item3, selectedBrick.Item4);
+
+                    selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
+                    selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
+                    selectedBrick.Item1.IsActive = true;
+                }
+            }
+        }
+
+        private void processCorkScrewTangible(BlobPair bp)
+        {
+            if (this.selectedBrick != null)
+            {
+                selectedBrick.Item1.LinearVelocity = Vector3.Zero;
+                if (this.lastCorkScrewOrientation != -1)
+                {
+                    float deltaDegrees = MathHelper.ToDegrees(bp.Orientation - this.lastCorkScrewOrientation);
+                    deltaDegrees = deltaDegrees > 180 ? (float)(deltaDegrees - 360) : deltaDegrees;
+                    deltaDegrees = deltaDegrees < -180 ? (float)(deltaDegrees + 360) : deltaDegrees;
+
+                    Vector3 newPosition = selectedBrick.Item1.Position;
+                    Vector3 direction = _viewManager.Position - selectedBrick.Item1.Position;
+                    direction.Normalize();
+                    float deltaAdd = deltaDegrees * JengaConstants.TANGIBLE_ZOOM_SCALE_FACTOR;
+                    newPosition = Vector3.Add(Vector3.Multiply(direction, deltaAdd), selectedBrick.Item1.Position);
+
+                    selectedBrick.Item1.IsActive = true;
+                    selectedBrick.Item1.SetWorld(newPosition, selectedBrick.Item2);
+                }
+            }
+
+            this.lastCorkScrewOrientation = bp.Orientation;
+        }
         #endregion
     }
 }

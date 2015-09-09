@@ -86,13 +86,7 @@ namespace JengaSimulator
             if (buttonName == "reset_button") {
                 CreateScene();
             }
-            /*if (buttonName == "exit_button")
-            {
-                this.Exit();
-            }*/
-        }
-
-        
+        }        
 
         #endregion
 
@@ -222,8 +216,15 @@ namespace JengaSimulator
             if (touches.Count == 0)            
                 _HUD.checkHitUI(null);
             
-            foreach (TouchPoint t in touches)                            
-                _HUD.checkHitUI(t);
+
+            foreach (TouchPoint t in touches)
+            {
+                UIComponent hit = _HUD.checkHitUI(t);
+                if (hit != null)
+                {
+                    hit.processTouchPoint(null);
+                }
+            }
             
             _inputManager.processTouchPoints(touches, gameTime);
             

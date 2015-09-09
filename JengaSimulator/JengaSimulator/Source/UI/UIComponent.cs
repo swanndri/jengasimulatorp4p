@@ -20,8 +20,8 @@ namespace JengaSimulator.Source.UI
             this.componentName = componentName;
         }
 
-        //Returns true if the touch point hits the UI component.
-        abstract public Boolean processTouchPoint(TouchPoint p);
+        //Returns the component if the touch point hits the UI component.
+        abstract public UIComponent processTouchPoint(TouchPoint p);
 
         abstract public void draw(GraphicsDevice g, SpriteBatch b);
     }

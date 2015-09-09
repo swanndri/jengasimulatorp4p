@@ -30,12 +30,12 @@ namespace JengaSimulator.Source.UI
             listeners.Add(buttonListener);
         }
 
-        public override bool processTouchPoint(TouchPoint p)
+        public override UIComponent processTouchPoint(TouchPoint p)
         {
             if (p == null)
             {
                 buttonDown = false;
-                return false;
+                return null;
             }
             if (componentArea.Contains(new Point((int)p.CenterX, (int)p.CenterY)))
             {
@@ -47,9 +47,9 @@ namespace JengaSimulator.Source.UI
                     }
                 }
                 buttonDown = true;
-                return true;
-            }            
-            return false;
+                return this;
+            }
+            return null;
         }
 
         public override void draw(GraphicsDevice g, SpriteBatch b)

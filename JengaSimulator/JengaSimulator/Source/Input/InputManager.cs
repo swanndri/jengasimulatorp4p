@@ -49,11 +49,11 @@ namespace JengaSimulator
             /*
             foreach (BlobPair bp in blobPairs)
             {
-                Console.WriteLine("LARGE BLOB: " + bp.BigBlob.MajorAxis + " : " + bp.BigBlob.MinorAxis + 
-                    " SMALL BLOB: " + bp.SmallBlob.MajorAxis + " : " + bp.SmallBlob.MinorAxis
-                    + " DISTANCE: " + bp.DistanceBetweenBlobCentres);
-            }
-            */
+                Console.WriteLine(bp.thisBlobPairTangible.Name + " : " + bp.Probability);
+                //Console.WriteLine("LARGE BLOB: " + bp.BigBlob.MajorAxis + " : " + bp.BigBlob.MinorAxis + 
+                //    " SMALL BLOB: " + bp.SmallBlob.MajorAxis + " : " + bp.SmallBlob.MinorAxis
+                //    + " DISTANCE: " + bp.DistanceBetweenBlobCentres);
+            }*/            
         }
 
         #region TouchEvents
@@ -127,7 +127,7 @@ namespace JengaSimulator
                 Vector2 lineVector = new Vector2(vectorDistances[i].Item2.CenterX - vectorDistances[i].Item3.CenterX,
                     vectorDistances[i].Item2.CenterY - vectorDistances[i].Item3.CenterY);
 
-                BlobPair tangible = new BlobPair(vectorDistances[i].Item2, vectorDistances[i].Item3, lineVector);
+                BlobPair tangible = new BlobPair(vectorDistances[i].Item2, vectorDistances[i].Item3, lineVector);                
                 if( tangible.Probability > JengaConstants.PROBABILITY_THRESHOLD)
                     blobPairList.Add(tangible);
             }
@@ -136,22 +136,6 @@ namespace JengaSimulator
         private Boolean isBlob(TouchPoint t)
         {
             return (!(t.IsFingerRecognized || t.IsTagRecognized));
-        }
-
-        float averageBigBlobSize = 0;
-        float averageSmallBlobSize = 0;
-        float averageDistance = 0;
-        int count = 0;
-        private void printAverageBlobStats(BlobPair b)
-        {
-            averageBigBlobSize += b.BigBlob.MajorAxis;
-            averageSmallBlobSize += b.SmallBlob.MajorAxis;
-            averageDistance += b.DistanceBetweenBlobCentres;
-            count++;
-            String output =     "BIG BLOB: " + (averageBigBlobSize /count) 
-                            +   "SMALL BLOB: " + (averageSmallBlobSize /count)
-                            + "DISTNACE: " + (averageDistance / count);
-            Console.WriteLine(output);   
         }
 
         #endregion

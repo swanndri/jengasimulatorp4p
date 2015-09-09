@@ -40,7 +40,7 @@ namespace JengaSimulator.Source.UI
             listeners.Add(sliderListener);
         }
 
-        public override bool processTouchPoint(TouchPoint p)
+        public override UIComponent processTouchPoint(TouchPoint p)
         {
             if (p != null)
             {
@@ -62,10 +62,10 @@ namespace JengaSimulator.Source.UI
                         indicatorArea = new Rectangle((int)(slideRatio * componentArea.Width) + componentArea.X - (defaultTexture.Height / 2), componentArea.Y, defaultTexture.Height, defaultTexture.Height);                    
                     }
                     updateListeners();
-                    return true;
+                    return this;
                 }
             }
-            return false;
+            return null;
         }
 
         private void updateListeners() {

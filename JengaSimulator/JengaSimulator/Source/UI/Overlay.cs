@@ -25,12 +25,12 @@ namespace JengaSimulator.Source.UI
             componentList.Add(component);
         }
 
-        public Boolean checkHitUI(TouchPoint p) {
+        public UIComponent checkHitUI(TouchPoint p) {
             foreach (UIComponent c in componentList)
             {
-                c.processTouchPoint(p);
+                return c.processTouchPoint(p);
             }
-            return false;
+            return null;
         }
 
         public override void Draw(GameTime gameTime )
