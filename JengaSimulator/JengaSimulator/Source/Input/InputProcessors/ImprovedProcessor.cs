@@ -38,6 +38,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
         private int holdingTouchPointID;                //Id of touchpoint.
         private float lastCorkScrewOrientation;
         private bool rotateOrZoom;
+        private long begin;
 
         public ImprovedProcessor(Game game, IViewManager viewManager, PhysicsManager physics )
         {
@@ -46,6 +47,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
             this._physics = physics;
             initialize();
         }
+
 
         public void initialize()
         {
@@ -107,9 +109,13 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
                         Vector3.Add(ref s.P1, ref diff, out point);
 
-                        Console.WriteLine(this.selectedBrick.Item4);
-                        Vector3 position = Vector3.Add(point, this.selectedBrick.Item4);
-                        //Vector3 position = point;
+                        float scaleFactor = ((Timestamp - begin) / JengaConstants.TIME_FOR_BLOCK_TO_CENTER);
+                        scaleFactor = scaleFactor > 1 ? 1 : scaleFactor;
+                        scaleFactor = 1 - scaleFactor;
+
+                        Vector3 offset = Vector3.Multiply(this.selectedBrick.Item4, scaleFactor);
+                        Vector3 position = Vector3.Add(point, offset);
+
 
                         if (!(Vector3.Subtract(position, selectedBrick.Item1.Position).Length() > JengaConstants.MAX_TANGIBLE_DISTANCE))
                         {
@@ -118,7 +124,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
 
                             selectedBrick.Item1.SetVelocity(Vector3.Zero, Vector3.Zero);
                             selectedBrick.Item1.SetWorld(position, selectedBrick.Item2);
-                            selectedBrick.Item1.IsActive = true;                            
+                            selectedBrick.Item1.IsActive = true;
                         }
                     }
                 }
@@ -302,6 +308,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     selectedBrick = brick;
                     selectedBrick.Item1.IsWeightless = true;
                     selectedBrick.Item1._isSelected = true;
+                    begin = Timestamp;
+                    Console.WriteLine("BEGIN");
                 }
             }
         }

@@ -68,7 +68,8 @@ namespace JengaSimulator.Source
         public const long TIME_BETWEEN_BLOCK_TANGIBLE_AND_SELECT = 10;
         public const int HIT_BOX_SIZE = 450;
 
-        
+        public const float TIME_FOR_BLOCK_TO_CENTER = 400.0f;
+
         //STACK TANGIBLE
         public const long STACK_SIDE_0 = 04;
         public const long STACK_SIDE_1 = 02;
