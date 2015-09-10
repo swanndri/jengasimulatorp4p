@@ -84,11 +84,11 @@ namespace JengaSimulator.Source
         public const float TIME_FOR_BLOCK_TO_CENTER = 400.0f;
 
         //STACK TANGIBLE
-        public const long STACK_SIDE_0 = 04;
-        public const long STACK_SIDE_1 = 02;
-        public const long STACK_SIDE_2 = 01;
-        public const long STACK_SIDE_3 = 03;
-        public const long STACK_SIDE_4 = 05;
+        public const long STACK_SIDE_0 = 50; //32
+        public const long STACK_SIDE_1 = 48; //31
+        public const long STACK_SIDE_2 = 58; //33
+        public const long STACK_SIDE_3 = 51; //3a
+        public const long STACK_SIDE_4 = 49; //30
 
         //Distance tangible can be away from digital block
         public const float MAX_TANGIBLE_DISTANCE = 5f;

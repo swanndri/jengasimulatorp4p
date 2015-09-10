@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using JengaSimulator.Source.UI;
+using Microsoft.Surface.Core;
 
 namespace JengaSimulator
 {
@@ -31,7 +32,7 @@ namespace JengaSimulator
         void SetProjection(float viewPlaneFar);
         void Move(Vector3 delta);
         void updateCameraPosition(float rotationAngle, float heightAngle, float radius);
-        void rotateToSide(int sidesToRotate);
+        void rotateToSide(int sidesToRotate, TouchPoint t);
         void toggleViewPort();
     }
 }

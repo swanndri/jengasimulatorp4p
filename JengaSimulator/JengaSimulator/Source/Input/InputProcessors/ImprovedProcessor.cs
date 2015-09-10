@@ -109,19 +109,19 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     switch (t.Tag.Value)
                     {
                         case JengaConstants.STACK_SIDE_0:
-                            _viewManager.rotateToSide(0);
+                            _viewManager.rotateToSide(0,t);
                             break;
                         case JengaConstants.STACK_SIDE_1:
-                            _viewManager.rotateToSide(1);
+                            _viewManager.rotateToSide(1, t);
                             break;
                         case JengaConstants.STACK_SIDE_2:
-                            _viewManager.rotateToSide(2);
+                            _viewManager.rotateToSide(2, t);
                             break;
                         case JengaConstants.STACK_SIDE_3:
-                            _viewManager.rotateToSide(3);
+                            _viewManager.rotateToSide(3, t);
                             break;
                         case JengaConstants.STACK_SIDE_4:
-                            _viewManager.rotateToSide(4);
+                            _viewManager.rotateToSide(4, t);
                             break;
 
                     }

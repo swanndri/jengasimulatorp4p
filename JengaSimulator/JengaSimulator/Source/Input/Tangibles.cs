@@ -120,8 +120,8 @@ namespace JengaSimulator
 
                                 break;
                             //Rotate stack onto top view
-                            case 4:
-                                viewManager.rotateToSide(4);
+                            /*case 4:
+                                viewManager.rotateToSide(4, touch);
                                 break;
                             //Corkscrew closer or further away
                             case 5:
@@ -136,7 +136,7 @@ namespace JengaSimulator
                             case 8:
                                 viewManager.rotateToSide(8);
                                 break;
-
+                                */
 
                         }
                     }

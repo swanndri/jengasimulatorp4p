@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Surface;
+using Microsoft.Surface.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using JengaSimulator.Source.UI;
@@ -295,7 +297,7 @@ namespace JengaSimulator
             }
         }
 
-        public void rotateToSide(int sidesToRotate)
+        public void rotateToSide(int sidesToRotate, TouchPoint t)
         {
             float rotationAngle = 0;
             double heightAngle = MathHelper.ToRadians(89);
@@ -303,7 +305,11 @@ namespace JengaSimulator
             {
                 case 0:
                     heightAngle = System.Convert.ToDouble(MathHelper.ToRadians(1));
-                    rotationAngle = MathHelper.ToRadians(270.0f);
+                    
+                    float rotation = (MathHelper.ToDegrees(t.Orientation) % 360) - 270;
+                    rotation = rotation < 0 ? 360 - rotation : rotation;
+                    rotation = 360 - rotation;
+                    rotationAngle = MathHelper.ToRadians(rotation);
                     break;
                 case 1:
                     rotationAngle = MathHelper.ToRadians(0f);

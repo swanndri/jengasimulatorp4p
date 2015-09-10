@@ -168,25 +168,25 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     }
                 }
 
-                switch (tagValue)
+                /*switch (tagValue)
                 {
                     case 4:
-                        viewManager.rotateToSide(4);
+                        viewManager.rotateToSide(4,t);
                         break;
                     case 5:
-                        viewManager.rotateToSide(5);
+                        viewManager.rotateToSide(5,t);
                         break;
                     case 6:
-                        viewManager.rotateToSide(6);
+                        viewManager.rotateToSide(6,t);
                         break;
                     case 7:
-                        viewManager.rotateToSide(7);
+                        viewManager.rotateToSide(7,t);
                         break;
                     case 8:
-                        viewManager.rotateToSide(8);
+                        viewManager.rotateToSide(8,t);
                         break;
                 }
-
+                */
                 touchPosition = touches[0];
                 //First time touch
                 if (lastTouchPosition == null)
