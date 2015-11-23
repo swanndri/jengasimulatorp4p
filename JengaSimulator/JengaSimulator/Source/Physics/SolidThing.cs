@@ -19,25 +19,28 @@ namespace JengaSimulator
         private Vector3 _diffuseColor;
 
         public bool _isSelected;
-        private bool _isTable;
+        private int _thingType;
         Game game;
 
-        public bool getIsTable()
+        public int getThingType()
         {
-            return _isTable;
+            return _thingType;
         }
 
         public SolidThing(Game game, Model model)
-            : this(game, model, true, false)
+            : this(game, model, true, 0)
         {
         }
 
-        public SolidThing(Game game, Model model, bool isColorRandom, bool isTable)
+        //0 = block
+        //1 = table
+        //2 = floor
+        public SolidThing(Game game, Model model, bool isColorRandom, int thingType)
             : base((RigidBodyModel)model.Tag)
         {
             this.game = game;
-            this._isTable = isTable;
-            if (isTable)
+            this._thingType = thingType;
+            if (thingType == 1 || thingType == 2)
             {
                 this.Freeze();
             }
@@ -66,26 +69,29 @@ namespace JengaSimulator
 
         public void Draw(IViewManager view)
         {
-            foreach (var mesh in _model.Meshes)
+            if (_thingType == 0 || _thingType == 1)
             {
-                foreach (BasicEffect effect in mesh.Effects)
+                foreach (var mesh in _model.Meshes)
                 {
-                    effect.World = _meshTransforms[mesh.ParentBone.Index] * Transform.Combined;
-                    effect.View = view.View;                    
-                    effect.Projection = view.Projection;
-                    if (_isColorRandom) effect.DiffuseColor = _diffuseColor;
-                    if(_isTable)
-                        effect.DiffuseColor *= 0.5f;
-                    /*if (!this.IsActive)
+                    foreach (BasicEffect effect in mesh.Effects)
                     {
-                        effect.DiffuseColor *= 0.5f;
-                    }*/
-                    if (_isSelected)
-                    {
-                        effect.DiffuseColor *= 4.0f;
+                        effect.World = _meshTransforms[mesh.ParentBone.Index] * Transform.Combined;
+                        effect.View = view.View;
+                        effect.Projection = view.Projection;
+                        if (_isColorRandom) effect.DiffuseColor = _diffuseColor;
+                        if (_thingType == 1)
+                            effect.DiffuseColor *= 0.5f;
+                        /*if (!this.IsActive)
+                        {
+                            effect.DiffuseColor *= 0.5f;
+                        }*/
+                        if (_isSelected)
+                        {
+                            effect.DiffuseColor *= 4.0f;
+                        }
                     }
+                    mesh.Draw();
                 }
-                mesh.Draw();
             }
         }
 

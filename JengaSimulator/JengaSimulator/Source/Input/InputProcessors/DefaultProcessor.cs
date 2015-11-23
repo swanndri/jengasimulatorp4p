@@ -200,7 +200,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                     Vector3 point;
                     var c = physics.BroadPhase.Intersect(ref s, out scalar, out point);
 
-                    if (c != null && c is BodySkin && !((SolidThing)((BodySkin)c).Owner).getIsTable())
+                    if (c != null && c is BodySkin && !(((SolidThing)((BodySkin)c).Owner).getThingType() == 1) && !(((SolidThing)((BodySkin)c).Owner).getThingType() == 2))
                     {
                         pickedObject = ((BodySkin)c).Owner;
                         orientation = pickedObject.Orientation;
@@ -245,7 +245,7 @@ namespace JengaSimulator.Source.Input.InputProcessors
                             break;
                         //unPin a block
                         case 1:
-                            if (pickedObjectST.getIsTable())
+                            if (pickedObjectST.getThingType() == 1)
                             {
                         
                                 break;

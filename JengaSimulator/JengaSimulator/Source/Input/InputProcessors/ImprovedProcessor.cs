@@ -79,21 +79,28 @@ namespace JengaSimulator.Source.Input.InputProcessors
         {
             bool corkScrewOnTable = false;
             bool fineCameraOnTable = false;
-            foreach (BlobPair bp in blobPairs)
-            {             
-                switch (bp.thisBlobPairTangible.Name){
-                    case("Jenga Block"):
-                        processBlockTangible(bp);
-                        break;
-                     case("Cork Screw"):
-                        processCorkScrewTangible(bp);
-                        corkScrewOnTable = true;
-                        break;
-                    case("Fine Camera"):
-                        processFineCamera(bp);
-                        fineCameraOnTable = true;
-                        break;
+            try
+            {
+                foreach (BlobPair bp in blobPairs)
+                {
+                    switch (bp.thisBlobPairTangible.Name)
+                    {
+                        case ("Jenga Block"):
+                            processBlockTangible(bp);
+                            break;
+                        case ("Cork Screw"):
+                            processCorkScrewTangible(bp);
+                            corkScrewOnTable = true;
+                            break;
+                        case ("Fine Camera"):
+                            processFineCamera(bp);
+                            fineCameraOnTable = true;
+                            break;
+                    }
                 }
+            }
+            catch (NullReferenceException e)
+            {
             }
 
             if (!corkScrewOnTable)
@@ -340,13 +347,15 @@ namespace JengaSimulator.Source.Input.InputProcessors
         }
         public void TouchTapGesture(object sender, TouchEventArgs e)
         {
+            
             TouchPoint t = e.TouchPoint;
+
             if (t.IsFingerRecognized)
             {
                 Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
 
                 bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
-                
+
                 if (doubleTap)
                 {
                     //Faketap detects if double tap was triggered by tangible
@@ -389,14 +398,34 @@ namespace JengaSimulator.Source.Input.InputProcessors
                         }
                         this.previousTap = null;
                     }
-                    else
-                    {
-
-                    }
                 }
                 else
                 {
                     this.previousTap = currentTap;
+                }
+            }
+            else
+            {
+                
+                if (!t.IsFingerRecognized && !t.IsTagRecognized)
+                {
+                    if (t.MajorAxis > 30)
+                    {
+                        Tuple<TouchPoint, long> currentTap = new Tuple<TouchPoint, long>(t, DateTime.Now.Ticks);
+
+                        bool doubleTap = wasDoubleTap(this.previousTap, currentTap);
+                        if (doubleTap)
+                        {
+                            //If we are currently holding a block
+                            if (selectedBrick != null)
+                            {
+                                selectedBrick.Item1.IsWeightless = false;
+                                selectedBrick.Item1.IsActive = true;
+                                selectedBrick.Item1._isSelected = false;
+                                selectedBrick = null;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -469,20 +498,35 @@ namespace JengaSimulator.Source.Input.InputProcessors
                 Vector3.Multiply(ref diff, this.selectedBrick.Item3, out diff);         //TODO FIX NULL REFERENCE(selectedblock)
                 Vector3.Add(ref s.P1, ref diff, out point);
                 Vector3 offset = Vector3.Multiply(this.selectedBrick.Item4, scaleFactor);
+
                 Vector3 position = Vector3.Add(point, offset);
 
-                //**************************
+                Vector3 directionVector = _viewManager.Position - this.selectedBrick.Item1.Position;
+                directionVector.Normalize();
+                Vector3 differenceVector = this.selectedBrick.Item1.Position - position;
+                float distance = Vector3.Dot(directionVector, differenceVector);
+                Vector3 additionOntoCurrent = Vector3.Multiply(directionVector, distance);
+                Vector3 finalVector = Vector3.Add(position, additionOntoCurrent);
+
+                position = finalVector;
+
+                //*******************************************************
+                //Uncomment this for snapping to middle of tangible block
+                //*******************************************************
                 /*if (!((_viewManager.Position - position).Length() > JengaConstants.MIN_CAMERA_DISTANCE 
                     && JengaConstants.TAP_BLOCK_TO_RAISE)){
-                */
-                /*
+                
+                
                     Vector3 newItem4 = Vector3.Subtract(this.selectedBrick.Item1.Position, point);
                     Vector3 direction = Vector3.Subtract(_viewManager.Position, point);
                     direction.Normalize();
 
                     Vector3 newOffset = direction * (Vector3.Dot(direction, newItem4));
-                    position = Vector3.Add(point, newOffset);*/
-                //}
+                    position = Vector3.Add(point, newOffset);
+                }*/
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                //Uncomment this for snapping to middle of tangible block
+                //*******************************************************
                 
                 if (!(Vector3.Subtract(position, selectedBrick.Item1.Position).Length() > JengaConstants.MAX_TANGIBLE_DISTANCE))
                 {
@@ -613,8 +657,8 @@ namespace JengaSimulator.Source.Input.InputProcessors
             float scalar;
             Vector3 point;
             var c = _physics.BroadPhase.Intersect(ref s, out scalar, out point);
-            
-            if (c != null && c is BodySkin && !((SolidThing)((BodySkin)c).Owner).getIsTable())
+
+            if (c != null && c is BodySkin && !(((SolidThing)((BodySkin)c).Owner).getThingType() == 1) && !(((SolidThing)((BodySkin)c).Owner).getThingType() == 2))
             {
                 SolidThing selectedObject = (SolidThing)(((BodySkin)c).Owner);
                 Quaternion initialRotation = selectedObject.Orientation;

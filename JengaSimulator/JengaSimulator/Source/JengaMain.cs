@@ -256,11 +256,16 @@ namespace JengaSimulator
             _physics.Clear();
             _physics.Gravity = new Vector3(0f, 0f, -9.8f);
             _inputManager.initialize();
+
             Model cubeModel = this.Content.Load<Model>("models/square_block");
             Model tableModel = this.Content.Load<Model>("models/table");
-            ModelMesh tableMesh = tableModel.Meshes.ElementAt(0);
+            Model invisPlatformModel = this.Content.Load<Model>("models/table");
 
-            SolidThing table = new SolidThing(this, tableModel, false, true);            
+            ModelMesh tableMesh = tableModel.Meshes.ElementAt(0);
+            ModelMesh invisPlatformMesh = invisPlatformModel.Meshes.ElementAt(0);
+
+            SolidThing table = new SolidThing(this, tableModel, false, 1);
+            SolidThing invisPlatform = new SolidThing(this, invisPlatformModel, false, 2);   
 
             float tableScale = 1.5f;
             Vector3 tablePosition = new Vector3(0, 0, -1f);
@@ -268,12 +273,18 @@ namespace JengaSimulator
             table.SetWorld(tableScale, tablePosition, tableRotation);
             table.Freeze();
 
+            float invisPlatformScale = 30.5f;
+            Vector3 invisPlatformPosition = new Vector3(0, 0, -12f);
+            Quaternion invisPlatformRotation = Quaternion.Identity;
+            invisPlatform.SetWorld(invisPlatformScale, invisPlatformPosition, invisPlatformRotation);
+            invisPlatform.Freeze();
+
             //Initialise game bounds equal to the table
             _gameBoundsX = tablePosition.X + tableMesh.BoundingSphere.Center.X + tableMesh.BoundingSphere.Radius;
             _gameBoundsY = tablePosition.Y + tableMesh.BoundingSphere.Center.Y + tableMesh.BoundingSphere.Radius;
             _gameBoundsZ = tablePosition.Z;
-            
 
+            _physics.Add(invisPlatform);
             _physics.Add(table);
 
             Random random = new Random();

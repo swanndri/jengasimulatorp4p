@@ -43,7 +43,7 @@ namespace JengaSimulator
 			}
             
             _view.toggleViewPort();
-             * */
+            */
             for (int i = 0; i < _physics.Bodies.Count; i++)
             {
                 var iv = _physics.Bodies[i] as IVisible;
